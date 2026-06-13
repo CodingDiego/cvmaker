@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { connection } from "next/server";
 import { Download, FileText, FileType } from "lucide-react";
 import { getPublicCv, shareUrlFor } from "@/lib/cv/share-service";
 import { getTemplate } from "@/templates/registry";
@@ -14,12 +12,9 @@ import { personLd } from "@/lib/seo";
 
 type Params = Promise<{ userId: string; cvId: string }>;
 
-async function ConnectionMarker() {
-  await connection();
-  return null;
-}
-
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  "use cache";
+
   const { userId, cvId } = await params;
   const cv = await getPublicCv(userId, cvId);
   if (!cv) return { title: "CV not found", robots: { index: false } };
@@ -45,9 +40,6 @@ export default async function SharedCvPage({ params }: { params: Params }) {
 
   return (
     <div className="relative flex min-h-svh flex-col">
-      <Suspense fallback={null}>
-        <ConnectionMarker />
-      </Suspense>
       <JsonLd data={personLd(cv.data, { url: shareUrlFor(userId, cvId) })} />
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.35]" />
 
