@@ -3,10 +3,10 @@ import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { cvs, type Cv } from "@/db/schema";
 import {
-  getUserPlan,
   requireDraftAllowance,
   requireTemplateAccess,
 } from "@/lib/billing/entitlements";
+import { getUserPlan } from "@/lib/billing/entitlements-server";
 import { getTemplate } from "@/templates/registry";
 import { sampleResume, type ResumeData } from "./types";
 

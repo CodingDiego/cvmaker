@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth/session";
-import { getUserPlan, FREE_DRAFT_LIMIT, type BillingPlan } from "@/lib/billing/entitlements";
+import { FREE_DRAFT_LIMIT, type BillingPlan } from "@/lib/billing/entitlements";
+import { getUserPlan } from "@/lib/billing/entitlements-server";
 import { listCvs } from "@/lib/cv/service";
 import { TemplateGallery } from "@/components/templates/template-gallery";
 import type { TemplateDraft } from "@/components/templates/template-card";
