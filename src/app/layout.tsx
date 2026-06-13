@@ -51,12 +51,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-<html
+return (
+    <html
       lang="en"
       className={`${sans.variable} ${display.variable} ${geistMono.variable} ${cvFontVariables} h-full antialiased`}
     >
-<body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col">
         <Providers>
           <TooltipProvider>
             {children}
