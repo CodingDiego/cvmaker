@@ -22,6 +22,13 @@ function hrefFor(value: string, kind: "url" | "email" | "phone" = "url"): string
   return `https://${v}`;
 }
 
+/** Decode a `data:image/...;base64,` URL into the bytes + type docx needs. */
+function dataUrlToImage(dataUrl: string): { data: Buffer; type: "jpg" | "png" } | null {
+  const m = /^data:image\/(png|jpe?g);base64,(.+)$/i.exec(dataUrl);
+  if (!m) return null;
+  return { data: Buffer.from(m[2]!, "base64"), type: m[1]!.toLowerCase() === "png" ? "png" : "jpg" };
+}
+
 /**
  * ATS-safe DOCX generation: real headings/paragraphs, a standard font, no
  * layout tables or text boxes. Even the two-column template linearizes here so

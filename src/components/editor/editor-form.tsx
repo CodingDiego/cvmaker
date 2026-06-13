@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import { ChevronDown, ChevronUp, ImageUp, Plus, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -61,10 +62,9 @@ function PhotoField() {
 
   return (
     <div className="flex items-center gap-4">
-      <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-muted">
+      <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-muted">
         {photo ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={photo} alt="Profile" className="size-full object-cover" />
+          <Image src={photo} alt="Profile" fill sizes="64px" unoptimized className="object-cover" />
         ) : (
           <User className="size-6 text-muted-foreground" />
         )}

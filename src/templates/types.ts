@@ -50,6 +50,30 @@ export interface TemplateTokens {
   accentChip?: boolean;
   /** Tint the sidebar (two-column layouts) with a faint accent wash. */
   sidebarTint?: boolean;
+
+  // --- Structural variety (drives the distinct silhouettes) ---
+  /** Which side the sidebar sits on in two-column layouts. Default "right". */
+  sidebarSide?: "left" | "right";
+  /**
+   * Sidebar treatment in two-column layouts:
+   * - "tint": faint accent wash, dark text, header stays on top (ATS-classic).
+   * - "filled": solid accent panel with light text; the name/contact header
+   *   lives inside the panel. The boldest, most recognizable silhouette.
+   */
+  sidebarStyle?: "tint" | "filled";
+  /**
+   * Section layout in single-column templates:
+   * - "stacked": title above content (default).
+   * - "side-label": title sits in a narrow right-aligned left gutter, content
+   *   flows to the right. Airy, editorial.
+   */
+  sectionLayout?: "stacked" | "side-label";
+  /** Flow single-column body sections into N newspaper columns. Default 1. */
+  bodyColumns?: 1 | 2;
+  /** Thin full-bleed accent rule across the very top of the page. */
+  topRule?: boolean;
+  /** Show an accent monogram (initials) block beside/above the name. */
+  monogram?: boolean;
 }
 
 export const DENSITY_SPACING: Record<Density, { section: number; item: number; line: number }> = {

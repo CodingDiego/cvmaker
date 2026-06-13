@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import Image from "next/image";
 import type { ResumeData } from "@/lib/cv/types";
 import { resolveSectionOrder } from "@/lib/cv/types";
 import { fontById } from "@/lib/font-config";
@@ -24,6 +25,9 @@ const INK = "#1f2937";
 const SUBTLE = "#6b7280";
 const FAINT = "#9ca3af";
 
+/** Section keys that live in the sidebar of two-column layouts. */
+const SIDEBAR_KEYS = new Set(["skills", "languages", "certifications"]);
+
 /** Normalize a possibly-bare URL/handle into an href. */
 function hrefFor(value: string, kind: "url" | "email" | "phone" = "url"): string {
   const v = value.trim();
@@ -33,11 +37,22 @@ function hrefFor(value: string, kind: "url" | "email" | "phone" = "url"): string
   return `https://${v}`;
 }
 
+/** Two-letter initials from a name, for the monogram block. */
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "CV";
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
+}
+
 export function ResumePreview({ data, tokens, accentColor, fontFamily, interactive = true }: PreviewProps) {
   const accent = accentColor || tokens.accentColor;
   const font = fontById(fontFamily ?? tokens.font);
   const sp = DENSITY_SPACING[tokens.density];
   const isTwoCol = tokens.layout === "two-column";
+  const filledSidebar = isTwoCol && tokens.sidebarStyle === "filled";
+  const sidebarSide = tokens.sidebarSide ?? "right";
+  const sideLabel = !isTwoCol && tokens.sectionLayout === "side-label";
   const pad = tokens.density === "compact" ? 40 : tokens.density === "roomy" ? 56 : 48;
   const bullet = tokens.bullet ?? "disc";
   const onBand = tokens.headerStyle === "band";
@@ -51,7 +66,6 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
     fontFamily: font.cssVar,
     fontSize: 11,
     lineHeight: sp.line,
-    padding: pad,
     boxSizing: "border-box",
   };
 
@@ -103,12 +117,37 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
     );
   };
 
-  const sectionNode = (title: string, children: ReactNode, key: string) => (
-    <section key={key} style={{ marginBottom: sp.section }}>
-      {sectionTitleNode(title)}
-      <div>{children}</div>
-    </section>
-  );
+  // A section. In side-label layouts the title sits in a narrow right-aligned
+  // left gutter and content flows to its right; otherwise it stacks on top.
+  const sectionNode = (title: string, children: ReactNode, key: string) => {
+    if (sideLabel) {
+      return (
+        <section key={key} style={{ display: "flex", gap: 22, marginBottom: sp.section, breakInside: "avoid" }}>
+          <div
+            style={{
+              flex: "0 0 104px",
+              textAlign: "right",
+              paddingTop: 1,
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: 1.2,
+              textTransform: "uppercase",
+              color: tokens.accent === "none" ? SUBTLE : accent,
+            }}
+          >
+            {title}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
+        </section>
+      );
+    }
+    return (
+      <section key={key} style={{ marginBottom: sp.section, breakInside: "avoid" }}>
+        {sectionTitleNode(title)}
+        <div>{children}</div>
+      </section>
+    );
+  };
 
   const markers: Record<string, string> = { disc: "•", dash: "–", square: "▪", none: "" };
   const bulletsNode = (items: string[]) => {
@@ -148,7 +187,7 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
   const dateRange = (a: string, b: string, current?: boolean) =>
     [a, current ? "Present" : b].filter(Boolean).join(" – ");
 
-  // --- Built-in section renderers ---
+  // --- Built-in section renderers (main column) ---
   const renderers: Record<string, () => ReactNode> = {
     summary: () =>
       data.summary?.trim()
@@ -325,7 +364,7 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
     letterSpacing: tokens.letterSpacedName ? 2 : -0.2,
   };
 
-  const textBlock = (
+  const nameTitleBlock = (
     <>
       <h1 style={nameStyle}>{data.header.fullName || "Your Name"}</h1>
       {data.header.title && (
@@ -342,6 +381,12 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
           {data.header.title}
         </div>
       )}
+    </>
+  );
+
+  const textBlock = (
+    <>
+      {nameTitleBlock}
       {contactBlock()}
     </>
   );
@@ -350,10 +395,13 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
   const photoPos = data.header.photoPosition ?? "left";
   const PHOTO_SIZE = 88;
   const photoEl = data.header.photo ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
+    <Image
       src={data.header.photo}
       alt=""
+      width={PHOTO_SIZE}
+      height={PHOTO_SIZE}
+      // User-provided data URL — skip the optimizer, render directly.
+      unoptimized
       style={{
         width: PHOTO_SIZE,
         height: PHOTO_SIZE,
@@ -365,22 +413,59 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
     />
   ) : null;
 
-  const headerInner = photoEl ? (
-    <div
-      style={{
-        display: "flex",
-        gap: 16,
-        alignItems: "center",
-        flexDirection: photoPos === "center" ? "column" : photoPos === "right" ? "row-reverse" : "row",
-        ...(photoPos === "center" ? { textAlign: "center" as const } : null),
-      }}
-    >
-      {photoEl}
-      <div style={{ minWidth: 0, flex: photoPos === "center" ? undefined : 1 }}>{textBlock}</div>
-    </div>
-  ) : (
-    textBlock
-  );
+  // A small accent monogram (initials) — only when there's no photo competing
+  // for the same slot.
+  const monogramEl =
+    tokens.monogram && !photoEl ? (
+      <div
+        style={{
+          flex: "0 0 auto",
+          width: 46,
+          height: 46,
+          borderRadius: 8,
+          background: accent,
+          color: "#fff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 18,
+          fontWeight: 700,
+          letterSpacing: 1,
+        }}
+      >
+        {initialsOf(data.header.fullName || "")}
+      </div>
+    ) : null;
+
+  let headerInner: ReactNode;
+  if (photoEl) {
+    headerInner = (
+      <div
+        style={{
+          display: "flex",
+          gap: 16,
+          alignItems: "center",
+          flexDirection: photoPos === "center" ? "column" : photoPos === "right" ? "row-reverse" : "row",
+          ...(photoPos === "center" ? { textAlign: "center" as const } : null),
+        }}
+      >
+        {photoEl}
+        <div style={{ minWidth: 0, flex: photoPos === "center" ? undefined : 1 }}>{textBlock}</div>
+      </div>
+    );
+  } else if (monogramEl && !centered) {
+    headerInner = (
+      <>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          {monogramEl}
+          <div>{nameTitleBlock}</div>
+        </div>
+        {contactBlock()}
+      </>
+    );
+  } else {
+    headerInner = textBlock;
+  }
 
   let header: ReactNode;
   if (onBand) {
@@ -407,34 +492,214 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
 
   const fullOrder = resolveSectionOrder(data);
 
-  if (isTwoCol) {
-    const sidebarKeys = new Set(["skills", "languages", "certifications"]);
-    const mainKeys = fullOrder.filter((k) => !sidebarKeys.has(k));
-    const sideKeys = fullOrder.filter((k) => sidebarKeys.has(k));
+  // ---- Filled sidebar: solid accent panel with the header living inside it. ----
+  if (filledSidebar) {
+    const mainKeys = fullOrder.filter((k) => !SIDEBAR_KEYS.has(k));
+    const sideKeys = fullOrder.filter((k) => SIDEBAR_KEYS.has(k));
+    const sidePad = Math.round(pad * 0.75);
+
+    const sidePhoto = data.header.photo ? (
+      <Image
+        src={data.header.photo}
+        alt=""
+        width={72}
+        height={72}
+        unoptimized
+        style={{
+          width: 72,
+          height: 72,
+          borderRadius: "50%",
+          objectFit: "cover",
+          border: "2px solid rgba(255,255,255,0.7)",
+          marginBottom: 12,
+        }}
+      />
+    ) : tokens.monogram ? (
+      <div
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.18)",
+          color: "#fff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 21,
+          fontWeight: 700,
+          marginBottom: 12,
+        }}
+      >
+        {initialsOf(data.header.fullName || "")}
+      </div>
+    ) : null;
+
+    const sideTitle = (children: ReactNode) => (
+      <h2
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          margin: "0 0 5px",
+          textTransform: "uppercase",
+          letterSpacing: 1.2,
+          color: "#fff",
+          borderBottom: "1px solid rgba(255,255,255,0.35)",
+          paddingBottom: 3,
+        }}
+      >
+        {children}
+      </h2>
+    );
+
+    const sidebar = (
+      <aside
+        style={{
+          flex: "0 0 35%",
+          background: accent,
+          color: "rgba(255,255,255,0.9)",
+          padding: sidePad,
+          fontSize: 10.5,
+          boxSizing: "border-box",
+        }}
+      >
+        {sidePhoto}
+        <h1 style={{ fontSize: Math.min(tokens.nameSize, 28), margin: 0, fontWeight: 700, lineHeight: 1.1, color: "#fff" }}>
+          {data.header.fullName || "Your Name"}
+        </h1>
+        {data.header.title && (
+          <div style={{ fontSize: 12, marginTop: 4, fontWeight: 600, color: "rgba(255,255,255,0.85)" }}>
+            {data.header.title}
+          </div>
+        )}
+        {contactEntries.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            {sideTitle("Contact")}
+            <div style={{ lineHeight: 1.6, wordBreak: "break-word" }}>
+              {contactEntries.map((e, i) => (
+                <div key={i} style={{ color: "rgba(255,255,255,0.9)" }}>
+                  {e.label}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {sideKeys.map((k) => {
+          if (k === "skills" && data.skills.length)
+            return (
+              <div key={k} style={{ marginTop: 16 }}>
+                {sideTitle("Skills")}
+                {data.skills.map((g) => (
+                  <div key={g.id} style={{ marginBottom: 6 }}>
+                    {g.category && <div style={{ fontWeight: 700, color: "#fff" }}>{g.category}</div>}
+                    <div style={{ color: "rgba(255,255,255,0.88)" }}>{g.items.filter(Boolean).join(", ")}</div>
+                  </div>
+                ))}
+              </div>
+            );
+          if (k === "languages" && data.languages.length)
+            return (
+              <div key={k} style={{ marginTop: 16 }}>
+                {sideTitle("Languages")}
+                {data.languages.map((l) => (
+                  <div key={l.id} style={{ marginBottom: 2, color: "rgba(255,255,255,0.9)" }}>
+                    {l.name}
+                    {l.level && <span style={{ color: "rgba(255,255,255,0.65)" }}> · {l.level}</span>}
+                  </div>
+                ))}
+              </div>
+            );
+          if (k === "certifications" && data.certifications.length)
+            return (
+              <div key={k} style={{ marginTop: 16 }}>
+                {sideTitle("Certifications")}
+                {data.certifications.map((c) => (
+                  <div key={c.id} style={{ marginBottom: 4 }}>
+                    <div style={{ color: "#fff" }}>{c.name || c.url}</div>
+                    {(c.issuer || c.date) && (
+                      <div style={{ color: "rgba(255,255,255,0.65)" }}>{[c.issuer, c.date].filter(Boolean).join(" · ")}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          return null;
+        })}
+      </aside>
+    );
+
+    const main = (
+      <div style={{ flex: 1, minWidth: 0, padding: pad, boxSizing: "border-box" }}>
+        {mainKeys.map((k) => renderKey(k))}
+      </div>
+    );
+
     return (
-      <div style={page}>
+      <div style={{ ...page, display: "flex", alignItems: "stretch" }}>
+        {sidebarSide === "left" ? (
+          <>
+            {sidebar}
+            {main}
+          </>
+        ) : (
+          <>
+            {main}
+            {sidebar}
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // ---- Tinted sidebar: header on top, faint accent wash beside the body. ----
+  if (isTwoCol) {
+    const mainKeys = fullOrder.filter((k) => !SIDEBAR_KEYS.has(k));
+    const sideKeys = fullOrder.filter((k) => SIDEBAR_KEYS.has(k));
+    const sidebar = (
+      <div
+        style={{
+          flex: "0 0 33%",
+          ...(tokens.sidebarTint
+            ? { background: `color-mix(in srgb, ${accent} 8%, #ffffff)`, borderRadius: 6, padding: 14, marginTop: -2 }
+            : null),
+        }}
+      >
+        {sideKeys.map((k) => renderKey(k))}
+      </div>
+    );
+    const main = <div style={{ flex: 1, minWidth: 0 }}>{mainKeys.map((k) => renderKey(k))}</div>;
+    return (
+      <div style={{ ...page, padding: pad }}>
         {header}
         <div style={{ display: "flex", gap: 22 }}>
-          <div
-            style={{
-              flex: "0 0 33%",
-              ...(tokens.sidebarTint
-                ? { background: `color-mix(in srgb, ${accent} 8%, #ffffff)`, borderRadius: 6, padding: 14, marginTop: -2 }
-                : null),
-            }}
-          >
-            {sideKeys.map((k) => renderKey(k))}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>{mainKeys.map((k) => renderKey(k))}</div>
+          {sidebarSide === "left" ? (
+            <>
+              {sidebar}
+              {main}
+            </>
+          ) : (
+            <>
+              {main}
+              {sidebar}
+            </>
+          )}
         </div>
       </div>
     );
   }
 
+  // ---- Single column (optionally a side-label gutter or two-column body). ----
+  const body =
+    tokens.bodyColumns === 2 ? (
+      <div style={{ columnCount: 2, columnGap: 28 }}>{fullOrder.map((k) => renderKey(k))}</div>
+    ) : (
+      <>{fullOrder.map((k) => renderKey(k))}</>
+    );
+
   return (
-    <div style={page}>
+    <div style={{ ...page, padding: pad }}>
+      {tokens.topRule && <div style={{ height: 4, background: accent, margin: `${-pad}px ${-pad}px ${pad * 0.6}px` }} />}
       {header}
-      {fullOrder.map((k) => renderKey(k))}
+      {body}
     </div>
   );
 }

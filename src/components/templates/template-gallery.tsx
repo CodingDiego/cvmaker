@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useMemo } from "react";
 import { Search } from "lucide-react";
 import { useQueryStates } from "nuqs";
 import { Input } from "@/components/ui/input";
@@ -28,19 +28,12 @@ export function TemplateGallery({ drafts }: { drafts: Record<string, TemplateDra
 
   const [{ q, font }, setFilters] = useQueryStates(templateSearchParsers, {
     history: "replace",
+    throttleMs: 200,
   });
 
-  const [input, setInput] = useState(q);
-  useEffect(() => setInput(q), [q]);
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (input !== q) setFilters({ q: input || null });
-    }, 250);
-    return () => clearTimeout(t);
-  }, [input, q, setFilters]);
-
+  const deferredQ = useDeferredValue(q);
   const filtered = useMemo(() => {
-    const needle = input.trim().toLowerCase();
+    const needle = deferredQ.trim().toLowerCase();
     return TEMPLATES.filter((t) => {
       const matchesText =
         !needle ||
@@ -49,7 +42,7 @@ export function TemplateGallery({ drafts }: { drafts: Record<string, TemplateDra
       const matchesFont = font === "all" || t.font === font;
       return matchesText && matchesFont;
     });
-  }, [input, font]);
+  }, [deferredQ, font]);
 
   return (
     <div className="space-y-8">
@@ -57,8 +50,8 @@ export function TemplateGallery({ drafts }: { drafts: Record<string, TemplateDra
         <div className="relative flex-1">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+            value={q}
+            onChange={(e) => setFilters({ q: e.target.value || null })}
             placeholder="Search templates…"
             className="pl-9"
             aria-label="Search templates"

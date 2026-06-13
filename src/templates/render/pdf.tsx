@@ -265,6 +265,8 @@ export async function renderPdf(
       <Page size="A4" style={s.page}>
         <View style={{ flexDirection: headerDir, alignItems: "center" }}>
           {photo ? (
+            // react-pdf <Image> has no alt prop (it renders to PDF, not the DOM).
+            // eslint-disable-next-line jsx-a11y/alt-text
             <Image src={photo} style={{ width: PHOTO, height: PHOTO, borderRadius: PHOTO / 2, objectFit: "cover" }} />
           ) : null}
           <HeaderText />

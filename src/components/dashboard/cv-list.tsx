@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useMemo } from "react";
 import { Link } from "@/components/link";
 import { Plus, Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -28,30 +28,23 @@ export function CvList() {
   const { data: cvs = [] } = useQuery(cvListOptions());
 
   // URL is the source of truth for the filters (shareable, survives refresh).
-  // `history: 'replace'` keeps typing out of the back-button stack.
+  // nuqs updates `q` synchronously for instant input feedback while throttling
+  // the actual URL writes; `history: 'replace'` keeps typing out of the back stack.
   const [{ q, template }, setFilters] = useQueryStates(cvSearchParsers, {
     history: "replace",
+    throttleMs: 200,
   });
 
-  // Local input mirrors the URL for instant typing feedback, debounced into the
-  // URL so we don't rewrite it on every keystroke.
-  const [input, setInput] = useState(q);
-  useEffect(() => setInput(q), [q]);
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (input !== q) setFilters({ q: input || null });
-    }, 300);
-    return () => clearTimeout(t);
-  }, [input, q, setFilters]);
-
+  // Defer the (potentially heavier) filter pass so typing stays snappy.
+  const deferredQ = useDeferredValue(q);
   const filtered = useMemo(() => {
-    const needle = input.trim().toLowerCase();
+    const needle = deferredQ.trim().toLowerCase();
     return cvs.filter((cv) => {
       const matchesText = !needle || cv.title.toLowerCase().includes(needle);
       const matchesTemplate = template === "all" || cv.templateId === template;
       return matchesText && matchesTemplate;
     });
-  }, [cvs, input, template]);
+  }, [cvs, deferredQ, template]);
 
   // No CVs at all → onboarding empty state (no filter UI).
   if (cvs.length === 0) {
@@ -77,8 +70,8 @@ export function CvList() {
         <div className="relative flex-1">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+            value={q}
+            onChange={(e) => setFilters({ q: e.target.value || null })}
             placeholder="Search your CVs by title…"
             className="pl-9"
             aria-label="Search CVs"
