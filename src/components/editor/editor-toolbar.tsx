@@ -4,14 +4,18 @@ import Link from "next/link";
 import { ArrowLeft, Check, CloudOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useCvStore } from "@/lib/cv/store";
 import { TEMPLATES } from "@/templates/registry";
 import { FONT_OPTIONS } from "@/lib/font-config";
 import { ExportMenu } from "./export-menu";
 import type { SaveStatus } from "@/lib/cv/use-autosave";
-
-const selectClass =
-  "h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
   if (status === "saving")
@@ -57,31 +61,31 @@ export function EditorToolbar({ status }: { status: SaveStatus }) {
       />
 
       <div className="flex items-center gap-2">
-        <select
-          className={selectClass}
-          value={templateId}
-          onChange={(e) => setMeta({ templateId: e.target.value })}
-          aria-label="Template"
-        >
-          {TEMPLATES.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.label}
-            </option>
-          ))}
-        </select>
+        <Select value={templateId} onValueChange={(v) => setMeta({ templateId: v })}>
+          <SelectTrigger size="sm" className="w-40" aria-label="Template">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {TEMPLATES.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        <select
-          className={selectClass}
-          value={fontFamily}
-          onChange={(e) => setMeta({ fontFamily: e.target.value })}
-          aria-label="Font"
-        >
-          {FONT_OPTIONS.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.label}
-            </option>
-          ))}
-        </select>
+        <Select value={fontFamily} onValueChange={(v) => setMeta({ fontFamily: v })}>
+          <SelectTrigger size="sm" className="w-36" aria-label="Font">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {FONT_OPTIONS.map((f) => (
+              <SelectItem key={f.id} value={f.id}>
+                {f.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <label className="flex items-center gap-1.5 text-xs text-muted-foreground" title="Accent color">
           <input

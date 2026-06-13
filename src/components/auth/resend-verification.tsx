@@ -12,7 +12,7 @@ export function ResendVerification() {
   return (
     <Button
       variant="outline"
-      className="w-full"
+      className="h-11 w-full"
       disabled={pending || sent}
       onClick={() =>
         startTransition(async () => {

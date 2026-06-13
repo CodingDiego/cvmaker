@@ -1,3 +1,4 @@
+import * as React from "react"
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -44,12 +45,24 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  nativeButton,
+  render,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+  // When rendered as a non-<button> element (e.g. a Next.js <Link> / <a>),
+  // Base UI warns unless `nativeButton` is false. Infer it from the rendered
+  // element so call sites don't have to pass it, while still honoring an
+  // explicit value.
+  const resolvedNativeButton =
+    nativeButton ??
+    (React.isValidElement(render) && render.type !== "button" ? false : undefined)
+
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      nativeButton={resolvedNativeButton}
+      render={render}
       {...props}
     />
   )

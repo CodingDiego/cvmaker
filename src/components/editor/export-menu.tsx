@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -68,17 +69,19 @@ export function ExportMenu({ cvId }: { cvId: string }) {
         {busy ? `Exporting ${activeFormat ?? ""}…` : "Export"}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuLabel>Download as</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => run("pdf")}>
-          <FileText className="size-4" /> PDF
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => run("docx")}>
-          <FileType className="size-4" /> Word (DOCX)
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => run("zip")}>
-          <Package className="size-4" /> All formats (ZIP)
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Download as</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => run("pdf")}>
+            <FileText className="size-4" /> PDF
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => run("docx")}>
+            <FileType className="size-4" /> Word (DOCX)
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => run("zip")}>
+            <Package className="size-4" /> All formats (ZIP)
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

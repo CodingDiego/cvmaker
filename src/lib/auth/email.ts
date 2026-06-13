@@ -1,5 +1,10 @@
 import "server-only";
-import { Resend } from "resend";
+// NOTE: Resend is disabled until a sending domain is purchased + verified.
+// Re-enable by (1) uncommenting the import below, (2) restoring the `resend()`
+// client and the real send branch in `sendEmail`, and (3) setting
+// RESEND_API_KEY / RESEND_FROM_EMAIL in the environment. Until then every email
+// is logged to the server console so the verify/reset flows stay fully testable.
+// import { Resend } from "resend";
 import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import { users, emailTokens } from "@/db/schema";
@@ -11,21 +16,25 @@ import { revokeOtherSessions } from "./sessions";
 const VERIFY_TTL_MS = 24 * 60 * 60 * 1000; // 24h
 const RESET_TTL_MS = 60 * 60 * 1000; // 1h
 
-let _resend: Resend | null = null;
-function resend(): Resend | null {
-  if (!env.hasResend()) return null;
-  if (!_resend) _resend = new Resend(env.resendApiKey()!);
-  return _resend;
-}
+// --- Resend client (disabled, see note above) -----------------------------
+// let _resend: Resend | null = null;
+// function resend(): Resend | null {
+//   if (!env.hasResend()) return null;
+//   if (!_resend) _resend = new Resend(env.resendApiKey()!);
+//   return _resend;
+// }
 
 async function sendEmail(to: string, subject: string, html: string) {
-  const client = resend();
-  if (!client) {
-    // Dev fallback: surface the email so flows are testable without Resend.
-    console.info(`\n[email → ${to}] ${subject}\n${html.replace(/<[^>]+>/g, " ").trim()}\n`);
-    return;
-  }
-  await client.emails.send({ from: env.resendFrom(), to, subject, html });
+  // Resend is commented out until the domain is bought — log to console instead.
+  console.info(`\n[email → ${to}] ${subject}\n${html.replace(/<[^>]+>/g, " ").trim()}\n`);
+
+  // --- Re-enable once Resend is configured ---------------------------------
+  // const client = resend();
+  // if (!client) {
+  //   console.info(`\n[email → ${to}] ${subject}\n${html.replace(/<[^>]+>/g, " ").trim()}\n`);
+  //   return;
+  // }
+  // await client.emails.send({ from: env.resendFrom(), to, subject, html });
 }
 
 function layout(title: string, body: string, cta?: { url: string; label: string }) {
