@@ -1,7 +1,9 @@
 import "server-only";
+import { cacheTag } from "next/cache";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { cvs, type Cv } from "@/db/schema";
+import { tags } from "@/lib/cache-tags";
 import { renderPdf } from "@/templates/render/pdf";
 import { renderDocx } from "@/templates/render/docx";
 import { putToStore, delFromStore } from "@/lib/blob";
@@ -116,6 +118,9 @@ export async function unshareCv(userId: string, cvId: string): Promise<void> {
 
 /** Public read used by the share page — only returns the CV if it's public. */
 export async function getPublicCv(userId: string, cvId: string): Promise<Cv | null> {
+  "use cache";
+  cacheTag(tags.cv(cvId));
+
   const [row] = await db
     .select()
     .from(cvs)
