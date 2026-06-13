@@ -1,12 +1,5 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalArticle } from "@/components/legal/legal-article";
-
-export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: "How CVMaker collects, uses, and protects your data.",
-  alternates: { canonical: "/privacy" },
-};
 
 export default function PrivacyPage() {
   return (

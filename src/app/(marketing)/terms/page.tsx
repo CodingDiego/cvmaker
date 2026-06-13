@@ -1,12 +1,5 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalArticle } from "@/components/legal/legal-article";
-
-export const metadata: Metadata = {
-  title: "Terms of Service",
-  description: "The terms governing your use of CVMaker.",
-  alternates: { canonical: "/terms" },
-};
 
 export default function TermsPage() {
   return (

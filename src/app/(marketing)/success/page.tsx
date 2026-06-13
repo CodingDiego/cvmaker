@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { AlertTriangle, ArrowRight, CheckCircle2, Clock3, CreditCard, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

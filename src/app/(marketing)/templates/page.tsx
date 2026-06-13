@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth/session";
 import { FREE_DRAFT_LIMIT, type BillingPlan } from "@/lib/billing/entitlements";
 import { getUserPlan } from "@/lib/billing/entitlements-server";
@@ -8,11 +7,6 @@ import type { TemplateDraft } from "@/components/templates/template-card";
 import { JsonLd } from "@/components/seo/json-ld";
 import { templatesItemListLd } from "@/lib/seo";
 import { FREE_TEMPLATES, PRO_TEMPLATES } from "@/templates/registry";
-
-export const metadata: Metadata = {
-  title: "Templates",
-  description: "Free ATS-friendly resume templates plus premium expressive CV designs.",
-};
 
 export default async function TemplatesPage() {
   const user = await getCurrentUser();
