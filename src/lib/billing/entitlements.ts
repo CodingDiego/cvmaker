@@ -21,12 +21,6 @@ export function isCvLimitError(error: unknown): error is CvLimitError {
   return error instanceof CvLimitError;
 }
 
-export async function getUserPlan(userId: string): Promise<BillingPlan> {
-  void userId;
-  // TODO: Read the persisted Polar subscription entitlement once webhooks store it.
-  return "free";
-}
-
 export function canUseTemplate(plan: BillingPlan, templateId: string) {
   return plan === "pro" || !isProTemplate(templateId);
 }
