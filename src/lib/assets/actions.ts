@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
+import { tags } from "@/lib/cache-tags";
 import {
   createAsset,
   shareAsset,
@@ -19,27 +20,27 @@ export async function uploadAssetAction(formData: FormData) {
     contentType: file.type || "application/octet-stream",
     data,
   });
-  revalidatePath("/dashboard/assets");
+  updateTag(tags.assetList(user.id));
   return { ok: true };
 }
 
 export async function shareAssetAction(assetId: string) {
   const user = await requireUser();
   const runId = await shareAsset(user.id, assetId);
-  revalidatePath("/dashboard/assets");
+  updateTag(tags.assetList(user.id));
   return { ok: Boolean(runId), runId };
 }
 
 export async function unshareAssetAction(assetId: string) {
   const user = await requireUser();
   const runId = await unshareAsset(user.id, assetId);
-  revalidatePath("/dashboard/assets");
+  updateTag(tags.assetList(user.id));
   return { ok: Boolean(runId), runId };
 }
 
 export async function deleteAssetAction(assetId: string) {
   const user = await requireUser();
   await deleteAsset(user.id, assetId);
-  revalidatePath("/dashboard/assets");
+  updateTag(tags.assetList(user.id));
   return { ok: true };
 }

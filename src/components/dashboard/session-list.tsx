@@ -1,20 +1,13 @@
 "use client";
 
-import { useTransition } from "react";
 import { Laptop, Loader2, MapPin, ShieldX } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { revokeSessionAction, revokeOtherSessionsAction } from "@/lib/auth/session-actions";
-
-export interface SessionView {
-  id: string;
-  deviceLabel: string | null;
-  ip: string | null;
-  environment: "prod" | "preview" | "local";
-  lastActiveAt: string;
-  current: boolean;
-}
+import { sessionListOptions, type SessionView } from "@/lib/auth/session-queries";
+import { queryKeys } from "@/lib/query/keys";
 
 const envLabel: Record<SessionView["environment"], string> = {
   prod: "Production",
@@ -23,22 +16,33 @@ const envLabel: Record<SessionView["environment"], string> = {
 };
 
 function RevokeButton({ id }: { id: string }) {
-  const [pending, start] = useTransition();
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: () => revokeSessionAction(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.sessions.list() }),
+  });
   return (
     <Button
       variant="destructive"
       size="sm"
-      disabled={pending}
-      onClick={() => start(() => void revokeSessionAction(id))}
+      disabled={mutation.isPending}
+      onClick={() => mutation.mutate()}
     >
-      {pending ? <Loader2 className="size-3.5 animate-spin" /> : <ShieldX className="size-3.5" />}
+      {mutation.isPending ? <Loader2 className="size-3.5 animate-spin" /> : <ShieldX className="size-3.5" />}
       Revoke
     </Button>
   );
 }
 
-export function SessionList({ sessions }: { sessions: SessionView[] }) {
-  const [pending, start] = useTransition();
+export function SessionList() {
+  const queryClient = useQueryClient();
+  const { data: sessions = [] } = useQuery(sessionListOptions());
+
+  const revokeOthers = useMutation({
+    mutationFn: () => revokeOtherSessionsAction(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.sessions.list() }),
+  });
+
   const hasOthers = sessions.some((s) => !s.current);
 
   return (
@@ -48,10 +52,10 @@ export function SessionList({ sessions }: { sessions: SessionView[] }) {
           <Button
             variant="outline"
             size="sm"
-            disabled={pending}
-            onClick={() => start(() => void revokeOtherSessionsAction())}
+            disabled={revokeOthers.isPending}
+            onClick={() => revokeOthers.mutate()}
           >
-            {pending && <Loader2 className="size-3.5 animate-spin" />}
+            {revokeOthers.isPending && <Loader2 className="size-3.5 animate-spin" />}
             Sign out all other sessions
           </Button>
         </div>

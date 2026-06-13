@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { TEMPLATES } from "@/templates/registry";
 import { sampleResume } from "@/lib/cv/types";
 import { PreviewThumbnail } from "@/components/templates/preview-thumbnail";
+import { JsonLd } from "@/components/seo/json-ld";
+import { organizationLd, softwareApplicationLd, websiteLd } from "@/lib/seo";
 
 const features = [
   {
@@ -41,6 +43,9 @@ export default function LandingPage() {
 
   return (
     <div className="relative overflow-hidden">
+      <JsonLd data={organizationLd()} />
+      <JsonLd data={websiteLd()} />
+      <JsonLd data={softwareApplicationLd()} />
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[600px] bg-glow" />
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-30 [mask-image:linear-gradient(to_bottom,black,transparent_70%)]" />
 

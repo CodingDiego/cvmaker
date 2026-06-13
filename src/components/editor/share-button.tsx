@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { Check, Copy, Download, ExternalLink, Globe, Loader2, RefreshCw, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,57 +15,61 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import {
-  getShareInfoAction,
-  shareCvAction,
-  unshareCvAction,
-} from "@/lib/cv/share-actions";
-import type { ShareInfo } from "@/lib/cv/share-service";
+import { shareCvAction, unshareCvAction } from "@/lib/cv/share-actions";
+import { shareInfoOptions, type ShareInfo } from "@/lib/cv/cv-queries";
+import { queryKeys } from "@/lib/query/keys";
 
 export function ShareButton({ cvId }: { cvId: string }) {
-  const [info, setInfo] = useState<ShareInfo | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const queryClient = useQueryClient();
 
-  // Fetch current share state when the dialog opens (event-driven, not an effect).
-  function handleOpenChange(open: boolean) {
-    if (open && !info) {
-      setLoading(true);
-      getShareInfoAction(cvId)
-        .then(setInfo)
-        .finally(() => setLoading(false));
-    }
+  // Share state is read from GET /api/cvs/:cvId/share, fetched lazily the first
+  // time the dialog opens (and refetched after a mutation invalidates the tag).
+  const { data: info, isLoading } = useQuery(shareInfoOptions(cvId, open));
+
+  function writeShare(next: ShareInfo) {
+    queryClient.setQueryData(queryKeys.cvs.share(cvId), next);
+    // The dashboard card shows a "Public" badge — keep the list in sync.
+    queryClient.invalidateQueries({ queryKey: queryKeys.cvs.list() });
   }
+
+  const shareMutation = useMutation({
+    mutationFn: (mode: "enable" | "resync") => shareCvAction(cvId).then((r) => ({ r, mode })),
+    onSuccess: ({ r, mode }) => {
+      writeShare(r);
+      if (mode === "enable") {
+        toast.success("Your CV is now public", {
+          description: "Anyone with the link can view and download it.",
+        });
+      } else {
+        toast.success("Public copy updated");
+      }
+    },
+    onError: (e) =>
+      toast.error("Couldn't update sharing", {
+        description: e instanceof Error ? e.message : undefined,
+      }),
+  });
+
+  const unshareMutation = useMutation({
+    mutationFn: () => unshareCvAction(cvId),
+    onSuccess: () => {
+      writeShare({ isPublic: false, shareUrl: null, pdfUrl: null, docxUrl: null });
+      toast.success("Sharing disabled");
+    },
+    onError: (e) =>
+      toast.error("Couldn't update sharing", {
+        description: e instanceof Error ? e.message : undefined,
+      }),
+  });
+
+  const pending = shareMutation.isPending || unshareMutation.isPending;
+  const isPublic = info?.isPublic ?? false;
 
   function toggle(next: boolean) {
-    startTransition(async () => {
-      try {
-        if (next) {
-          const result = await shareCvAction(cvId);
-          setInfo(result);
-          toast.success("Your CV is now public", { description: "Anyone with the link can view and download it." });
-        } else {
-          await unshareCvAction(cvId);
-          setInfo({ isPublic: false, shareUrl: null, pdfUrl: null, docxUrl: null });
-          toast.success("Sharing disabled");
-        }
-      } catch (e) {
-        toast.error("Couldn't update sharing", { description: e instanceof Error ? e.message : undefined });
-      }
-    });
-  }
-
-  function resync() {
-    startTransition(async () => {
-      try {
-        const result = await shareCvAction(cvId);
-        setInfo(result);
-        toast.success("Public copy updated");
-      } catch (e) {
-        toast.error("Couldn't update", { description: e instanceof Error ? e.message : undefined });
-      }
-    });
+    if (next) shareMutation.mutate("enable");
+    else unshareMutation.mutate();
   }
 
   function copy() {
@@ -75,10 +80,8 @@ export function ShareButton({ cvId }: { cvId: string }) {
     setTimeout(() => setCopied(false), 1500);
   }
 
-  const isPublic = info?.isPublic ?? false;
-
   return (
-    <Dialog onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button variant="outline" size="sm" className="h-9" />}>
         <Share2 className="size-4" /> Share
       </DialogTrigger>
@@ -100,7 +103,7 @@ export function ShareButton({ cvId }: { cvId: string }) {
               </div>
             </div>
           </div>
-          {loading ? (
+          {isLoading ? (
             <Loader2 className="size-4 animate-spin text-muted-foreground" />
           ) : (
             <Switch checked={isPublic} disabled={pending} onCheckedChange={toggle} />
@@ -136,7 +139,7 @@ export function ShareButton({ cvId }: { cvId: string }) {
                   <Download className="size-4" /> DOCX
                 </Button>
               )}
-              <Button size="sm" variant="ghost" className="ml-auto" disabled={pending} onClick={resync}>
+              <Button size="sm" variant="ghost" className="ml-auto" disabled={pending} onClick={() => shareMutation.mutate("resync")}>
                 {pending ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
                 Update public copy
               </Button>

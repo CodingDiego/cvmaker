@@ -14,7 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { startExportAction, getExportStatusAction } from "@/lib/cv/export-actions";
+import { startExportAction } from "@/lib/cv/export-actions";
+import { exportStatusOptions } from "@/lib/cv/export-queries";
 import type { ExportFormat } from "@/workflows/export-cv";
 
 const FORMAT_LABEL: Record<ExportFormat, string> = {
@@ -36,15 +37,7 @@ export function ExportMenu({ cvId }: { cvId: string }) {
     },
   });
 
-  const { data: status } = useQuery({
-    queryKey: ["export", exportId],
-    queryFn: () => getExportStatusAction(exportId!),
-    enabled: !!exportId,
-    refetchInterval: (q) => {
-      const s = q.state.data?.status;
-      return s === "done" || s === "error" ? false : 1000;
-    },
-  });
+  const { data: status } = useQuery(exportStatusOptions(exportId));
 
   // Toast once per terminal poll result. Only side effects here (no setState) —
   // the download UI is derived from `status` directly, avoiding popup-blocked

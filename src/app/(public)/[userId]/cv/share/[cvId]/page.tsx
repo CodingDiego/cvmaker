@@ -2,22 +2,29 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Download, FileText, FileType } from "lucide-react";
-import { getPublicCv } from "@/lib/cv/share-service";
+import { getPublicCv, shareUrlFor } from "@/lib/cv/share-service";
 import { getTemplate } from "@/templates/registry";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ScaledResume } from "@/components/templates/scaled-resume";
+import { JsonLd } from "@/components/seo/json-ld";
+import { personLd } from "@/lib/seo";
 
 type Params = Promise<{ userId: string; cvId: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { userId, cvId } = await params;
   const cv = await getPublicCv(userId, cvId);
-  if (!cv) return { title: "CV not found" };
+  if (!cv) return { title: "CV not found", robots: { index: false } };
   const name = cv.data.header?.fullName || cv.title;
+  const description = cv.data.header?.title || "Shared resume";
+  const url = shareUrlFor(userId, cvId);
   return {
     title: `${name} — CV`,
-    description: cv.data.header?.title || "Shared resume",
+    description,
+    alternates: { canonical: url },
+    openGraph: { type: "profile", title: `${name} — CV`, description, url },
+    twitter: { card: "summary", title: `${name} — CV`, description },
   };
 }
 
@@ -31,6 +38,7 @@ export default async function SharedCvPage({ params }: { params: Params }) {
 
   return (
     <div className="relative flex min-h-svh flex-col">
+      <JsonLd data={personLd(cv.data, { url: shareUrlFor(userId, cvId) })} />
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.35]" />
 
       <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b bg-background/80 px-4 py-3 backdrop-blur sm:px-6">

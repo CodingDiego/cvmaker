@@ -1,9 +1,11 @@
 "use server";
 
 import { requireUser } from "@/lib/auth/session";
-import { startExport, getExportStatus, type ExportStatus } from "./export-service";
+import { startExport } from "./export-service";
 import type { ExportFormat } from "@/workflows/export-cv";
 
+// The status READ now lives at GET /api/exports/:exportId (see export-queries.ts).
+// This action only kicks off the export workflow.
 export async function startExportAction(
   cvId: string,
   format: ExportFormat,
@@ -11,9 +13,4 @@ export async function startExportAction(
   const user = await requireUser();
   const exportId = await startExport(user.id, cvId, format);
   return { exportId };
-}
-
-export async function getExportStatusAction(exportId: string): Promise<ExportStatus | null> {
-  const user = await requireUser();
-  return getExportStatus(user.id, exportId);
 }

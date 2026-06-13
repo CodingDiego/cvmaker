@@ -1,24 +1,28 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
-import { shareCv, unshareCv, getShareInfo, type ShareInfo } from "./share-service";
+import { tags } from "@/lib/cache-tags";
+import { shareCv, unshareCv, type ShareInfo } from "./share-service";
 
-export async function getShareInfoAction(cvId: string): Promise<ShareInfo | null> {
-  const user = await requireUser();
-  return getShareInfo(user.id, cvId);
-}
+// Note: the share-state READ now lives at GET /api/cvs/:cvId/share
+// (getShareInfoCached). These actions only mutate, then invalidate the relevant
+// tags for read-your-own-writes.
 
 export async function shareCvAction(cvId: string): Promise<ShareInfo> {
   const user = await requireUser();
   const info = await shareCv(user.id, cvId);
-  revalidatePath("/dashboard");
+  updateTag(tags.shareInfo(cvId));
+  updateTag(tags.cv(cvId));
+  updateTag(tags.cvList(user.id)); // card shows a "Public" badge
   return info;
 }
 
 export async function unshareCvAction(cvId: string): Promise<{ ok: true }> {
   const user = await requireUser();
   await unshareCv(user.id, cvId);
-  revalidatePath("/dashboard");
+  updateTag(tags.shareInfo(cvId));
+  updateTag(tags.cv(cvId));
+  updateTag(tags.cvList(user.id));
   return { ok: true };
 }

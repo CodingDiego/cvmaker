@@ -4,14 +4,45 @@ import "./globals.css";
 import { sans, display, geistMono, cvFontVariables } from "@/lib/fonts";
 import { Providers } from "@/lib/providers";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { siteConfig } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
     default: "CVMaker — Free ATS-friendly resume builder",
     template: "%s · CVMaker",
   },
-  description:
-    "Create, edit and export ATS-friendly resumes for free. 10 professional templates, live preview, and export to PDF, DOCX or all formats at once.",
+  description: siteConfig.description,
+  applicationName: siteConfig.name,
+  keywords: [
+    "resume builder",
+    "CV maker",
+    "ATS-friendly resume",
+    "free resume templates",
+    "PDF resume",
+    "DOCX resume",
+    "online CV",
+  ],
+  authors: [{ name: siteConfig.name }],
+  creator: siteConfig.name,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: siteConfig.name,
+    title: "CVMaker — Free ATS-friendly resume builder",
+    description: siteConfig.description,
+    url: siteConfig.url,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CVMaker — Free ATS-friendly resume builder",
+    description: siteConfig.description,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
 };
 
 export default function RootLayout({

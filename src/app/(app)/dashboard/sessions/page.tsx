@@ -1,22 +1,21 @@
 import type { Metadata } from "next";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { requireUser } from "@/lib/auth/session";
-import { listActiveSessions } from "@/lib/auth/sessions";
-import { SessionList, type SessionView } from "@/components/dashboard/session-list";
+import { getQueryClient } from "@/lib/query/client";
+import { queryKeys } from "@/lib/query/keys";
+import { getSessionListCached, withCurrent } from "@/lib/auth/session-reads";
+import { SessionList } from "@/components/dashboard/session-list";
 
 export const metadata: Metadata = { title: "Active sessions" };
 
 export default async function SessionsPage() {
   const user = await requireUser("/dashboard/sessions");
-  const rows = await listActiveSessions(user.id);
 
-  const sessions: SessionView[] = rows.map((s) => ({
-    id: s.id,
-    deviceLabel: s.deviceLabel,
-    ip: s.ip,
-    environment: s.environment,
-    lastActiveAt: s.lastActiveAt.toISOString(),
-    current: s.id === user.sessionId,
-  }));
+  // Prefetch with the per-request `current` flag already applied so hydration
+  // matches what GET /api/sessions returns.
+  const queryClient = getQueryClient();
+  const rows = await getSessionListCached(user.id);
+  queryClient.setQueryData(queryKeys.sessions.list(), withCurrent(rows, user.sessionId));
 
   return (
     <div className="space-y-6">
@@ -27,7 +26,9 @@ export default async function SessionsPage() {
           clutter. Revoke any you don&apos;t recognize.
         </p>
       </div>
-      <SessionList sessions={sessions} />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <SessionList />
+      </HydrationBoundary>
     </div>
   );
 }

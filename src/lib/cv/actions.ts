@@ -1,8 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
+import { tags } from "@/lib/cache-tags";
 import { resumeSchema, type ResumeData } from "./types";
 import {
   createCv,
@@ -10,24 +11,37 @@ import {
   updateCvData,
   updateCvMeta,
 } from "./service";
+import { unshareCv } from "./share-service";
 
 export async function createCvAction(templateId?: string) {
   const user = await requireUser();
   const cv = await createCv(user.id, { templateId });
+  // RYOW: expire the list cache before navigating so the dashboard (if revisited)
+  // and any client refetch see the new CV immediately.
+  updateTag(tags.cvList(user.id));
   redirect(`/editor/${cv.id}`);
 }
 
 export async function deleteCvAction(cvId: string) {
   const user = await requireUser();
+  // Remove any public blob copies first so deleting a shared CV doesn't orphan
+  // files in the public store (best-effort — never blocks the delete).
+  try {
+    await unshareCv(user.id, cvId);
+  } catch {
+    // ignore cleanup failures
+  }
   await deleteCv(user.id, cvId);
-  revalidatePath("/dashboard");
+  updateTag(tags.cvList(user.id));
+  updateTag(tags.cv(cvId));
   return { ok: true };
 }
 
 export async function renameCvAction(cvId: string, title: string) {
   const user = await requireUser();
   await updateCvMeta(user.id, cvId, { title: title.trim() || "Untitled CV" });
-  revalidatePath("/dashboard");
+  updateTag(tags.cv(cvId));
+  updateTag(tags.cvList(user.id));
   return { ok: true };
 }
 
@@ -37,6 +51,10 @@ export async function saveCvDataAction(cvId: string, data: ResumeData) {
   const parsed = resumeSchema.safeParse(data);
   if (!parsed.success) return { ok: false, error: "Invalid resume data" };
   await updateCvData(user.id, cvId, parsed.data);
+  // The dashboard card renders a preview from `data` and shows updatedAt, so the
+  // list tag is invalidated alongside the detail tag.
+  updateTag(tags.cv(cvId));
+  updateTag(tags.cvList(user.id));
   return { ok: true };
 }
 
@@ -46,5 +64,7 @@ export async function updateCvMetaAction(
 ) {
   const user = await requireUser();
   await updateCvMeta(user.id, cvId, meta);
+  updateTag(tags.cv(cvId));
+  updateTag(tags.cvList(user.id));
   return { ok: true };
 }

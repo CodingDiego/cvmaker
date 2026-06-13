@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRef } from "react";
 import { Copy, Globe, Loader2, Lock, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,31 +14,32 @@ import {
   unshareAssetAction,
   deleteAssetAction,
 } from "@/lib/assets/actions";
-
-export interface AssetView {
-  id: string;
-  name: string;
-  contentType: string;
-  shared: boolean;
-  publicUrl: string | null;
-  syncing: boolean;
-}
+import { assetListOptions, type AssetView } from "@/lib/assets/asset-queries";
+import { queryKeys } from "@/lib/query/keys";
 
 function AssetRow({ asset }: { asset: AssetView }) {
-  const router = useRouter();
-  const [pending, start] = useTransition();
+  const queryClient = useQueryClient();
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: queryKeys.assets.list() });
 
-  function toggleShare(next: boolean) {
-    start(async () => {
-      const res = next ? await shareAssetAction(asset.id) : await unshareAssetAction(asset.id);
+  const toggleMutation = useMutation({
+    mutationFn: (next: boolean) =>
+      next ? shareAssetAction(asset.id) : unshareAssetAction(asset.id),
+    onSuccess: (res, next) => {
       if (res.ok) {
         toast.message(next ? "Sharing asset…" : "Unsharing asset…", {
           description: "The public copy is syncing in the background.",
         });
-        router.refresh();
       }
-    });
-  }
+      invalidate();
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteAssetAction(asset.id),
+    onSuccess: invalidate,
+  });
+
+  const pending = toggleMutation.isPending || deleteMutation.isPending;
 
   return (
     <Card>
@@ -76,7 +77,7 @@ function AssetRow({ asset }: { asset: AssetView }) {
             <Switch
               checked={asset.shared}
               disabled={pending}
-              onCheckedChange={toggleShare}
+              onCheckedChange={(next) => toggleMutation.mutate(next)}
               aria-label="Share publicly"
             />
           </div>
@@ -85,10 +86,7 @@ function AssetRow({ asset }: { asset: AssetView }) {
             size="icon-sm"
             aria-label="Delete asset"
             disabled={pending}
-            onClick={() => start(async () => {
-              await deleteAssetAction(asset.id);
-              router.refresh();
-            })}
+            onClick={() => deleteMutation.mutate()}
           >
             <Trash2 className="size-4" />
           </Button>
@@ -98,38 +96,52 @@ function AssetRow({ asset }: { asset: AssetView }) {
   );
 }
 
-export function AssetManager({ assets }: { assets: AssetView[] }) {
-  const router = useRouter();
+export function AssetManager() {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
+  const queryClient = useQueryClient();
+
+  // While any asset has an in-flight sync, poll so the "Syncing…" badge clears
+  // on its own once the background workflow finishes.
+  const { data: assets = [] } = useQuery({
+    ...assetListOptions(),
+    refetchInterval: (q) => (q.state.data?.some((a) => a.syncing) ? 2000 : false),
+  });
+
+  const uploadMutation = useMutation({
+    mutationFn: (file: File) => {
+      const fd = new FormData();
+      fd.set("file", file);
+      return uploadAssetAction(fd);
+    },
+    onSuccess: (res) => {
+      if (res.ok) {
+        toast.success("Asset uploaded");
+        queryClient.invalidateQueries({ queryKey: queryKeys.assets.list() });
+      } else {
+        toast.error(res.error ?? "Upload failed");
+      }
+    },
+    onError: () => toast.error("Upload failed"),
+    onSettled: () => {
+      if (inputRef.current) inputRef.current.value = "";
+    },
+  });
 
   function onUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    const fd = new FormData();
-    fd.set("file", file);
-    uploadAssetAction(fd)
-      .then((res) => {
-        if (res.ok) {
-          toast.success("Asset uploaded");
-          router.refresh();
-        } else {
-          toast.error(res.error ?? "Upload failed");
-        }
-      })
-      .finally(() => {
-        setUploading(false);
-        if (inputRef.current) inputRef.current.value = "";
-      });
+    if (file) uploadMutation.mutate(file);
   }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
         <input ref={inputRef} type="file" hidden onChange={onUpload} />
-        <Button onClick={() => inputRef.current?.click()} disabled={uploading}>
-          {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+        <Button onClick={() => inputRef.current?.click()} disabled={uploadMutation.isPending}>
+          {uploadMutation.isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Upload className="size-4" />
+          )}
           Upload asset
         </Button>
       </div>

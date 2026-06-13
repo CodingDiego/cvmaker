@@ -74,6 +74,10 @@ export const resumeSchema = z.object({
   header: z.object({
     fullName: z.string().default(""),
     title: z.string().default(""),
+    // Optional profile photo as a data URL (resized client-side before storing)
+    // and where it sits relative to the name block.
+    photo: z.string().default(""),
+    photoPosition: z.enum(["left", "center", "right"]).default("left"),
     contact: contactSchema.default(() => contactSchema.parse({})),
   }),
   summary: z.string().default(""),

@@ -2,19 +2,24 @@
 
 import { Activity, useState } from "react";
 import { Eye, Pencil } from "lucide-react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useCvStore, type CvMeta } from "@/lib/cv/store";
+import { useCvStore } from "@/lib/cv/store";
 import { useAutosave } from "@/lib/cv/use-autosave";
-import type { ResumeData } from "@/lib/cv/types";
+import { cvDetailOptions } from "@/lib/cv/cv-queries";
 import { EditorToolbar } from "./editor-toolbar";
 import { EditorForm } from "./editor-form";
 import { LivePreview } from "./live-preview";
 
 type EditorView = "edit" | "preview";
 
-export function EditorShell({ cv }: { cv: CvMeta & { data: ResumeData } }) {
-  // One-time synchronous store hydration from the server payload (runs once,
+export function EditorShell({ cvId }: { cvId: string }) {
+  // The detail was server-prefetched into the cache, so this resolves
+  // synchronously on first render (no loading state).
+  const { data: cv } = useSuspenseQuery(cvDetailOptions(cvId));
+
+  // One-time synchronous store hydration from the cached payload (runs once,
   // before children read the store).
   useState(() => {
     useCvStore.getState().init(cv);

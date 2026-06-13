@@ -1,9 +1,18 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import Link from "next/link";
-import { Globe, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Link } from "@/components/link";
+import { Globe, Loader2, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { deleteCvAction, renameCvAction } from "@/lib/cv/actions";
+import { queryKeys } from "@/lib/query/keys";
 import { TEMPLATE_LABELS, getTemplate } from "@/templates/registry";
 import { PreviewThumbnail } from "@/components/templates/preview-thumbnail";
 import type { ResumeData } from "@/lib/cv/types";
@@ -37,7 +47,30 @@ export function CvCard({
 }) {
   const [renaming, setRenaming] = useState(false);
   const [name, setName] = useState(title);
-  const [pending, startTransition] = useTransition();
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Mutations call the Server Action (which runs updateTag for read-your-own-
+  // writes), then invalidate the list query so React Query refetches /api/cvs.
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteCvAction(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.cvs.list() });
+      toast.success("CV deleted");
+      setConfirmingDelete(false);
+    },
+    onError: () => {
+      toast.error("Couldn't delete this CV");
+      setConfirmingDelete(false);
+    },
+  });
+
+  const renameMutation = useMutation({
+    mutationFn: (next: string) => renameCvAction(id, next),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.cvs.list() }),
+  });
+
+  const pending = deleteMutation.isPending || renameMutation.isPending;
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg">
@@ -70,7 +103,7 @@ export function CvCard({
               onChange={(e) => setName(e.target.value)}
               onBlur={() => {
                 setRenaming(false);
-                startTransition(() => void renameCvAction(id, name));
+                if (name !== title) renameMutation.mutate(name);
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") (e.target as HTMLInputElement).blur();
@@ -98,14 +131,45 @@ export function CvCard({
             </DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
-              disabled={pending}
-              onSelect={() => startTransition(() => void deleteCvAction(id))}
+              // Defer to the next tick so the click that closes the menu doesn't
+              // also register as an outside-press that immediately dismisses the
+              // just-opened confirmation dialog.
+              onSelect={() => setTimeout(() => setConfirmingDelete(true), 0)}
             >
               <Trash2 className="size-4" /> Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      <Dialog open={confirmingDelete} onOpenChange={setConfirmingDelete}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete this CV?</DialogTitle>
+            <DialogDescription>
+              “{title}” will be permanently deleted{isPublic ? ", including its public share link" : ""}. This
+              can’t be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" disabled={pending} onClick={() => setConfirmingDelete(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() => deleteMutation.mutate()}
+            >
+              {deleteMutation.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Trash2 className="size-4" />
+              )}
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

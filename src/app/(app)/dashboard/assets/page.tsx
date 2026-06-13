@@ -1,22 +1,21 @@
 import type { Metadata } from "next";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { requireUser } from "@/lib/auth/session";
-import { listAssets } from "@/lib/assets/service";
-import { AssetManager, type AssetView } from "@/components/dashboard/asset-manager";
+import { getQueryClient } from "@/lib/query/client";
+import { queryKeys } from "@/lib/query/keys";
+import { getAssetListCached } from "@/lib/assets/asset-reads";
+import { AssetManager } from "@/components/dashboard/asset-manager";
 
 export const metadata: Metadata = { title: "Assets" };
 
 export default async function AssetsPage() {
   const user = await requireUser("/dashboard/assets");
-  const rows = await listAssets(user.id);
 
-  const assets: AssetView[] = rows.map((a) => ({
-    id: a.id,
-    name: a.name,
-    contentType: a.contentType,
-    shared: a.shared,
-    publicUrl: a.publicUrl,
-    syncing: Boolean(a.syncRunId),
-  }));
+  const queryClient = getQueryClient();
+  await queryClient.prefetchQuery({
+    queryKey: queryKeys.assets.list(),
+    queryFn: () => getAssetListCached(user.id),
+  });
 
   return (
     <div className="space-y-6">
@@ -27,7 +26,9 @@ export default async function AssetsPage() {
           store; every update re-syncs automatically.
         </p>
       </div>
-      <AssetManager assets={assets} />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <AssetManager />
+      </HydrationBoundary>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { SiteHeader } from "@/components/site-header";
+import { MarketingFooter } from "@/components/marketing-footer";
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,9 +9,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
         <SiteHeader />
       </Suspense>
       <main className="flex-1">{children}</main>
-      <footer className="border-t py-8 text-center text-sm text-muted-foreground">
-        <p>CVMaker — Free, ATS-friendly resume builder.</p>
-      </footer>
+      <MarketingFooter />
     </div>
   );
 }

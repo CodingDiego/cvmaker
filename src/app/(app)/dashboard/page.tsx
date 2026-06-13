@@ -1,16 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { requireUser } from "@/lib/auth/session";
-import { listCvs } from "@/lib/cv/service";
+import { getQueryClient } from "@/lib/query/client";
+import { queryKeys } from "@/lib/query/keys";
+import { getCvListCached } from "@/lib/cv/cv-reads";
 import { Button } from "@/components/ui/button";
-import { CvCard } from "@/components/dashboard/cv-card";
+import { CvList } from "@/components/dashboard/cv-list";
 
 export const metadata: Metadata = { title: "My CVs" };
 
 export default async function DashboardPage() {
   const user = await requireUser("/dashboard");
-  const cvs = await listCvs(user.id);
+
+  // Prefetch the list through the same cached read the GET route uses, then
+  // hand it to the client via HydrationBoundary — server-rendered, no flash,
+  // and the client refetches from /api/cvs on demand.
+  const queryClient = getQueryClient();
+  await queryClient.prefetchQuery({
+    queryKey: queryKeys.cvs.list(),
+    queryFn: () => getCvListCached(user.id),
+  });
 
   return (
     <div className="space-y-6">
@@ -24,33 +35,9 @@ export default async function DashboardPage() {
         </Button>
       </div>
 
-      {cvs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-20 text-center">
-          <p className="font-medium">No CVs yet</p>
-          <p className="mb-4 text-sm text-muted-foreground">
-            Pick a template to start building your resume.
-          </p>
-          <Button render={<Link href="/templates" />}>
-            <Plus className="size-4" /> Browse templates
-          </Button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {cvs.map((cv) => (
-            <CvCard
-              key={cv.id}
-              id={cv.id}
-              title={cv.title}
-              templateId={cv.templateId}
-              updatedAt={cv.updatedAt.toISOString()}
-              data={cv.data}
-              accentColor={cv.accentColor}
-              fontFamily={cv.fontFamily}
-              isPublic={cv.isPublic}
-            />
-          ))}
-        </div>
-      )}
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <CvList />
+      </HydrationBoundary>
     </div>
   );
 }
