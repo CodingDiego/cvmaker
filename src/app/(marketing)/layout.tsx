@@ -1,6 +1,14 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { MarketingFooter } from "@/components/marketing-footer";
+
+export const metadata: Metadata = {
+  title: {
+    default: "CVMaker — Free ATS-friendly resume builder",
+    template: "%s · CVMaker",
+  },
+};
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
