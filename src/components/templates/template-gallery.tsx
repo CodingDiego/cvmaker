@@ -1,7 +1,7 @@
 "use client";
 
 import { useDeferredValue, useMemo } from "react";
-import { Search } from "lucide-react";
+import { Crown, Search } from "lucide-react";
 import { useQueryStates } from "nuqs";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,13 +17,17 @@ import { FONT_OPTIONS, fontById } from "@/lib/font-config";
 import { templateSearchParsers } from "@/lib/search-params";
 import { PreviewThumbnail } from "@/components/templates/preview-thumbnail";
 import { UseTemplateButton, type TemplateDraft } from "@/components/templates/template-card";
+import type { BillingPlan } from "@/lib/billing/entitlements";
 
-/**
- * Filterable template gallery. The template set is static (10 designs), so
- * search + font filtering happen client-side; nuqs keeps both in the URL so a
- * filtered gallery is shareable and survives refresh.
- */
-export function TemplateGallery({ drafts }: { drafts: Record<string, TemplateDraft> }) {
+export function TemplateGallery({
+  drafts,
+  plan,
+  draftCount,
+}: {
+  drafts: Record<string, TemplateDraft>;
+  plan: BillingPlan;
+  draftCount: number;
+}) {
   const sample = useMemo(() => sampleResume(), []);
 
   const [{ q, font }, setFilters] = useQueryStates(templateSearchParsers, {
@@ -52,7 +56,7 @@ export function TemplateGallery({ drafts }: { drafts: Record<string, TemplateDra
           <Input
             value={q}
             onChange={(e) => setFilters({ q: e.target.value || null })}
-            placeholder="Search templates…"
+            placeholder="Search templates..."
             className="pl-9"
             aria-label="Search templates"
           />
@@ -81,38 +85,56 @@ export function TemplateGallery({ drafts }: { drafts: Record<string, TemplateDra
         </p>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6">
-          {filtered.map((tokens) => (
-            <article
-              key={tokens.id}
-              className="group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
-            >
-              <div className="relative flex justify-center overflow-hidden border-b bg-gradient-to-b from-muted/40 to-muted/10 p-5">
-                <div
-                  className="overflow-hidden rounded-md shadow-lg ring-1 ring-black/10 transition-transform duration-300 group-hover:scale-[1.03]"
-                  style={{ height: 320 }}
-                >
-                  <PreviewThumbnail data={sample} tokens={tokens} width={226} />
-                </div>
-                <span
-                  className="absolute top-3 right-3 size-4 rounded-full ring-2 ring-white/80"
-                  style={{ background: tokens.accentColor }}
-                  aria-hidden
-                />
-              </div>
-              <div className="flex flex-1 flex-col gap-3 p-4">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="font-display text-lg font-semibold">{tokens.label}</h3>
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-[0.7rem] text-muted-foreground">
-                      {fontById(tokens.font).label.replace(" (serif)", "")}
-                    </span>
+          {filtered.map((tokens) => {
+            const isPro = tokens.access === "pro";
+            return (
+              <article
+                key={tokens.id}
+                className="group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className="relative flex justify-center overflow-hidden border-b bg-gradient-to-b from-muted/40 to-muted/10 p-5">
+                  <div
+                    className="overflow-hidden rounded-md shadow-lg ring-1 ring-black/10 transition-transform duration-300 group-hover:scale-[1.03]"
+                    style={{ height: 320 }}
+                  >
+                    <PreviewThumbnail data={sample} tokens={tokens} width={226} />
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">{tokens.description}</p>
+                  <span
+                    className="absolute top-3 right-3 size-4 rounded-full ring-2 ring-white/80"
+                    style={{ background: tokens.accentColor }}
+                    aria-hidden
+                  />
                 </div>
-                <UseTemplateButton templateId={tokens.id} draft={drafts[tokens.id]} />
-              </div>
-            </article>
-          ))}
+                <div className="flex flex-1 flex-col gap-3 p-4">
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="font-display text-lg font-semibold">{tokens.label}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">{tokens.description}</p>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        {isPro && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[0.7rem] font-medium text-primary-foreground">
+                            <Crown className="size-3" /> Pro
+                          </span>
+                        )}
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-[0.7rem] text-muted-foreground">
+                          {fontById(tokens.font).label.replace(" (serif)", "")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <UseTemplateButton
+                    templateId={tokens.id}
+                    access={tokens.access}
+                    draft={drafts[tokens.id]}
+                    plan={plan}
+                    draftCount={draftCount}
+                  />
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
     </div>

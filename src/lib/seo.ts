@@ -20,7 +20,7 @@ import type { ResumeData } from "@/lib/cv/types";
 export const siteConfig = {
   name: "CVMaker",
   description:
-    "Create, edit and export ATS-friendly resumes for free. 10 professional templates, a live preview, and export to PDF, DOCX or all formats at once.",
+    "Create, edit and export ATS-friendly resumes. Start with 10 free templates, then unlock Pro CV designs, live preview, PDF and DOCX export.",
   url: env.appUrl().replace(/\/$/, ""),
 } as const;
 

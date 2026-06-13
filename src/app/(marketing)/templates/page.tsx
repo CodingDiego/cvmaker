@@ -1,23 +1,29 @@
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth/session";
+import { getUserPlan, FREE_DRAFT_LIMIT, type BillingPlan } from "@/lib/billing/entitlements";
 import { listCvs } from "@/lib/cv/service";
 import { TemplateGallery } from "@/components/templates/template-gallery";
 import type { TemplateDraft } from "@/components/templates/template-card";
 import { JsonLd } from "@/components/seo/json-ld";
 import { templatesItemListLd } from "@/lib/seo";
+import { FREE_TEMPLATES, PRO_TEMPLATES } from "@/templates/registry";
 
 export const metadata: Metadata = {
   title: "Templates",
-  description: "10 distinct ATS-friendly resume templates to choose from.",
+  description: "Free ATS-friendly resume templates plus premium expressive CV designs.",
 };
 
 export default async function TemplatesPage() {
-  // Map each template to the user's most-recent draft using it (if any), so the
-  // gallery can offer "continue draft vs start new" without losing work.
   const user = await getCurrentUser();
   const draftsByTemplate: Record<string, TemplateDraft> = {};
+  let draftCount = 0;
+  let plan: BillingPlan = "free";
+
   if (user) {
-    const cvs = await listCvs(user.id); // ordered newest-first
+    const [cvs, userPlan] = await Promise.all([listCvs(user.id), getUserPlan(user.id)]);
+    draftCount = cvs.length;
+    plan = userPlan;
+
     for (const cv of cvs) {
       if (!draftsByTemplate[cv.templateId]) {
         draftsByTemplate[cv.templateId] = {
@@ -36,18 +42,18 @@ export default async function TemplatesPage() {
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <div className="mx-auto mb-12 max-w-2xl text-center">
           <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
-            10 distinct designs · all ATS-safe
+            {FREE_TEMPLATES.length} free templates + {PRO_TEMPLATES.length} Pro designs
           </span>
           <h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
             Choose your template
           </h1>
           <p className="mt-4 text-pretty text-muted-foreground">
-            Every design parses cleanly through applicant tracking systems. Pick one to start — you can
-            switch any time without losing content.
+            Start with up to {FREE_DRAFT_LIMIT} free CV drafts, or upgrade to unlock premium
+            templates and higher draft capacity.
           </p>
         </div>
 
-        <TemplateGallery drafts={draftsByTemplate} />
+        <TemplateGallery drafts={draftsByTemplate} plan={plan} draftCount={draftCount} />
       </div>
     </div>
   );

@@ -20,7 +20,7 @@ const features = [
   },
   {
     icon: Sparkles,
-    title: "10 distinct templates",
+    title: "Free and Pro designs",
     description: "From minimal to executive — switch designs any time without retyping a thing.",
   },
   {
@@ -61,8 +61,8 @@ export default function LandingPage() {
               <span className="text-primary"> read</span>, not rejected.
             </h1>
             <p className="mt-6 max-w-lg text-lg text-pretty text-muted-foreground">
-              Build a polished, ATS-friendly CV in minutes. Ten distinct templates, a live preview, and
-              one-click export to PDF, DOCX or a single ZIP.
+              Build a polished, ATS-friendly CV in minutes. Start with 10 free templates, unlock
+              premium designs, and export to PDF, DOCX or a single ZIP.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button size="lg" className="h-11 px-5 text-base" render={<Link href="/templates" />}>

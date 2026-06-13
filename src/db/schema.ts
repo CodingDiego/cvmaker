@@ -36,6 +36,11 @@ export const users = pgTable("users", {
   avatarUrl: text("avatar_url"),
   emailVerified: boolean("email_verified").notNull().default(false),
   twoFactorEnabled: boolean("two_factor_enabled").notNull().default(false),
+  billingPlan: text("billing_plan").notNull().default("free"),
+  polarCustomerId: text("polar_customer_id"),
+  polarSubscriptionId: text("polar_subscription_id"),
+  polarSubscriptionStatus: text("polar_subscription_status"),
+  polarStateSyncedAt: timestamp("polar_state_synced_at", { withTimezone: true }),
   // AES-encrypted TOTP secret (null until 2FA is set up).
   totpSecret: text("totp_secret"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

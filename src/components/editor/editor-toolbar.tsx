@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCvStore } from "@/lib/cv/store";
-import { TEMPLATES } from "@/templates/registry";
+import { FREE_TEMPLATES } from "@/templates/registry";
 import { FONT_OPTIONS } from "@/lib/font-config";
 import { ExportMenu } from "./export-menu";
 import { ShareButton } from "./share-button";
@@ -76,7 +76,7 @@ export function EditorToolbar({ status }: { status: SaveStatus }) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {TEMPLATES.map((t) => (
+            {FREE_TEMPLATES.map((t) => (
               <SelectItem key={t.id} value={t.id}>
                 {t.label}
               </SelectItem>
