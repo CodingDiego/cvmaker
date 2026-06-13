@@ -15,11 +15,13 @@ export type AccentUsage = "none" | "rule" | "heading" | "name" | "sidebar";
 export type HeaderStyle = "plain" | "band" | "underline" | "boxed";
 export type ContactStyle = "inline" | "stacked";
 export type BulletStyle = "disc" | "dash" | "square" | "none";
+export type TemplateAccess = "free" | "pro";
 
 export interface TemplateTokens {
   id: string;
   label: string;
   description: string;
+  access?: TemplateAccess;
   layout: LayoutKind;
   headerAlign: HeaderAlign;
   sectionTitle: SectionTitleStyle;

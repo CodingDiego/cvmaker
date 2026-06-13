@@ -2,6 +2,12 @@ import "server-only";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { cvs, type Cv } from "@/db/schema";
+import {
+  getUserPlan,
+  requireDraftAllowance,
+  requireTemplateAccess,
+} from "@/lib/billing/entitlements";
+import { getTemplate } from "@/templates/registry";
 import { sampleResume, type ResumeData } from "./types";
 
 export async function listCvs(userId: string): Promise<Cv[]> {
@@ -21,12 +27,17 @@ export async function createCv(
   userId: string,
   input: { title?: string; templateId?: string } = {},
 ): Promise<Cv> {
+  const templateId = getTemplate(input.templateId || "classic").id;
+  const plan = await getUserPlan(userId);
+  requireTemplateAccess(plan, templateId);
+  requireDraftAllowance(plan, (await listCvs(userId)).length);
+
   const [row] = await db
     .insert(cvs)
     .values({
       userId,
       title: input.title?.trim() || "Untitled CV",
-      templateId: input.templateId || "classic",
+      templateId,
       data: sampleResume(),
     })
     .returning();
@@ -49,9 +60,17 @@ export async function updateCvMeta(
   cvId: string,
   meta: Partial<Pick<Cv, "title" | "templateId" | "accentColor" | "fontFamily">>,
 ): Promise<void> {
+  const nextMeta = { ...meta };
+  if (nextMeta.templateId) {
+    const templateId = getTemplate(nextMeta.templateId).id;
+    const plan = await getUserPlan(userId);
+    requireTemplateAccess(plan, templateId);
+    nextMeta.templateId = templateId;
+  }
+
   await db
     .update(cvs)
-    .set({ ...meta, updatedAt: new Date() })
+    .set({ ...nextMeta, updatedAt: new Date() })
     .where(and(eq(cvs.id, cvId), eq(cvs.userId, userId)));
 }
 

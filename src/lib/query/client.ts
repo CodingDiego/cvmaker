@@ -1,4 +1,4 @@
-import { QueryClient, defaultShouldDehydrateQuery, isServer } from "@tanstack/react-query";
+import { QueryClient, defaultShouldDehydrateQuery, environmentManager } from "@tanstack/react-query";
 
 /**
  * Singleton-aware QueryClient factory following TanStack's Next.js App Router
@@ -26,7 +26,7 @@ function makeQueryClient() {
 let browserQueryClient: QueryClient | undefined;
 
 export function getQueryClient(): QueryClient {
-  if (isServer) {
+  if (environmentManager.isServer()) {
     // Server: always make a new client.
     return makeQueryClient();
   }

@@ -18,10 +18,12 @@ export function useAutosave(): { status: SaveStatus } {
   const mutation = useMutation({
     mutationFn: async () => {
       const { cvId, data, title, templateId, accentColor, fontFamily } = useCvStore.getState();
-      await Promise.all([
+      const [dataResult, metaResult] = await Promise.all([
         saveCvDataAction(cvId, data),
         updateCvMetaAction(cvId, { title, templateId, accentColor, fontFamily }),
       ]);
+      if (!dataResult.ok) throw new Error(dataResult.error);
+      if (!metaResult.ok) throw new Error(metaResult.error);
     },
   });
 

@@ -3,6 +3,7 @@
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
+import { isCvLimitError } from "@/lib/billing/entitlements";
 import { tags } from "@/lib/cache-tags";
 import { resumeSchema, type ResumeData } from "./types";
 import {
@@ -15,11 +16,21 @@ import { unshareCv } from "./share-service";
 
 export async function createCvAction(templateId?: string) {
   const user = await requireUser();
-  const cv = await createCv(user.id, { templateId });
+  let cvId: string;
+  try {
+    const cv = await createCv(user.id, { templateId });
+    cvId = cv.id;
+  } catch (error) {
+    if (isCvLimitError(error)) {
+      return { ok: false, reason: error.reason, error: error.message };
+    }
+    throw error;
+  }
+
   // RYOW: expire the list cache before navigating so the dashboard (if revisited)
   // and any client refetch see the new CV immediately.
   updateTag(tags.cvList(user.id));
-  redirect(`/editor/${cv.id}`);
+  redirect(`/editor/${cvId}`);
 }
 
 export async function deleteCvAction(cvId: string) {
@@ -63,7 +74,14 @@ export async function updateCvMetaAction(
   meta: { title?: string; templateId?: string; accentColor?: string; fontFamily?: string },
 ) {
   const user = await requireUser();
-  await updateCvMeta(user.id, cvId, meta);
+  try {
+    await updateCvMeta(user.id, cvId, meta);
+  } catch (error) {
+    if (isCvLimitError(error)) {
+      return { ok: false, reason: error.reason, error: error.message };
+    }
+    throw error;
+  }
   updateTag(tags.cv(cvId));
   updateTag(tags.cvList(user.id));
   return { ok: true };
