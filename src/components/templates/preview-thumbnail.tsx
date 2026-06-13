@@ -1,4 +1,4 @@
-import { ResumePreview, PAGE_WIDTH } from "@/templates/preview/resume-preview";
+import { ResumePreview, PAGE_HEIGHT, PAGE_WIDTH } from "@/templates/preview/resume-preview";
 import type { ResumeData } from "@/lib/cv/types";
 import type { TemplateTokens } from "@/templates/types";
 
@@ -25,7 +25,7 @@ export function PreviewThumbnail({
   const scale = width / PAGE_WIDTH;
   return (
     <div
-      style={{ width, height: height ?? width * 1.414, overflow: "hidden" }}
+      style={{ width, height: height ?? PAGE_HEIGHT * scale, overflow: "hidden" }}
       className="pointer-events-none select-none bg-white"
       aria-hidden
     >

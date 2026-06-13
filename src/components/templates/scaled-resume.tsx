@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ResumePreview, PAGE_WIDTH } from "@/templates/preview/resume-preview";
+import { ResumePreview, PAGE_HEIGHT, PAGE_WIDTH } from "@/templates/preview/resume-preview";
 import type { ResumeData } from "@/lib/cv/types";
 import type { TemplateTokens } from "@/templates/types";
 
@@ -34,7 +34,7 @@ export function ScaledResume({
 
   return (
     <div ref={ref} className="w-full">
-      <div style={{ height: PAGE_WIDTH * 1.414 * scale }}>
+      <div style={{ height: PAGE_HEIGHT * scale }}>
         <div
           style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: PAGE_WIDTH }}
           className="overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10"
