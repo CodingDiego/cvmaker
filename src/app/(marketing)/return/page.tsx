@@ -31,7 +31,7 @@ export default function ReturnPage() {
             <div className="rounded-lg border border-dashed bg-background p-4 text-sm text-muted-foreground">
               Configure your Polar Checkout Link return URL as:
               <code className="mt-2 block break-all rounded-md bg-muted px-3 py-2 font-mono text-foreground">
-                https://your-domain.com/return
+                https://free-cv.com/return
               </code>
             </div>
 

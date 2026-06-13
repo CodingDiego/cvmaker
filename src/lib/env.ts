@@ -82,7 +82,7 @@ export const env = {
   hasPolar: () => Boolean(optional("POLAR_ACCESS_TOKEN")),
 
   // App URL.
-  appUrl: () => optional("APP_URL") ?? "http://localhost:3000",
+  appUrl: () => optional("APP_URL") ?? "https://free-cv.com",
 
   // Deployment environment (Vercel).
   vercelEnv: () => optional("VERCEL_ENV"), // "production" | "preview" | "development"

@@ -1,20 +1,33 @@
 "use client";
 
-import { useActionState } from "react";
+import { startTransition, useActionState, useRef } from "react";
 import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, KeyRound, Lock, Mail, MailCheck } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   requestPasswordResetAction,
   performPasswordResetAction,
   type ActionState,
 } from "@/lib/auth/actions";
+import {
+  resetPerformSchema,
+  resetRequestSchema,
+  type ResetPerformValues,
+  type ResetRequestValues,
+} from "@/lib/auth/auth-schemas";
 import { AuthCard, FormError, IconField, PasswordField, SubmitButton } from "./auth-ui";
 
 const initial: ActionState = { status: "idle" };
 
 export function ResetRequestForm() {
-  const [state, action] = useActionState(requestPasswordResetAction, initial);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, action, pending] = useActionState(requestPasswordResetAction, initial);
+  const form = useForm<ResetRequestValues>({
+    resolver: zodResolver(resetRequestSchema),
+    defaultValues: { email: "" },
+  });
 
   if (state.status === "success") {
     return (
@@ -36,19 +49,29 @@ export function ResetRequestForm() {
       title="Reset your password"
       description="Enter your email and we'll send a reset link."
     >
-      <form action={action} className="space-y-4">
+      <form
+        ref={formRef}
+        onSubmit={form.handleSubmit(() => {
+          const current = formRef.current;
+          if (!current) return;
+          startTransition(() => action(new FormData(current)));
+        })}
+        className="space-y-4"
+        noValidate
+      >
         <IconField
           id="email"
-          name="email"
           type="email"
           label="Email"
           icon={Mail}
           autoComplete="email"
           required
           placeholder="you@email.com"
+          error={form.formState.errors.email?.message}
+          {...form.register("email")}
         />
         {state.status === "error" && <FormError message={state.message} />}
-        <SubmitButton>Send reset link</SubmitButton>
+        <SubmitButton pending={pending}>Send reset link</SubmitButton>
         <p className="text-center text-sm text-muted-foreground">
           Remembered it?{" "}
           <Link href="/login" className="font-medium text-foreground hover:underline">
@@ -61,7 +84,12 @@ export function ResetRequestForm() {
 }
 
 export function ResetPerformForm({ token }: { token: string }) {
-  const [state, action] = useActionState(performPasswordResetAction, initial);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, action, pending] = useActionState(performPasswordResetAction, initial);
+  const form = useForm<ResetPerformValues>({
+    resolver: zodResolver(resetPerformSchema),
+    defaultValues: { password: "" },
+  });
 
   if (state.status === "success") {
     return (
@@ -83,20 +111,30 @@ export function ResetPerformForm({ token }: { token: string }) {
       title="Choose a new password"
       description="Enter a new password for your account."
     >
-      <form action={action} className="space-y-4">
+      <form
+        ref={formRef}
+        onSubmit={form.handleSubmit(() => {
+          const current = formRef.current;
+          if (!current) return;
+          startTransition(() => action(new FormData(current)));
+        })}
+        className="space-y-4"
+        noValidate
+      >
         <input type="hidden" name="token" value={token} />
         <PasswordField
           id="password"
-          name="password"
           label="New password"
           icon={Lock}
           autoComplete="new-password"
           required
           minLength={8}
           placeholder="At least 8 characters"
+          error={form.formState.errors.password?.message}
+          {...form.register("password")}
         />
         {state.status === "error" && <FormError message={state.message} />}
-        <SubmitButton>Update password</SubmitButton>
+        <SubmitButton pending={pending}>Update password</SubmitButton>
       </form>
     </AuthCard>
   );

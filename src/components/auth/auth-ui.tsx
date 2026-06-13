@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, type LucideIcon } from "lucide-react";
-import { useFormStatus } from "react-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,13 +47,16 @@ export function IconField({
   label,
   icon: Icon,
   labelAction,
+  error,
   className,
   ...props
 }: React.ComponentProps<typeof Input> & {
   label: string;
   icon: LucideIcon;
   labelAction?: React.ReactNode;
+  error?: string;
 }) {
+  const errorId = `${id}-error`;
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
@@ -63,8 +65,19 @@ export function IconField({
       </div>
       <div className="relative">
         <Icon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input id={id} className={cn("h-11 pl-9", className)} {...props} />
+        <Input
+          id={id}
+          aria-invalid={Boolean(error) || undefined}
+          aria-describedby={error ? errorId : undefined}
+          className={cn("h-11 pl-9", className)}
+          {...props}
+        />
       </div>
+      {error && (
+        <p id={errorId} className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -74,14 +87,17 @@ export function PasswordField({
   label,
   icon: Icon,
   labelAction,
+  error,
   className,
   ...props
 }: React.ComponentProps<typeof Input> & {
   label: string;
   icon: LucideIcon;
   labelAction?: React.ReactNode;
+  error?: string;
 }) {
   const [show, setShow] = useState(false);
+  const errorId = `${id}-error`;
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
@@ -93,6 +109,8 @@ export function PasswordField({
         <Input
           id={id}
           type={show ? "text" : "password"}
+          aria-invalid={Boolean(error) || undefined}
+          aria-describedby={error ? errorId : undefined}
           className={cn("h-11 px-9", className)}
           {...props}
         />
@@ -106,12 +124,22 @@ export function PasswordField({
           {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         </button>
       </div>
+      {error && (
+        <p id={errorId} className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
 
-export function SubmitButton({ children }: { children: React.ReactNode }) {
-  const { pending } = useFormStatus();
+export function SubmitButton({
+  children,
+  pending,
+}: {
+  children: React.ReactNode;
+  pending?: boolean;
+}) {
   return (
     <Button type="submit" size="lg" className="h-11 w-full" disabled={pending}>
       {pending && <Loader2 className="size-4 animate-spin" />}

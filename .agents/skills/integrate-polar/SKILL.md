@@ -103,11 +103,11 @@ Checkout Links) and configure it there:
 
 1. **Success URL** — where Polar sends the buyer after payment. Use the
    `{CHECKOUT_ID}` placeholder so you can confirm the checkout server-side:
-   `https://<your-domain>/success?checkout_id={CHECKOUT_ID}`.
+   `https://free-cv.com/success?checkout_id={CHECKOUT_ID}`.
    ⚠️ This page must **not** grant access on its own — anyone can open it without
    paying. It's a thank-you/confirmation page; entitlement comes from webhooks.
 2. **Return URL** — where the "← Back" link goes:
-   `https://<your-domain>/return`.
+   `https://free-cv.com/return`.
 3. **Require billing address** — enable it (needed for tax/merchant-of-record).
 4. Copy the link URL into `POLAR_CHECKOUT_LINK`. Point your pricing button at
    `/api/checkout` (not the raw link) so the logged-in user's identity is attached.

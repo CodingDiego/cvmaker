@@ -2,13 +2,16 @@
 
 import { useState, useTransition } from "react";
 import Image from "next/image";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Loader2, ShieldCheck, ShieldOff } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { twoFaSchema, type TwoFaValues } from "@/lib/auth/auth-schemas";
 import {
   startTwoFactorSetupAction,
   confirmTwoFactorSetupAction,
@@ -38,24 +41,29 @@ function BackupCodes({ codes }: { codes: string[] }) {
 
 export function TwoFactorSetup({ enabled }: { enabled: boolean }) {
   const [setup, setSetup] = useState<SetupData | null>(null);
-  const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [backupCodes, setBackupCodes] = useState<string[] | null>(null);
   const [isEnabled, setIsEnabled] = useState(enabled);
   const [pending, start] = useTransition();
+  const form = useForm<TwoFaValues>({
+    resolver: zodResolver(twoFaSchema),
+    defaultValues: { code: "" },
+  });
 
   function begin() {
     setError(null);
+    form.reset({ code: "" });
     start(async () => setSetup(await startTwoFactorSetupAction()));
   }
 
-  function confirm() {
+  function confirm(values: TwoFaValues) {
     setError(null);
     start(async () => {
-      const res = await confirmTwoFactorSetupAction(code);
+      const res = await confirmTwoFactorSetupAction(values.code);
       if (!res.ok) return setError(res.error);
       setIsEnabled(true);
       setSetup(null);
+      form.reset({ code: "" });
       setBackupCodes(res.backupCodes ?? null);
       toast.success("Two-factor authentication enabled");
     });
@@ -118,23 +126,29 @@ export function TwoFactorSetup({ enabled }: { enabled: boolean }) {
             <p className="text-xs text-muted-foreground">
               Or enter this key manually: <code className="font-mono">{setup.secret}</code>
             </p>
-            <div className="flex items-end gap-2">
+            <form className="flex items-end gap-2" onSubmit={form.handleSubmit(confirm)} noValidate>
               <div className="space-y-1">
                 <Label htmlFor="totp">Verification code</Label>
                 <Input
                   id="totp"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
                   inputMode="numeric"
                   placeholder="123456"
                   className="w-36"
+                  aria-invalid={Boolean(form.formState.errors.code) || undefined}
+                  aria-describedby={form.formState.errors.code ? "totp-error" : undefined}
+                  {...form.register("code")}
                 />
+                {form.formState.errors.code?.message && (
+                  <p id="totp-error" className="text-sm text-destructive">
+                    {form.formState.errors.code.message}
+                  </p>
+                )}
               </div>
-              <Button onClick={confirm} disabled={pending || code.length < 6}>
+              <Button type="submit" disabled={pending}>
                 {pending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
                 Confirm
               </Button>
-            </div>
+            </form>
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
         )}

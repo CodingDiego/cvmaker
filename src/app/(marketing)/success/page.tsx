@@ -80,7 +80,7 @@ export default async function SuccessPage({
             <div className="rounded-lg border border-dashed bg-background p-4 text-sm text-muted-foreground">
               Configure your Polar Checkout Link success URL as:
               <code className="mt-2 block break-all rounded-md bg-muted px-3 py-2 font-mono text-foreground">
-                https://your-domain.com/success?checkout_id={"{"}CHECKOUT_ID{"}"}
+                https://free-cv.com/success?checkout_id={"{"}CHECKOUT_ID{"}"}
               </code>
             </div>
 

@@ -1,17 +1,25 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { startTransition, useActionState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Mail, User, UserPlus } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { registerAction, type ActionState } from "@/lib/auth/actions";
+import { registerSchema, type RegisterValues } from "@/lib/auth/auth-schemas";
 import { AuthCard, FormError, IconField, PasswordField, SubmitButton } from "./auth-ui";
 
 const initial: ActionState = { status: "idle" };
 
 export function RegisterForm() {
   const router = useRouter();
-  const [state, action] = useActionState(registerAction, initial);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, action, pending] = useActionState(registerAction, initial);
+  const form = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { name: "", email: "", password: "" },
+  });
 
   useEffect(() => {
     if (state.status === "success") {
@@ -26,37 +34,49 @@ export function RegisterForm() {
       title="Create your account"
       description="Build ATS-friendly resumes for free."
     >
-      <form action={action} className="space-y-4">
+      <form
+        ref={formRef}
+        onSubmit={form.handleSubmit(() => {
+          const current = formRef.current;
+          if (!current) return;
+          startTransition(() => action(new FormData(current)));
+        })}
+        className="space-y-4"
+        noValidate
+      >
         <IconField
           id="name"
-          name="name"
           label="Name"
           icon={User}
           autoComplete="name"
           placeholder="Jane Doe"
+          error={form.formState.errors.name?.message}
+          {...form.register("name")}
         />
         <IconField
           id="email"
-          name="email"
           type="email"
           label="Email"
           icon={Mail}
           autoComplete="email"
           required
           placeholder="you@email.com"
+          error={form.formState.errors.email?.message}
+          {...form.register("email")}
         />
         <PasswordField
           id="password"
-          name="password"
           label="Password"
           icon={Lock}
           autoComplete="new-password"
           required
           minLength={8}
           placeholder="At least 8 characters"
+          error={form.formState.errors.password?.message}
+          {...form.register("password")}
         />
         {state.status === "error" && <FormError message={state.message} />}
-        <SubmitButton>Create account</SubmitButton>
+        <SubmitButton pending={pending}>Create account</SubmitButton>
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
           <Link href="/login" className="font-medium text-foreground hover:underline">

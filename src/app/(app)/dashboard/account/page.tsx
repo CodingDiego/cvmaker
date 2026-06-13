@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/session";
-import { updateProfileAction } from "@/lib/auth/account-actions";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { ProfileForm } from "@/components/dashboard/profile-form";
 
 export const metadata: Metadata = { title: "Account" };
 
@@ -23,17 +20,7 @@ export default async function AccountPage() {
           <CardTitle>Profile</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={updateProfileAction} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" value={user.email} disabled />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" defaultValue={user.name ?? ""} placeholder="Your name" />
-            </div>
-            <Button type="submit">Save changes</Button>
-          </form>
+          <ProfileForm email={user.email} name={user.name} />
         </CardContent>
       </Card>
     </div>
