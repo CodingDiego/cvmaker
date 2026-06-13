@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Download, FileText, FileType } from "lucide-react";
@@ -11,24 +10,6 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { personLd } from "@/lib/seo";
 
 type Params = Promise<{ userId: string; cvId: string }>;
-
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  "use cache";
-
-  const { userId, cvId } = await params;
-  const cv = await getPublicCv(userId, cvId);
-  if (!cv) return { title: "CV not found", robots: { index: false } };
-  const name = cv.data.header?.fullName || cv.title;
-  const description = cv.data.header?.title || "Shared resume";
-  const url = shareUrlFor(userId, cvId);
-  return {
-    title: `${name} — CV`,
-    description,
-    alternates: { canonical: url },
-    openGraph: { type: "profile", title: `${name} — CV`, description, url },
-    twitter: { card: "summary", title: `${name} — CV`, description },
-  };
-}
 
 export default async function SharedCvPage({ params }: { params: Params }) {
   const { userId, cvId } = await params;
@@ -52,12 +33,33 @@ export default async function SharedCvPage({ params }: { params: Params }) {
         </div>
         <div className="flex items-center gap-2">
           {cv.publicPdfUrl && (
-            <Button size="sm" render={<a href={cv.publicPdfUrl} target="_blank" rel="noreferrer noopener" download />}>
+            <Button
+              size="sm"
+              render={
+                <a
+                  href={cv.publicPdfUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  download
+                />
+              }
+            >
               <FileText className="size-4" /> <span className="hidden sm:inline">Download</span> PDF
             </Button>
           )}
           {cv.publicDocxUrl && (
-            <Button size="sm" variant="outline" render={<a href={cv.publicDocxUrl} target="_blank" rel="noreferrer noopener" download />}>
+            <Button
+              size="sm"
+              variant="outline"
+              render={
+                <a
+                  href={cv.publicDocxUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  download
+                />
+              }
+            >
               <FileType className="size-4" /> DOCX
             </Button>
           )}
@@ -77,7 +79,7 @@ export default async function SharedCvPage({ params }: { params: Params }) {
       <footer className="border-t">
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 px-4 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
           <p className="text-sm text-muted-foreground">
-            Built with <span className="font-display font-semibold text-foreground">CVMaker</span> — free ATS-friendly resumes.
+            Built with <span className="font-display font-semibold text-foreground">CVMaker</span> - free ATS-friendly resumes.
           </p>
           <Button variant="outline" size="sm" render={<Link href="/templates" />}>
             <Download className="size-4 rotate-180" /> Make your own
