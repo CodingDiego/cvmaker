@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useRef } from "react";
+import { startTransition, useActionState } from "react";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, KeyRound, Lock, Mail, MailCheck } from "lucide-react";
@@ -22,7 +22,6 @@ import { AuthCard, FormError, IconField, PasswordField, SubmitButton } from "./a
 const initial: ActionState = { status: "idle" };
 
 export function ResetRequestForm() {
-  const formRef = useRef<HTMLFormElement>(null);
   const [state, action, pending] = useActionState(requestPasswordResetAction, initial);
   const form = useForm<ResetRequestValues>({
     resolver: zodResolver(resetRequestSchema),
@@ -50,11 +49,10 @@ export function ResetRequestForm() {
       description="Enter your email and we'll send a reset link."
     >
       <form
-        ref={formRef}
-        onSubmit={form.handleSubmit(() => {
-          const current = formRef.current;
-          if (!current) return;
-          startTransition(() => action(new FormData(current)));
+        onSubmit={form.handleSubmit((values) => {
+          const formData = new FormData();
+          formData.set("email", values.email);
+          startTransition(() => action(formData));
         })}
         className="space-y-4"
         noValidate
@@ -84,7 +82,6 @@ export function ResetRequestForm() {
 }
 
 export function ResetPerformForm({ token }: { token: string }) {
-  const formRef = useRef<HTMLFormElement>(null);
   const [state, action, pending] = useActionState(performPasswordResetAction, initial);
   const form = useForm<ResetPerformValues>({
     resolver: zodResolver(resetPerformSchema),
@@ -112,11 +109,11 @@ export function ResetPerformForm({ token }: { token: string }) {
       description="Enter a new password for your account."
     >
       <form
-        ref={formRef}
-        onSubmit={form.handleSubmit(() => {
-          const current = formRef.current;
-          if (!current) return;
-          startTransition(() => action(new FormData(current)));
+        onSubmit={form.handleSubmit((values) => {
+          const formData = new FormData();
+          formData.set("token", token);
+          formData.set("password", values.password);
+          startTransition(() => action(formData));
         })}
         className="space-y-4"
         noValidate

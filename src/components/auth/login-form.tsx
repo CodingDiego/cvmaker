@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useEffect, useRef } from "react";
+import { startTransition, useActionState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,9 +21,6 @@ export function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/dashboard";
-  const loginFormRef = useRef<HTMLFormElement>(null);
-  const twoFaFormRef = useRef<HTMLFormElement>(null);
-
   const [state, action, pending] = useActionState(loginAction, initial);
   const [twoFaState, twoFaAction, twoFaPending] = useActionState(
     verifyLoginTwoFactorAction,
@@ -53,11 +50,11 @@ export function LoginForm() {
         description="Enter the 6-digit code from your authenticator app, or a backup code."
       >
         <form
-          ref={twoFaFormRef}
-          onSubmit={twoFaForm.handleSubmit(() => {
-            const current = twoFaFormRef.current;
-            if (!current) return;
-            startTransition(() => twoFaAction(new FormData(current)));
+          onSubmit={twoFaForm.handleSubmit((values) => {
+            const formData = new FormData();
+            formData.set("challengeId", state.challengeId);
+            formData.set("code", values.code);
+            startTransition(() => twoFaAction(formData));
           })}
           className="space-y-4"
           noValidate
@@ -85,11 +82,11 @@ export function LoginForm() {
   return (
     <AuthCard icon={LogIn} title="Welcome back" description="Sign in to your CVMaker account.">
       <form
-        ref={loginFormRef}
-        onSubmit={loginForm.handleSubmit(() => {
-          const current = loginFormRef.current;
-          if (!current) return;
-          startTransition(() => action(new FormData(current)));
+        onSubmit={loginForm.handleSubmit((values) => {
+          const formData = new FormData();
+          formData.set("email", values.email);
+          formData.set("password", values.password);
+          startTransition(() => action(formData));
         })}
         className="space-y-4"
         noValidate

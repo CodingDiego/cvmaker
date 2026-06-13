@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useEffect, useRef } from "react";
+import { startTransition, useActionState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +14,6 @@ const initial: ActionState = { status: "idle" };
 
 export function RegisterForm() {
   const router = useRouter();
-  const formRef = useRef<HTMLFormElement>(null);
   const [state, action, pending] = useActionState(registerAction, initial);
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
@@ -35,11 +34,12 @@ export function RegisterForm() {
       description="Build ATS-friendly resumes for free."
     >
       <form
-        ref={formRef}
-        onSubmit={form.handleSubmit(() => {
-          const current = formRef.current;
-          if (!current) return;
-          startTransition(() => action(new FormData(current)));
+        onSubmit={form.handleSubmit((values) => {
+          const formData = new FormData();
+          formData.set("name", values.name);
+          formData.set("email", values.email);
+          formData.set("password", values.password);
+          startTransition(() => action(formData));
         })}
         className="space-y-4"
         noValidate

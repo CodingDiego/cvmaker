@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useRef } from "react";
+import { startTransition, useActionState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 const initial: AccountActionState = { status: "idle" };
 
 export function ProfileForm({ email, name }: { email: string; name: string | null }) {
-  const formRef = useRef<HTMLFormElement>(null);
   const [state, action, pending] = useActionState(updateProfileAction, initial);
   const form = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
@@ -23,11 +22,10 @@ export function ProfileForm({ email, name }: { email: string; name: string | nul
 
   return (
     <form
-      ref={formRef}
-      onSubmit={form.handleSubmit(() => {
-        const current = formRef.current;
-        if (!current) return;
-        startTransition(() => action(new FormData(current)));
+      onSubmit={form.handleSubmit((values) => {
+        const formData = new FormData();
+        formData.set("name", values.name);
+        startTransition(() => action(formData));
       })}
       className="space-y-4"
       noValidate
