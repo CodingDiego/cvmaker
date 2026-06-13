@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { requireUser } from "@/lib/auth/session";
@@ -6,8 +5,6 @@ import { getQueryClient } from "@/lib/query/client";
 import { queryKeys } from "@/lib/query/keys";
 import { getCvDetailCached } from "@/lib/cv/cv-reads";
 import { EditorShell } from "@/components/editor/editor-shell";
-
-export const metadata: Metadata = { title: "Editor" };
 
 export default async function EditorPage({ params }: { params: Promise<{ cvId: string }> }) {
   const { cvId } = await params;
