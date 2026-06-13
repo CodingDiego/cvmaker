@@ -7,11 +7,6 @@ import { firstSearchParam } from "@/lib/polar-success";
 import { loadPolarSuccessState } from "@/lib/polar-success-server";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "Payment status",
-  description: "Review the status of your Polar checkout.",
-};
-
 const toneStyles = {
   success: {
     icon: CheckCircle2,
