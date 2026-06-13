@@ -7,6 +7,7 @@ import { DENSITY_SPACING, type TemplateTokens } from "@/templates/types";
 
 // A4 width at 96dpi. The editor scales this paper to fit its container.
 export const PAGE_WIDTH = 794;
+export const PAGE_HEIGHT = PAGE_WIDTH * 1.414;
 
 interface PreviewProps {
   data: ResumeData;
@@ -60,7 +61,8 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
 
   const page: CSSProperties = {
     width: PAGE_WIDTH,
-    minHeight: PAGE_WIDTH * 1.414,
+    height: PAGE_HEIGHT,
+    minHeight: PAGE_HEIGHT,
     background: "#ffffff",
     color: INK,
     fontFamily: font.cssVar,
@@ -658,8 +660,9 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
       <div
         style={{
           flex: "0 0 33%",
+          alignSelf: "stretch",
           ...(tokens.sidebarTint
-            ? { background: `color-mix(in srgb, ${accent} 8%, #ffffff)`, borderRadius: 6, padding: 14, marginTop: -2 }
+            ? { background: `color-mix(in srgb, ${accent} 8%, #ffffff)`, borderRadius: 6, padding: 14, marginTop: -2, minHeight: "100%" }
             : null),
         }}
       >
@@ -668,9 +671,9 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
     );
     const main = <div style={{ flex: 1, minWidth: 0 }}>{mainKeys.map((k) => renderKey(k))}</div>;
     return (
-      <div style={{ ...page, padding: pad }}>
+      <div style={{ ...page, padding: pad, display: "flex", flexDirection: "column" }}>
         {header}
-        <div style={{ display: "flex", gap: 22 }}>
+        <div style={{ display: "flex", gap: 22, flex: 1, alignItems: "stretch", minHeight: 0 }}>
           {sidebarSide === "left" ? (
             <>
               {sidebar}
