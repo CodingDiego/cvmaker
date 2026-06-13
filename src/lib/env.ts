@@ -73,8 +73,11 @@ export const env = {
   // Polar payments — optional in dev (payment routes degrade until configured).
   polarAccessToken: () => optional("POLAR_ACCESS_TOKEN"),
   polarWebhookSecret: () => optional("POLAR_WEBHOOK_SECRET"),
-  // The persistent Checkout Link created in the Polar dashboard (success URL,
-  // return URL and "require billing address" are all configured ON the link).
+  polarProductPro: () => optional("POLAR_PRODUCT_PRO"),
+  polarSuccessUrl: () =>
+    optional("POLAR_SUCCESS_URL") ?? `${env.appUrl()}/success?checkout_id={CHECKOUT_ID}`,
+  polarReturnUrl: () => optional("POLAR_RETURN_URL") ?? `${env.appUrl()}/return`,
+  // Legacy hosted checkout link. Kept only for backward compatibility.
   polarCheckoutLink: () => optional("POLAR_CHECKOUT_LINK"),
   // "sandbox" for test mode, "production" for live. Defaults to sandbox off prod.
   polarServer: (): "sandbox" | "production" =>

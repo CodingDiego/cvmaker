@@ -23,7 +23,7 @@ export const polar = new Polar({
  * in your pricing UI; this is just the canonical source.
  */
 export const POLAR_PRODUCTS = {
-  pro: process.env.POLAR_PRODUCT_PRO ?? "",
+  pro: env.polarProductPro() ?? "",
 } as const;
 
 export type PolarPlan = keyof typeof POLAR_PRODUCTS;

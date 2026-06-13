@@ -14,6 +14,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 export const GET = CustomerPortal({
   accessToken: env.polarAccessToken() ?? "",
   server: env.polarServer(),
+  returnUrl: `${env.appUrl()}/dashboard/billing`,
   getExternalCustomerId: async () => {
     const user = await getCurrentUser();
     if (!user) redirect("/login?next=/dashboard/billing");

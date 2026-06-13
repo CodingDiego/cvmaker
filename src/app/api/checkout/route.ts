@@ -1,40 +1,47 @@
-import { NextResponse } from "next/server";
+import { Checkout } from "@polar-sh/nextjs";
+import { NextRequest, NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { getCurrentUser } from "@/lib/auth/session";
+import { POLAR_PRODUCTS } from "@/lib/polar";
 
-/**
- * GET /api/checkout
- *
- * We use a **Polar Checkout Link** (a persistent URL configured in the Polar
- * dashboard — that's where the Success URL, Return URL and "require billing
- * address" live). This route is a thin redirect that stamps the *logged-in*
- * user onto the checkout so the webhook can map the resulting order/subscription
- * back to our user:
- *
- *   - `customer_external_id` = our `user.id`  → arrives as `customer.externalId`
- *   - `customer_email`       = our `user.email` (prefills + reliable fallback)
- *
- * Anonymous visitors are sent straight to the link (Polar collects their email,
- * and we reconcile by email in the webhook).
- *
- * Point your pricing button at `/api/checkout` instead of hardcoding the Polar
- * URL, so identity is always attached.
- */
-export async function GET() {
-  const link = env.polarCheckoutLink();
-  if (!link) {
+const checkout = Checkout({
+  accessToken: env.polarAccessToken() ?? "",
+  successUrl: env.polarSuccessUrl(),
+  returnUrl: env.polarReturnUrl(),
+  server: env.polarServer(),
+  includeCheckoutId: false,
+});
+
+export async function GET(request: NextRequest) {
+  if (!env.polarAccessToken()) {
     return NextResponse.json(
-      { error: "POLAR_CHECKOUT_LINK is not configured" },
+      { error: "POLAR_ACCESS_TOKEN is not configured" },
       { status: 503 },
     );
   }
 
-  const target = new URL(link);
-  const user = await getCurrentUser();
-  if (user) {
-    target.searchParams.set("customer_external_id", user.id);
-    target.searchParams.set("customer_email", user.email);
+  const url = new URL(request.url);
+  if (url.searchParams.getAll("products").length === 0) {
+    const defaultProduct = POLAR_PRODUCTS.pro;
+    if (!defaultProduct) {
+      return NextResponse.json(
+        { error: "POLAR_PRODUCT_PRO is not configured" },
+        { status: 503 },
+      );
+    }
+    url.searchParams.append("products", defaultProduct);
   }
 
-  return NextResponse.redirect(target.toString());
+  const user = await getCurrentUser();
+  if (user) {
+    url.searchParams.set("customerExternalId", user.id);
+    url.searchParams.set("customerEmail", user.email);
+    if (user.name) url.searchParams.set("customerName", user.name);
+    url.searchParams.set(
+      "customerMetadata",
+      JSON.stringify({ appUserId: user.id, source: "free-cv" }),
+    );
+  }
+
+  return checkout(new NextRequest(url));
 }
