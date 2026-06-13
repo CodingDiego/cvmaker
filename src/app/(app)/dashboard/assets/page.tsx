@@ -1,12 +1,9 @@
-import type { Metadata } from "next";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { requireUser } from "@/lib/auth/session";
 import { getQueryClient } from "@/lib/query/client";
 import { queryKeys } from "@/lib/query/keys";
 import { getAssetListCached } from "@/lib/assets/asset-reads";
 import { AssetManager } from "@/components/dashboard/asset-manager";
-
-export const metadata: Metadata = { title: "Assets" };
 
 export default async function AssetsPage() {
   const user = await requireUser("/dashboard/assets");

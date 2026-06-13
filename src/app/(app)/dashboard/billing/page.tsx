@@ -1,10 +1,7 @@
-import type { Metadata } from "next";
 import { CreditCard, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "@/components/link";
-
-export const metadata: Metadata = { title: "Billing" };
 
 export default function BillingPage() {
   return (

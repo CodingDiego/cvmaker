@@ -1,12 +1,9 @@
-import type { Metadata } from "next";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { requireUser } from "@/lib/auth/session";
 import { getQueryClient } from "@/lib/query/client";
 import { queryKeys } from "@/lib/query/keys";
 import { getSessionListCached, withCurrent } from "@/lib/auth/session-reads";
 import { SessionList } from "@/components/dashboard/session-list";
-
-export const metadata: Metadata = { title: "Active sessions" };
 
 export default async function SessionsPage() {
   const user = await requireUser("/dashboard/sessions");

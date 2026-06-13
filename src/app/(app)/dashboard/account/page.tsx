@@ -1,9 +1,6 @@
-import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/session";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileForm } from "@/components/dashboard/profile-form";
-
-export const metadata: Metadata = { title: "Account" };
 
 export default async function AccountPage() {
   const user = await requireUser("/dashboard/account");

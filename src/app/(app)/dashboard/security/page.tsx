@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { MailCheck, MailWarning } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
@@ -6,8 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TwoFactorSetup } from "@/components/dashboard/two-factor-setup";
-
-export const metadata: Metadata = { title: "Security" };
 
 export default async function SecurityPage() {
   const user = await requireUser("/dashboard/security");

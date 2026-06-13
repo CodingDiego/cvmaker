@@ -9,8 +9,6 @@ import { getCvListCached } from "@/lib/cv/cv-reads";
 import { Button } from "@/components/ui/button";
 import { CvList } from "@/components/dashboard/cv-list";
 
-export const metadata: Metadata = { title: "My CVs" };
-
 export default async function DashboardPage() {
   const user = await requireUser("/dashboard");
 
