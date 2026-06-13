@@ -1,5 +1,4 @@
 import { CustomerPortal } from "@polar-sh/nextjs";
-import type { NextRequest } from "next/server";
 import { redirect } from "next/navigation";
 import { env } from "@/lib/env";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -15,7 +14,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 export const GET = CustomerPortal({
   accessToken: env.polarAccessToken() ?? "",
   server: env.polarServer(),
-  getExternalCustomerId: async (_req: NextRequest) => {
+  getExternalCustomerId: async () => {
     const user = await getCurrentUser();
     if (!user) redirect("/login?next=/dashboard/billing");
     return user.id;

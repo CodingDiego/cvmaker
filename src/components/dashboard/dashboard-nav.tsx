@@ -2,12 +2,13 @@
 
 import { Link } from "@/components/link";
 import { usePathname } from "next/navigation";
-import { FileText, Images, MonitorSmartphone, ShieldCheck, User } from "lucide-react";
+import { CreditCard, FileText, Images, MonitorSmartphone, ShieldCheck, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/dashboard", label: "My CVs", icon: FileText, exact: true },
   { href: "/dashboard/assets", label: "Assets", icon: Images },
+  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/sessions", label: "Sessions", icon: MonitorSmartphone },
   { href: "/dashboard/security", label: "Security", icon: ShieldCheck },
   { href: "/dashboard/account", label: "Account", icon: User },

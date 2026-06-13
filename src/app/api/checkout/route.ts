@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { getCurrentUser } from "@/lib/auth/session";
 
@@ -20,7 +20,7 @@ import { getCurrentUser } from "@/lib/auth/session";
  * Point your pricing button at `/api/checkout` instead of hardcoding the Polar
  * URL, so identity is always attached.
  */
-export async function GET(_req: NextRequest) {
+export async function GET() {
   const link = env.polarCheckoutLink();
   if (!link) {
     return NextResponse.json(
