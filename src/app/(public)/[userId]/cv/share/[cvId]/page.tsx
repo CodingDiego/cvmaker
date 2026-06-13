@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Download, FileText, FileType } from "lucide-react";
 import { getPublicCv, shareUrlFor } from "@/lib/cv/share-service";
 import { getTemplate } from "@/templates/registry";
@@ -13,6 +14,7 @@ import { personLd } from "@/lib/seo";
 type Params = Promise<{ userId: string; cvId: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  await connection();
   const { userId, cvId } = await params;
   const cv = await getPublicCv(userId, cvId);
   if (!cv) return { title: "CV not found", robots: { index: false } };
@@ -29,6 +31,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 }
 
 export default async function SharedCvPage({ params }: { params: Params }) {
+  await connection();
   const { userId, cvId } = await params;
   const cv = await getPublicCv(userId, cvId);
   if (!cv) notFound();
