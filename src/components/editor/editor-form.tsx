@@ -1,11 +1,115 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import { useRef } from "react";
+import { ChevronDown, ChevronUp, ImageUp, Plus, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useCvStore, newId } from "@/lib/cv/store";
 import { TextField, AreaField, BulletsField, LinkField } from "./field";
+
+/** Downscale + re-encode a chosen image to a small JPEG data URL so the resume
+ * document (autosaved as JSON) stays lightweight. */
+async function fileToResizedDataUrl(file: File, max = 320): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+  const width = Math.round(bitmap.width * scale);
+  const height = Math.round(bitmap.height * scale);
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas unsupported");
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close?.();
+  return canvas.toDataURL("image/jpeg", 0.85);
+}
+
+const PHOTO_POSITIONS = [
+  { id: "left", label: "Left" },
+  { id: "center", label: "Center" },
+  { id: "right", label: "Right" },
+] as const;
+
+function PhotoField() {
+  const photo = useCvStore((s) => s.data.header.photo);
+  const position = useCvStore((s) => s.data.header.photoPosition);
+  const mutate = useCvStore((s) => s.mutate);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const dataUrl = await fileToResizedDataUrl(file);
+        mutate((d) => {
+          d.header.photo = dataUrl;
+        });
+      } catch {
+        // Ignore unreadable images.
+      }
+    }
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
+  return (
+    <div className="flex items-center gap-4">
+      <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-muted">
+        {photo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={photo} alt="Profile" className="size-full object-cover" />
+        ) : (
+          <User className="size-6 text-muted-foreground" />
+        )}
+      </div>
+      <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
+        <input ref={inputRef} type="file" accept="image/*" hidden onChange={onPick} />
+        <Button size="sm" variant="outline" onClick={() => inputRef.current?.click()}>
+          <ImageUp className="size-3.5" /> {photo ? "Replace photo" : "Add photo"}
+        </Button>
+        {photo && (
+          <>
+            <Select
+              value={position}
+              onValueChange={(v) =>
+                v && mutate((d) => {
+                  d.header.photoPosition = v as "left" | "center" | "right";
+                })
+              }
+            >
+              <SelectTrigger className="h-9 w-32" aria-label="Photo position">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PHOTO_POSITIONS.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => mutate((d) => {
+                d.header.photo = "";
+              })}
+            >
+              <Trash2 className="size-3.5" /> Remove
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function SectionBlock({
   title,
@@ -81,6 +185,7 @@ export function EditorForm() {
     <div className="space-y-4">
       {/* Header */}
       <SectionBlock title="Personal details">
+        <PhotoField />
         <div className="grid gap-3 sm:grid-cols-2">
           <TextField label="Full name" value={data.header.fullName} onChange={(v) => mutate((d) => { d.header.fullName = v; })} />
           <TextField label="Job title" value={data.header.title} onChange={(v) => mutate((d) => { d.header.title = v; })} />
