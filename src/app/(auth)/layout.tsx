@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+
+export const metadata: Metadata = {
+  title: "Authentication",
+  description: "Sign in, register, or reset your password.",
+};
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (

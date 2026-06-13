@@ -1,12 +1,9 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, MailCheck, XCircle } from "lucide-react";
 import { verifyEmailToken } from "@/lib/auth/email";
 import { getCurrentUser } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
 import { ResendVerification } from "@/components/auth/resend-verification";
-
-export const metadata: Metadata = { title: "Verify email" };
 
 function Shell({
   icon,

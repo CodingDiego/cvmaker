@@ -1,8 +1,16 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/session";
 import { SiteHeader } from "@/components/site-header";
 import { DashboardNav } from "@/components/dashboard/dashboard-nav";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Dashboard",
+    template: "%s · Dashboard",
+  },
+};
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   await requireUser("/dashboard");

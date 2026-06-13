@@ -1,7 +1,4 @@
-import type { Metadata } from "next";
 import { ResetRequestForm, ResetPerformForm } from "@/components/auth/reset-forms";
-
-export const metadata: Metadata = { title: "Reset password" };
 
 export default async function ResetPage({
   searchParams,
