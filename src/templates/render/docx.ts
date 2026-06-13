@@ -74,7 +74,24 @@ export async function renderDocx(
       children: [new TextRun({ text: label, font, size, color: accent, underline: {} })],
     });
 
-  // Header
+  // Header — optional photo first, aligned per its chosen position. We keep it
+  // as a standalone paragraph (never a layout table) so the DOCX stays ATS-safe.
+  const photo = data.header.photo ? dataUrlToImage(data.header.photo) : null;
+  if (photo) {
+    const pos = data.header.photoPosition ?? "left";
+    const photoAlign =
+      pos === "center" ? AlignmentType.CENTER : pos === "right" ? AlignmentType.RIGHT : AlignmentType.LEFT;
+    children.push(
+      new Paragraph({
+        alignment: photoAlign,
+        spacing: { after: 80 },
+        children: [
+          new ImageRun({ data: photo.data, type: photo.type, transformation: { width: 72, height: 72 } }),
+        ],
+      }),
+    );
+  }
+
   children.push(
     new Paragraph({
       alignment: headerAlign,
