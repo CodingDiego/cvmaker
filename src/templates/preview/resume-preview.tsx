@@ -325,7 +325,7 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
     letterSpacing: tokens.letterSpacedName ? 2 : -0.2,
   };
 
-  const headerInner = (
+  const textBlock = (
     <>
       <h1 style={nameStyle}>{data.header.fullName || "Your Name"}</h1>
       {data.header.title && (
@@ -344,6 +344,42 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
       )}
       {contactBlock()}
     </>
+  );
+
+  // Optional profile photo positioned relative to the name/contact block.
+  const photoPos = data.header.photoPosition ?? "left";
+  const PHOTO_SIZE = 88;
+  const photoEl = data.header.photo ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={data.header.photo}
+      alt=""
+      style={{
+        width: PHOTO_SIZE,
+        height: PHOTO_SIZE,
+        borderRadius: "50%",
+        objectFit: "cover",
+        flexShrink: 0,
+        border: onBand ? "2px solid rgba(255,255,255,0.7)" : `2px solid ${accent}`,
+      }}
+    />
+  ) : null;
+
+  const headerInner = photoEl ? (
+    <div
+      style={{
+        display: "flex",
+        gap: 16,
+        alignItems: "center",
+        flexDirection: photoPos === "center" ? "column" : photoPos === "right" ? "row-reverse" : "row",
+        ...(photoPos === "center" ? { textAlign: "center" as const } : null),
+      }}
+    >
+      {photoEl}
+      <div style={{ minWidth: 0, flex: photoPos === "center" ? undefined : 1 }}>{textBlock}</div>
+    </div>
+  ) : (
+    textBlock
   );
 
   let header: ReactNode;

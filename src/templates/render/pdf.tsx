@@ -3,6 +3,7 @@ import {
   Page,
   View,
   Text,
+  Image,
   Link,
   StyleSheet,
   renderToBuffer,
@@ -238,13 +239,35 @@ export async function renderPdf(
 
   const fullOrder = resolveSectionOrder(data);
 
+  const photo = data.header.photo;
+  const photoPos = data.header.photoPosition ?? "left";
+  const PHOTO = 64;
+  const headerDir =
+    photoPos === "center" ? "column" : photoPos === "right" ? "row-reverse" : "row";
+
+  const HeaderText = () => (
+    <View
+      style={{
+        flexGrow: 1,
+        ...(photo && photoPos === "left" ? { marginLeft: 12 } : null),
+        ...(photo && photoPos === "right" ? { marginRight: 12 } : null),
+        ...(photo && photoPos === "center" ? { marginTop: 6 } : null),
+      }}
+    >
+      <Text style={s.name}>{data.header.fullName || "Your Name"}</Text>
+      {data.header.title ? <Text style={s.role}>{data.header.title}</Text> : null}
+      <ContactLine />
+    </View>
+  );
+
   const doc = (
     <Document>
       <Page size="A4" style={s.page}>
-        <View>
-          <Text style={s.name}>{data.header.fullName || "Your Name"}</Text>
-          {data.header.title ? <Text style={s.role}>{data.header.title}</Text> : null}
-          <ContactLine />
+        <View style={{ flexDirection: headerDir, alignItems: "center" }}>
+          {photo ? (
+            <Image src={photo} style={{ width: PHOTO, height: PHOTO, borderRadius: PHOTO / 2, objectFit: "cover" }} />
+          ) : null}
+          <HeaderText />
         </View>
         {fullOrder.map((k) => renderKey(k))}
       </Page>

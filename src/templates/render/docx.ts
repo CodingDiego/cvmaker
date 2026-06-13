@@ -4,6 +4,7 @@ import {
   Paragraph,
   TextRun,
   ExternalHyperlink,
+  ImageRun,
   AlignmentType,
   BorderStyle,
   type ISectionOptions,
