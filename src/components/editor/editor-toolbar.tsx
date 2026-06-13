@@ -61,7 +61,7 @@ export function EditorToolbar({ status }: { status: SaveStatus }) {
       />
 
       <div className="flex items-center gap-2">
-        <Select value={templateId} onValueChange={(v) => setMeta({ templateId: v })}>
+        <Select value={templateId} onValueChange={(v) => v && setMeta({ templateId: v })}>
           <SelectTrigger size="sm" className="w-40" aria-label="Template">
             <SelectValue />
           </SelectTrigger>
@@ -74,7 +74,7 @@ export function EditorToolbar({ status }: { status: SaveStatus }) {
           </SelectContent>
         </Select>
 
-        <Select value={fontFamily} onValueChange={(v) => setMeta({ fontFamily: v })}>
+        <Select value={fontFamily} onValueChange={(v) => v && setMeta({ fontFamily: v })}>
           <SelectTrigger size="sm" className="w-36" aria-label="Font">
             <SelectValue />
           </SelectTrigger>
