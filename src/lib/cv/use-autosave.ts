@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { saveCvDataAction, updateCvMetaAction } from "./actions";
 import { useCvStore } from "./store";
@@ -25,14 +25,18 @@ export function useAutosave(): { status: SaveStatus } {
     },
   });
 
+  // The save itself reads the latest revision/mutation without widening the
+  // effect's deps — so a changing mutation identity can't re-arm the timer.
+  const save = useEffectEvent(() => {
+    lastSaved.current = revision;
+    mutation.mutate();
+  });
+
   useEffect(() => {
     if (revision === 0 || revision === lastSaved.current) return;
-    const handle = setTimeout(() => {
-      lastSaved.current = revision;
-      mutation.mutate();
-    }, 1000);
+    const handle = setTimeout(save, 1000);
     return () => clearTimeout(handle);
-  }, [revision, mutation]);
+  }, [revision]);
 
   const status: SaveStatus = mutation.isPending
     ? "saving"

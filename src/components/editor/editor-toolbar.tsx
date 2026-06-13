@@ -15,6 +15,7 @@ import { useCvStore } from "@/lib/cv/store";
 import { TEMPLATES } from "@/templates/registry";
 import { FONT_OPTIONS } from "@/lib/font-config";
 import { ExportMenu } from "./export-menu";
+import { ShareButton } from "./share-button";
 import type { SaveStatus } from "@/lib/cv/use-autosave";
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
@@ -26,7 +27,7 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
     );
   if (status === "saved")
     return (
-      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <span className="flex items-center gap-1.5 text-xs text-primary">
         <Check className="size-3.5" /> Saved
       </span>
     );
@@ -39,6 +40,8 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
   return null;
 }
 
+const CONTROL = "h-9";
+
 export function EditorToolbar({ status }: { status: SaveStatus }) {
   const cvId = useCvStore((s) => s.cvId);
   const title = useCvStore((s) => s.title);
@@ -48,21 +51,28 @@ export function EditorToolbar({ status }: { status: SaveStatus }) {
   const setMeta = useCvStore((s) => s.setMeta);
 
   return (
-    <div className="flex flex-wrap items-center gap-3 border-b bg-background px-4 py-2.5">
-      <Button variant="ghost" size="icon-sm" aria-label="Back to dashboard" render={<Link href="/dashboard" />}>
+    <div className="flex flex-wrap items-center gap-2 border-b bg-card/60 px-3 py-2.5 backdrop-blur sm:gap-3 sm:px-4">
+      <Button
+        variant="ghost"
+        size="icon"
+        className={CONTROL}
+        aria-label="Back to dashboard"
+        render={<Link href="/dashboard" />}
+      >
         <ArrowLeft className="size-4" />
       </Button>
 
       <Input
         value={title}
         onChange={(e) => setMeta({ title: e.target.value })}
-        className="h-8 w-44 font-medium"
+        className={`${CONTROL} w-40 font-medium sm:w-48`}
         aria-label="CV title"
+        placeholder="Untitled CV"
       />
 
       <div className="flex items-center gap-2">
         <Select value={templateId} onValueChange={(v) => v && setMeta({ templateId: v })}>
-          <SelectTrigger size="sm" className="w-40" aria-label="Template">
+          <SelectTrigger className={`${CONTROL} w-36`} aria-label="Template">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -75,7 +85,7 @@ export function EditorToolbar({ status }: { status: SaveStatus }) {
         </Select>
 
         <Select value={fontFamily} onValueChange={(v) => v && setMeta({ fontFamily: v })}>
-          <SelectTrigger size="sm" className="w-36" aria-label="Font">
+          <SelectTrigger className={`${CONTROL} w-32`} aria-label="Font">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -87,19 +97,24 @@ export function EditorToolbar({ status }: { status: SaveStatus }) {
           </SelectContent>
         </Select>
 
-        <label className="flex items-center gap-1.5 text-xs text-muted-foreground" title="Accent color">
+        <label
+          className={`${CONTROL} relative flex w-9 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-input`}
+          title="Accent color"
+          style={{ background: accentColor }}
+        >
           <input
             type="color"
             value={accentColor}
             onChange={(e) => setMeta({ accentColor: e.target.value })}
-            className="size-8 cursor-pointer rounded-lg border border-input bg-transparent p-0.5"
+            className="absolute inset-0 cursor-pointer opacity-0"
             aria-label="Accent color"
           />
         </label>
       </div>
 
-      <div className="ml-auto flex items-center gap-3">
+      <div className="ml-auto flex items-center gap-2 sm:gap-3">
         <SaveIndicator status={status} />
+        <ShareButton cvId={cvId} />
         <ExportMenu cvId={cvId} />
       </div>
     </div>

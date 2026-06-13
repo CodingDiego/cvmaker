@@ -17,6 +17,12 @@ import {
 import { startExportAction, getExportStatusAction } from "@/lib/cv/export-actions";
 import type { ExportFormat } from "@/workflows/export-cv";
 
+const FORMAT_LABEL: Record<ExportFormat, string> = {
+  pdf: "PDF",
+  docx: "Word (DOCX)",
+  zip: "All formats (ZIP)",
+};
+
 export function ExportMenu({ cvId }: { cvId: string }) {
   const [exportId, setExportId] = useState<string | null>(null);
   const [activeFormat, setActiveFormat] = useState<ExportFormat | null>(null);
@@ -25,7 +31,7 @@ export function ExportMenu({ cvId }: { cvId: string }) {
     mutationFn: (format: ExportFormat) => startExportAction(cvId, format),
     onSuccess: ({ exportId }) => setExportId(exportId),
     onError: () => {
-      toast.error("Couldn't start export. Is Blob storage configured?");
+      toast.error("Couldn't start export", { description: "Blob storage may not be configured yet." });
       setActiveFormat(null);
     },
   });
@@ -36,53 +42,70 @@ export function ExportMenu({ cvId }: { cvId: string }) {
     enabled: !!exportId,
     refetchInterval: (q) => {
       const s = q.state.data?.status;
-      return s === "done" || s === "error" ? false : 1200;
+      return s === "done" || s === "error" ? false : 1000;
     },
   });
 
-  // Fire download / toast once per completed export (external side effects only).
-  const handledRef = useRef<string | null>(null);
+  // Toast once per terminal poll result. Only side effects here (no setState) —
+  // the download UI is derived from `status` directly, avoiding popup-blocked
+  // auto-opens and cascading re-renders.
+  const toastedRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!status || !exportId || handledRef.current === exportId) return;
+    if (!status || !exportId || toastedRef.current === exportId) return;
     if (status.status === "done" && status.url) {
-      handledRef.current = exportId;
-      toast.success("Export ready", { description: "Your download is starting." });
-      window.open(status.url, "_blank");
+      toastedRef.current = exportId;
+      toast.success("Export ready", { description: `Your ${FORMAT_LABEL[activeFormat ?? "pdf"]} is ready to download.` });
     } else if (status.status === "error") {
-      handledRef.current = exportId;
+      toastedRef.current = exportId;
       toast.error("Export failed", { description: status.error ?? undefined });
     }
-  }, [status, exportId]);
+  }, [status, exportId, activeFormat]);
 
   const done = status?.status === "done" || status?.status === "error";
   const busy = startMutation.isPending || (!!exportId && !done);
+  const readyUrl = status?.status === "done" ? status.url : null;
 
   function run(format: ExportFormat) {
+    toastedRef.current = null;
     setActiveFormat(format);
     startMutation.mutate(format);
+    toast.info(`Generating ${FORMAT_LABEL[format]}…`);
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="default" size="sm" disabled={busy} />}>
-        {busy ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-        {busy ? `Exporting ${activeFormat ?? ""}…` : "Export"}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>Download as</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => run("pdf")}>
-            <FileText className="size-4" /> PDF
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => run("docx")}>
-            <FileType className="size-4" /> Word (DOCX)
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => run("zip")}>
-            <Package className="size-4" /> All formats (ZIP)
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center gap-2">
+      {readyUrl && (
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-9 border-primary/40 text-primary"
+          render={<a href={readyUrl} target="_blank" rel="noreferrer noopener" download />}
+        >
+          <Download className="size-4" /> Download {FORMAT_LABEL[activeFormat ?? "pdf"]}
+        </Button>
+      )}
+
+      <DropdownMenu>
+        <DropdownMenuTrigger render={<Button variant="default" size="sm" className="h-9" disabled={busy} />}>
+          {busy ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+          {busy ? `Exporting ${activeFormat ? FORMAT_LABEL[activeFormat] : ""}…` : "Export"}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Download as</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => run("pdf")}>
+              <FileText className="size-4" /> PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => run("docx")}>
+              <FileType className="size-4" /> Word (DOCX)
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => run("zip")}>
+              <Package className="size-4" /> All formats (ZIP)
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }

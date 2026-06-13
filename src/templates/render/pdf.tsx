@@ -3,11 +3,21 @@ import {
   Page,
   View,
   Text,
+  Link,
   StyleSheet,
   renderToBuffer,
 } from "@react-pdf/renderer";
 import type { ResumeData } from "@/lib/cv/types";
+import { resolveSectionOrder } from "@/lib/cv/types";
 import { getTemplate } from "@/templates/registry";
+
+function hrefFor(value: string, kind: "url" | "email" | "phone" = "url"): string {
+  const v = value.trim();
+  if (kind === "email") return `mailto:${v}`;
+  if (kind === "phone") return `tel:${v.replace(/[^\d+]/g, "")}`;
+  if (/^https?:\/\//i.test(v)) return v;
+  return `https://${v}`;
+}
 
 /**
  * ATS-safe PDF generation: selectable, real text using react-pdf's built-in
@@ -49,8 +59,12 @@ export async function renderPdf(
     muted: { color: "#6b7280" },
     item: { marginBottom: 5 },
     bullet: { flexDirection: "row", marginBottom: 1 },
-    bulletDot: { width: 8 },
+    bulletDot: { width: 8, color: accent },
+    link: { color: accent, textDecoration: "none" },
   });
+
+  const markers: Record<string, string> = { disc: "•", dash: "–", square: "▪", none: "•" };
+  const marker = markers[tokens.bullet ?? "disc"] ?? "•";
 
   const dateRange = (a: string, b: string, current?: boolean) =>
     [a, current ? "Present" : b].filter(Boolean).join(" – ");
@@ -66,7 +80,7 @@ export async function renderPdf(
     <>
       {items.filter(Boolean).map((b, i) => (
         <View style={s.bullet} key={i}>
-          <Text style={s.bulletDot}>•</Text>
+          <Text style={s.bulletDot}>{marker}</Text>
           <Text style={{ flex: 1 }}>{b}</Text>
         </View>
       ))}
@@ -74,9 +88,32 @@ export async function renderPdf(
   );
 
   const c = data.header.contact;
-  const contactLine = [c.email, c.phone, c.location, c.website, c.linkedin, c.github]
-    .filter(Boolean)
-    .join("   •   ");
+  const contactEntries: { label: string; value: string; kind?: "url" | "email" | "phone" }[] = [
+    c.email && { label: c.email, value: c.email, kind: "email" as const },
+    c.phone && { label: c.phone, value: c.phone, kind: "phone" as const },
+    c.location && { label: c.location, value: "" },
+    c.website && { label: c.website, value: c.website },
+    c.linkedin && { label: c.linkedin, value: c.linkedin },
+    c.github && { label: c.github, value: c.github },
+  ].filter(Boolean) as { label: string; value: string; kind?: "url" | "email" | "phone" }[];
+
+  const ContactLine = () =>
+    contactEntries.length ? (
+      <Text style={s.contact}>
+        {contactEntries.map((e, i) => (
+          <Text key={i}>
+            {i > 0 ? "   •   " : ""}
+            {e.value ? (
+              <Link src={hrefFor(e.value, e.kind)} style={s.link}>
+                {e.label}
+              </Link>
+            ) : (
+              e.label
+            )}
+          </Text>
+        ))}
+      </Text>
+    ) : null;
 
   const renderers: Record<string, () => React.ReactNode> = {
     summary: () =>
@@ -138,7 +175,17 @@ export async function renderPdf(
           <SecTitle>Projects</SecTitle>
           {data.projects.map((p) => (
             <View style={s.item} key={p.id}>
-              <Text style={s.bold}>{p.name}{p.link ? `  ${p.link}` : ""}</Text>
+              <Text>
+                <Text style={s.bold}>{p.name}</Text>
+                {p.link ? (
+                  <Text>
+                    {"  "}
+                    <Link src={hrefFor(p.link)} style={s.link}>
+                      {p.link}
+                    </Link>
+                  </Text>
+                ) : null}
+              </Text>
               {p.description ? <Text style={s.muted}>{p.description}</Text> : null}
               <Bullets items={p.bullets} />
             </View>
@@ -151,7 +198,16 @@ export async function renderPdf(
           <SecTitle>Certifications</SecTitle>
           {data.certifications.map((ct) => (
             <View style={s.row} key={ct.id}>
-              <Text>{[ct.name, ct.issuer].filter(Boolean).join(" — ")}</Text>
+              <Text>
+                {ct.url ? (
+                  <Link src={hrefFor(ct.url)} style={s.link}>
+                    {ct.name || ct.url}
+                  </Link>
+                ) : (
+                  <Text>{ct.name}</Text>
+                )}
+                {ct.issuer ? <Text style={s.muted}> — {ct.issuer}</Text> : null}
+              </Text>
               <Text style={s.muted}>{ct.date}</Text>
             </View>
           ))}
@@ -166,9 +222,21 @@ export async function renderPdf(
       ) : null,
   };
 
-  const order = data.sectionOrder.filter((k) => renderers[k]);
-  const rest = Object.keys(renderers).filter((k) => !order.includes(k));
-  const fullOrder = [...order, ...rest];
+  const renderCustom = (id: string) => {
+    const cs = data.custom.find((s2) => s2.id === id);
+    if (!cs || (!cs.title && !cs.items.length)) return null;
+    return (
+      <View style={s.section} key={`custom:${id}`}>
+        <SecTitle>{cs.title || "Section"}</SecTitle>
+        <Bullets items={cs.items.map((i) => i.text)} />
+      </View>
+    );
+  };
+
+  const renderKey = (k: string) =>
+    k.startsWith("custom:") ? renderCustom(k.slice("custom:".length)) : renderers[k]?.();
+
+  const fullOrder = resolveSectionOrder(data);
 
   const doc = (
     <Document>
@@ -176,17 +244,9 @@ export async function renderPdf(
         <View>
           <Text style={s.name}>{data.header.fullName || "Your Name"}</Text>
           {data.header.title ? <Text style={s.role}>{data.header.title}</Text> : null}
-          {contactLine ? <Text style={s.contact}>{contactLine}</Text> : null}
+          <ContactLine />
         </View>
-        {fullOrder.map((k) => renderers[k]?.())}
-        {data.custom.map((cs) =>
-          cs.title || cs.items.length ? (
-            <View style={s.section} key={cs.id}>
-              <SecTitle>{cs.title || "Section"}</SecTitle>
-              <Bullets items={cs.items.map((i) => i.text)} />
-            </View>
-          ) : null,
-        )}
+        {fullOrder.map((k) => renderKey(k))}
       </Page>
     </Document>
   );

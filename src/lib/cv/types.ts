@@ -55,6 +55,7 @@ export const certificationSchema = z.object({
   name: z.string().default(""),
   issuer: z.string().default(""),
   date: z.string().default(""),
+  url: z.string().default(""),
 });
 
 export const languageSchema = z.object({
@@ -83,7 +84,9 @@ export const resumeSchema = z.object({
   certifications: z.array(certificationSchema).default([]),
   languages: z.array(languageSchema).default([]),
   custom: z.array(customSectionSchema).default([]),
-  // Section render order (keys of the sections above).
+  // Section render order. Built-in keys (see BUILT_IN_SECTIONS) plus custom
+  // sections referenced as `custom:<id>`, so custom sections can be reordered
+  // freely among the built-in ones.
   sectionOrder: z.array(z.string()).default([
     "summary",
     "experience",
@@ -94,6 +97,41 @@ export const resumeSchema = z.object({
     "languages",
   ]),
 });
+
+/** The fixed, built-in section keys in their default order. */
+export const BUILT_IN_SECTIONS = [
+  "summary",
+  "experience",
+  "education",
+  "skills",
+  "projects",
+  "certifications",
+  "languages",
+] as const;
+
+export const SECTION_LABELS: Record<string, string> = {
+  summary: "Summary",
+  experience: "Experience",
+  education: "Education",
+  skills: "Skills",
+  projects: "Projects",
+  certifications: "Certifications",
+  languages: "Languages",
+};
+
+/** Build the resolved render order: stored order first, then any missing keys. */
+export function resolveSectionOrder(data: ResumeData): string[] {
+  const order = data.sectionOrder.filter(
+    (k) =>
+      BUILT_IN_SECTIONS.includes(k as (typeof BUILT_IN_SECTIONS)[number]) ||
+      (k.startsWith("custom:") && data.custom.some((c) => `custom:${c.id}` === k)),
+  );
+  const missingBuiltIns = BUILT_IN_SECTIONS.filter((k) => !order.includes(k));
+  const missingCustom = data.custom
+    .map((c) => `custom:${c.id}`)
+    .filter((k) => !order.includes(k));
+  return [...order, ...missingBuiltIns, ...missingCustom];
+}
 
 export type Contact = z.infer<typeof contactSchema>;
 export type Experience = z.infer<typeof experienceSchema>;
@@ -185,7 +223,13 @@ export function sampleResume(): ResumeData {
       },
     ],
     certifications: [
-      { id: "cert-1", name: "AWS Solutions Architect", issuer: "Amazon", date: "2022" },
+      {
+        id: "cert-1",
+        name: "AWS Solutions Architect",
+        issuer: "Amazon",
+        date: "2022",
+        url: "credly.com/badges/alexmorgan-aws",
+      },
     ],
     languages: [
       { id: "lng-1", name: "English", level: "Native" },

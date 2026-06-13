@@ -1,5 +1,6 @@
 import {
-  Geist,
+  Fraunces,
+  Manrope,
   Geist_Mono,
   Inter,
   Roboto,
@@ -8,9 +9,18 @@ import {
   Merriweather,
 } from "next/font/google";
 
-// App chrome fonts.
-export const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-export const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+// App chrome fonts — a distinctive editorial pairing (not Inter/Roboto):
+// Fraunces (a characterful modern serif) for display/headings, Manrope (a clean
+// geometric sans) for body/UI. These style the app only; the ATS-safe CV fonts
+// below are separate.
+export const display = Fraunces({
+  variable: "--font-display",
+  subsets: ["latin"],
+  axes: ["opsz", "SOFT", "WONK"],
+  display: "swap",
+});
+export const sans = Manrope({ variable: "--font-sans", subsets: ["latin"], display: "swap" });
+export const geistMono = Geist_Mono({ variable: "--font-mono", subsets: ["latin"] });
 
 // ATS-safe resume fonts — optimized + self-hosted by next/font. Each exposes a
 // CSS variable consumed by the on-screen CV preview. The matching @fontsource

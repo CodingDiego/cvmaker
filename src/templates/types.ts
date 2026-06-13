@@ -11,6 +11,10 @@ export type HeaderAlign = "left" | "center";
 export type SectionTitleStyle = "uppercase" | "capitalize" | "smallcaps" | "bar";
 export type Density = "compact" | "normal" | "roomy";
 export type AccentUsage = "none" | "rule" | "heading" | "name" | "sidebar";
+/** How the name/contact block is treated. */
+export type HeaderStyle = "plain" | "band" | "underline" | "boxed";
+export type ContactStyle = "inline" | "stacked";
+export type BulletStyle = "disc" | "dash" | "square" | "none";
 
 export interface TemplateTokens {
   id: string;
@@ -28,6 +32,24 @@ export interface TemplateTokens {
   accentColor: string;
   /** Relative name size in px for the preview. */
   nameSize: number;
+
+  // --- Distinctive styling (optional; sensible defaults in the renderer) ---
+  /** Treatment of the whole header block. */
+  headerStyle?: HeaderStyle;
+  /** Contact line layout. */
+  contactStyle?: ContactStyle;
+  /** Bullet marker shape for experience/project lists. */
+  bullet?: BulletStyle;
+  /** UPPERCASE the name. */
+  uppercaseName?: boolean;
+  /** Wide letter-spacing on the name (editorial feel). */
+  letterSpacedName?: boolean;
+  /** Underline only under the section-title text (not a full-width rule). */
+  titleUnderline?: boolean;
+  /** Render section titles as a filled accent chip. */
+  accentChip?: boolean;
+  /** Tint the sidebar (two-column layouts) with a faint accent wash. */
+  sidebarTint?: boolean;
 }
 
 export const DENSITY_SPACING: Record<Density, { section: number; item: number; line: number }> = {

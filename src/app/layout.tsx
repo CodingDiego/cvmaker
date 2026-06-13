@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import "./globals.css";
-import { geistSans, geistMono, cvFontVariables } from "@/lib/fonts";
+import { sans, display, geistMono, cvFontVariables } from "@/lib/fonts";
 import { Providers } from "@/lib/providers";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -23,7 +23,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${cvFontVariables} h-full antialiased`}
+      className={`${sans.variable} ${display.variable} ${geistMono.variable} ${cvFontVariables} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Providers>

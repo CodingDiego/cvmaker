@@ -15,6 +15,13 @@
       "when": 1781299651161,
       "tag": "0001_unknown_grim_reaper",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781331695298,
+      "tag": "0002_abnormal_speed_demon",
+      "breakpoints": true
     }
   ]
 }

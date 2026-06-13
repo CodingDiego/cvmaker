@@ -85,6 +85,12 @@ export const cvs = pgTable("cvs", {
   data: jsonb("data").$type<ResumeData>().notNull(),
   accentColor: text("accent_color").notNull().default("#2563eb"),
   fontFamily: text("font_family").notNull().default("inter"),
+  // Public sharing: when shared, rendered PDF/DOCX live in the PUBLIC blob store
+  // and the CV is viewable at /[userId]/cv/share/[cvId].
+  isPublic: boolean("is_public").notNull().default(false),
+  publicPdfUrl: text("public_pdf_url"),
+  publicDocxUrl: text("public_docx_url"),
+  sharedAt: timestamp("shared_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [index("cvs_user_idx").on(t.userId)]);

@@ -3,13 +3,23 @@ import {
   Packer,
   Paragraph,
   TextRun,
+  ExternalHyperlink,
   AlignmentType,
   BorderStyle,
   type ISectionOptions,
 } from "docx";
 import type { ResumeData } from "@/lib/cv/types";
+import { resolveSectionOrder } from "@/lib/cv/types";
 import { fontById } from "@/lib/font-config";
 import { getTemplate } from "@/templates/registry";
+
+function hrefFor(value: string, kind: "url" | "email" | "phone" = "url"): string {
+  const v = value.trim();
+  if (kind === "email") return `mailto:${v}`;
+  if (kind === "phone") return `tel:${v.replace(/[^\d+]/g, "")}`;
+  if (/^https?:\/\//i.test(v)) return v;
+  return `https://${v}`;
+}
 
 /**
  * ATS-safe DOCX generation: real headings/paragraphs, a standard font, no
@@ -57,6 +67,12 @@ export async function renderDocx(
       children: [new TextRun({ text, font, size: 20 })],
     });
 
+  const linkRun = (label: string, value: string, kind?: "url" | "email" | "phone", size = 20) =>
+    new ExternalHyperlink({
+      link: hrefFor(value, kind),
+      children: [new TextRun({ text: label, font, size, color: accent, underline: {} })],
+    });
+
   // Header
   children.push(
     new Paragraph({
@@ -69,9 +85,25 @@ export async function renderDocx(
     children.push(new Paragraph({ alignment: headerAlign, spacing: { after: 40 }, children: [new TextRun({ text: data.header.title, size: 24, color: "444444", font })] }));
   }
   const c = data.header.contact;
-  const contactLine = [c.email, c.phone, c.location, c.website, c.linkedin, c.github].filter(Boolean).join("  |  ");
-  if (contactLine) {
-    children.push(new Paragraph({ alignment: headerAlign, spacing: { after: 120 }, children: [new TextRun({ text: contactLine, size: 18, color: "666666", font })] }));
+  const contactEntries: { label: string; value: string; kind?: "url" | "email" | "phone" }[] = [
+    c.email && { label: c.email, value: c.email, kind: "email" as const },
+    c.phone && { label: c.phone, value: c.phone, kind: "phone" as const },
+    c.location && { label: c.location, value: "" },
+    c.website && { label: c.website, value: c.website },
+    c.linkedin && { label: c.linkedin, value: c.linkedin },
+    c.github && { label: c.github, value: c.github },
+  ].filter(Boolean) as { label: string; value: string; kind?: "url" | "email" | "phone" }[];
+  if (contactEntries.length) {
+    const runs: (TextRun | ExternalHyperlink)[] = [];
+    contactEntries.forEach((e, i) => {
+      if (i > 0) runs.push(new TextRun({ text: "  |  ", size: 18, color: "666666", font }));
+      runs.push(
+        e.value
+          ? linkRun(e.label, e.value, e.kind, 18)
+          : new TextRun({ text: e.label, size: 18, color: "666666", font }),
+      );
+    });
+    children.push(new Paragraph({ alignment: headerAlign, spacing: { after: 120 }, children: runs }));
   }
 
   const renderers: Record<string, () => void> = {
@@ -111,7 +143,15 @@ export async function renderDocx(
       if (!data.projects.length) return;
       children.push(sectionTitle("Projects"));
       for (const p of data.projects) {
-        children.push(line([{ text: p.name, bold: true }, { text: p.link ? `   ${p.link}` : "", color: accent }]));
+        children.push(
+          new Paragraph({
+            spacing: { after: 40 },
+            children: [
+              new TextRun({ text: p.name, bold: true, font, size: 20 }),
+              ...(p.link ? [new TextRun({ text: "   ", font, size: 20 }), linkRun(p.link, p.link)] : []),
+            ],
+          }),
+        );
         if (p.description) children.push(line([{ text: p.description, color: "444444" }]));
         p.bullets.filter(Boolean).forEach((b) => children.push(bullet(b)));
       }
@@ -120,7 +160,18 @@ export async function renderDocx(
       if (!data.certifications.length) return;
       children.push(sectionTitle("Certifications"));
       for (const ct of data.certifications) {
-        children.push(line([{ text: [ct.name, ct.issuer].filter(Boolean).join(" — ") }, { text: ct.date ? `   ${ct.date}` : "", color: "666666" }]));
+        children.push(
+          new Paragraph({
+            spacing: { after: 40 },
+            children: [
+              ct.url
+                ? linkRun(ct.name || ct.url, ct.url)
+                : new TextRun({ text: ct.name, font, size: 20 }),
+              ...(ct.issuer ? [new TextRun({ text: ` — ${ct.issuer}`, font, size: 20, color: "444444" })] : []),
+              ...(ct.date ? [new TextRun({ text: `   ${ct.date}`, font, size: 20, color: "666666" })] : []),
+            ],
+          }),
+        );
       }
     },
     languages: () => {
@@ -130,15 +181,17 @@ export async function renderDocx(
     },
   };
 
-  const order = data.sectionOrder.filter((k) => renderers[k]);
-  const rest = Object.keys(renderers).filter((k) => !order.includes(k));
-  [...order, ...rest].forEach((k) => renderers[k]?.());
-
-  for (const cs of data.custom) {
-    if (!cs.title && !cs.items.length) continue;
+  const renderCustom = (id: string) => {
+    const cs = data.custom.find((s2) => s2.id === id);
+    if (!cs || (!cs.title && !cs.items.length)) return;
     children.push(sectionTitle(cs.title || "Section"));
     cs.items.filter((i) => i.text).forEach((i) => children.push(bullet(i.text)));
-  }
+  };
+
+  resolveSectionOrder(data).forEach((k) => {
+    if (k.startsWith("custom:")) renderCustom(k.slice("custom:".length));
+    else renderers[k]?.();
+  });
 
   const section: ISectionOptions = {
     properties: { page: { margin: { top: 720, bottom: 720, left: 720, right: 720 } } },

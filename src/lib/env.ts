@@ -70,6 +70,17 @@ export const env = {
   resendFrom: () => optional("RESEND_FROM_EMAIL") ?? "CVMaker <onboarding@resend.dev>",
   hasResend: () => Boolean(optional("RESEND_API_KEY")),
 
+  // Polar payments — optional in dev (payment routes degrade until configured).
+  polarAccessToken: () => optional("POLAR_ACCESS_TOKEN"),
+  polarWebhookSecret: () => optional("POLAR_WEBHOOK_SECRET"),
+  // The persistent Checkout Link created in the Polar dashboard (success URL,
+  // return URL and "require billing address" are all configured ON the link).
+  polarCheckoutLink: () => optional("POLAR_CHECKOUT_LINK"),
+  // "sandbox" for test mode, "production" for live. Defaults to sandbox off prod.
+  polarServer: (): "sandbox" | "production" =>
+    optional("POLAR_SERVER") === "production" ? "production" : "sandbox",
+  hasPolar: () => Boolean(optional("POLAR_ACCESS_TOKEN")),
+
   // App URL.
   appUrl: () => optional("APP_URL") ?? "http://localhost:3000",
 

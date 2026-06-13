@@ -1,20 +1,35 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useCvStore, newId } from "@/lib/cv/store";
-import { TextField, AreaField, BulletsField } from "./field";
+import { TextField, AreaField, BulletsField, LinkField } from "./field";
 
-function SectionBlock({ title, children, onAdd }: { title: string; children: React.ReactNode; onAdd?: () => void }) {
+function SectionBlock({
+  title,
+  hint,
+  children,
+  onAdd,
+  addLabel = "Add",
+}: {
+  title: string;
+  hint?: string;
+  children: React.ReactNode;
+  onAdd?: () => void;
+  addLabel?: string;
+}) {
   return (
-    <section className="space-y-3 rounded-xl border p-4">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold">{title}</h3>
+    <section className="space-y-3 rounded-xl border bg-card p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <h3 className="font-semibold">{title}</h3>
+          {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+        </div>
         {onAdd && (
           <Button size="sm" variant="outline" onClick={onAdd}>
-            <Plus className="size-3.5" /> Add
+            <Plus className="size-3.5" /> {addLabel}
           </Button>
         )}
       </div>
@@ -23,10 +38,30 @@ function SectionBlock({ title, children, onAdd }: { title: string; children: Rea
   );
 }
 
-function ItemCard({ children, onRemove }: { children: React.ReactNode; onRemove: () => void }) {
+function ItemCard({
+  children,
+  onRemove,
+  onMoveUp,
+  onMoveDown,
+}: {
+  children: React.ReactNode;
+  onRemove: () => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+}) {
   return (
-    <div className="space-y-3 rounded-lg border bg-muted/20 p-3">
-      <div className="flex justify-end">
+    <div className="space-y-3 rounded-lg border bg-muted/30 p-3">
+      <div className="flex justify-end gap-0.5">
+        {onMoveUp && (
+          <Button size="icon-xs" variant="ghost" aria-label="Move up" onClick={onMoveUp}>
+            <ChevronUp className="size-3.5" />
+          </Button>
+        )}
+        {onMoveDown && (
+          <Button size="icon-xs" variant="ghost" aria-label="Move down" onClick={onMoveDown}>
+            <ChevronDown className="size-3.5" />
+          </Button>
+        )}
         <Button size="icon-xs" variant="ghost" aria-label="Remove" onClick={onRemove}>
           <Trash2 className="size-3.5" />
         </Button>
@@ -49,12 +84,12 @@ export function EditorForm() {
         <div className="grid gap-3 sm:grid-cols-2">
           <TextField label="Full name" value={data.header.fullName} onChange={(v) => mutate((d) => { d.header.fullName = v; })} />
           <TextField label="Job title" value={data.header.title} onChange={(v) => mutate((d) => { d.header.title = v; })} />
-          <TextField label="Email" value={data.header.contact.email} onChange={(v) => mutate((d) => { d.header.contact.email = v; })} />
+          <TextField label="Email" type="email" value={data.header.contact.email} onChange={(v) => mutate((d) => { d.header.contact.email = v; })} />
           <TextField label="Phone" value={data.header.contact.phone} onChange={(v) => mutate((d) => { d.header.contact.phone = v; })} />
           <TextField label="Location" value={data.header.contact.location} onChange={(v) => mutate((d) => { d.header.contact.location = v; })} />
-          <TextField label="Website" value={data.header.contact.website} onChange={(v) => mutate((d) => { d.header.contact.website = v; })} />
-          <TextField label="LinkedIn" value={data.header.contact.linkedin} onChange={(v) => mutate((d) => { d.header.contact.linkedin = v; })} />
-          <TextField label="GitHub" value={data.header.contact.github} onChange={(v) => mutate((d) => { d.header.contact.github = v; })} />
+          <LinkField label="Website" value={data.header.contact.website} onChange={(v) => mutate((d) => { d.header.contact.website = v; })} />
+          <LinkField label="LinkedIn" value={data.header.contact.linkedin} placeholder="linkedin.com/in/you" onChange={(v) => mutate((d) => { d.header.contact.linkedin = v; })} />
+          <LinkField label="GitHub" value={data.header.contact.github} placeholder="github.com/you" onChange={(v) => mutate((d) => { d.header.contact.github = v; })} />
         </div>
       </SectionBlock>
 
@@ -69,7 +104,12 @@ export function EditorForm() {
         onAdd={() => mutate((d) => { d.experience.push({ id: newId("exp"), company: "", role: "", location: "", startDate: "", endDate: "", current: false, bullets: [] }); })}
       >
         {data.experience.map((e, i) => (
-          <ItemCard key={e.id} onRemove={() => mutate((d) => { d.experience.splice(i, 1); })}>
+          <ItemCard
+            key={e.id}
+            onRemove={() => mutate((d) => { d.experience.splice(i, 1); })}
+            onMoveUp={i > 0 ? () => mutate((d) => { d.experience.splice(i - 1, 0, d.experience.splice(i, 1)[0]!); }) : undefined}
+            onMoveDown={i < data.experience.length - 1 ? () => mutate((d) => { d.experience.splice(i + 1, 0, d.experience.splice(i, 1)[0]!); }) : undefined}
+          >
             <div className="grid gap-3 sm:grid-cols-2">
               <TextField label="Role" value={e.role} onChange={(v) => mutate((d) => { d.experience[i]!.role = v; })} />
               <TextField label="Company" value={e.company} onChange={(v) => mutate((d) => { d.experience[i]!.company = v; })} />
@@ -130,7 +170,7 @@ export function EditorForm() {
           <ItemCard key={p.id} onRemove={() => mutate((d) => { d.projects.splice(i, 1); })}>
             <div className="grid gap-3 sm:grid-cols-2">
               <TextField label="Name" value={p.name} onChange={(v) => mutate((d) => { d.projects[i]!.name = v; })} />
-              <TextField label="Link" value={p.link} onChange={(v) => mutate((d) => { d.projects[i]!.link = v; })} />
+              <LinkField label="Link" value={p.link} onChange={(v) => mutate((d) => { d.projects[i]!.link = v; })} />
             </div>
             <AreaField label="Description" rows={2} value={p.description} onChange={(v) => mutate((d) => { d.projects[i]!.description = v; })} />
             <BulletsField value={p.bullets} onChange={(v) => mutate((d) => { d.projects[i]!.bullets = v; })} />
@@ -141,7 +181,7 @@ export function EditorForm() {
       {/* Certifications */}
       <SectionBlock
         title="Certifications"
-        onAdd={() => mutate((d) => { d.certifications.push({ id: newId("cert"), name: "", issuer: "", date: "" }); })}
+        onAdd={() => mutate((d) => { d.certifications.push({ id: newId("cert"), name: "", issuer: "", date: "", url: "" }); })}
       >
         {data.certifications.map((c, i) => (
           <ItemCard key={c.id} onRemove={() => mutate((d) => { d.certifications.splice(i, 1); })}>
@@ -150,6 +190,7 @@ export function EditorForm() {
               <TextField label="Issuer" value={c.issuer} onChange={(v) => mutate((d) => { d.certifications[i]!.issuer = v; })} />
               <TextField label="Date" value={c.date} onChange={(v) => mutate((d) => { d.certifications[i]!.date = v; })} />
             </div>
+            <LinkField label="Credential link (optional)" value={c.url} placeholder="credly.com/badges/…" onChange={(v) => mutate((d) => { d.certifications[i]!.url = v; })} />
           </ItemCard>
         ))}
       </SectionBlock>
@@ -165,6 +206,33 @@ export function EditorForm() {
               <TextField label="Language" value={l.name} onChange={(v) => mutate((d) => { d.languages[i]!.name = v; })} />
               <TextField label="Level" value={l.level} onChange={(v) => mutate((d) => { d.languages[i]!.level = v; })} />
             </div>
+          </ItemCard>
+        ))}
+      </SectionBlock>
+
+      {/* Custom sections — user-defined, reorderable */}
+      <SectionBlock
+        title="Custom sections"
+        hint="Add your own sections (e.g. Awards, Publications) and reorder them. They render after the built-in sections."
+        addLabel="Add section"
+        onAdd={() => mutate((d) => { d.custom.push({ id: newId("cs"), title: "", items: [{ id: newId("ci"), text: "" }] }); })}
+      >
+        {data.custom.length === 0 && (
+          <p className="text-sm text-muted-foreground">No custom sections yet.</p>
+        )}
+        {data.custom.map((cs, i) => (
+          <ItemCard
+            key={cs.id}
+            onRemove={() => mutate((d) => { d.custom.splice(i, 1); })}
+            onMoveUp={i > 0 ? () => mutate((d) => { d.custom.splice(i - 1, 0, d.custom.splice(i, 1)[0]!); }) : undefined}
+            onMoveDown={i < data.custom.length - 1 ? () => mutate((d) => { d.custom.splice(i + 1, 0, d.custom.splice(i, 1)[0]!); }) : undefined}
+          >
+            <TextField label="Section title" value={cs.title} placeholder="Awards" onChange={(v) => mutate((d) => { d.custom[i]!.title = v; })} />
+            <BulletsField
+              label="Items (one per line)"
+              value={cs.items.map((it) => it.text)}
+              onChange={(lines) => mutate((d) => { d.custom[i]!.items = lines.map((text, idx) => ({ id: cs.items[idx]?.id ?? newId("ci"), text })); })}
+            />
           </ItemCard>
         ))}
       </SectionBlock>
