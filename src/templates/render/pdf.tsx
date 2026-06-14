@@ -41,7 +41,14 @@ export async function renderPdf(
     page: { paddingVertical: 36, paddingHorizontal: 40, fontFamily, fontSize: 9.5, color: "#1f2937", lineHeight: 1.4 },
     name: { fontSize: 22, fontFamily: boldFont, color: tokens.accent === "name" ? accent : "#111827", textAlign: headerAlign },
     role: { fontSize: 11, color: "#4b5563", marginTop: 2, textAlign: headerAlign },
-    contact: { fontSize: 8.5, color: "#6b7280", marginTop: 4, textAlign: headerAlign },
+    headerText: { flexGrow: 1, flexShrink: 1, flexBasis: 0 },
+    contactRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: headerAlign === "center" ? "center" : "flex-start",
+      marginTop: 4,
+    },
+    contactItem: { fontSize: 8.5, color: "#6b7280", marginRight: 8, marginBottom: 2 },
     section: { marginTop: 12 },
     secTitle: {
       fontSize: 11,
@@ -100,9 +107,9 @@ export async function renderPdf(
 
   const ContactLine = () =>
     contactEntries.length ? (
-      <Text style={s.contact}>
+      <View style={s.contactRow}>
         {contactEntries.map((e, i) => (
-          <Text key={i}>
+          <Text key={i} style={s.contactItem}>
             {i > 0 ? "   •   " : ""}
             {e.value ? (
               <Link src={hrefFor(e.value, e.kind)} style={s.link}>
@@ -113,7 +120,7 @@ export async function renderPdf(
             )}
           </Text>
         ))}
-      </Text>
+      </View>
     ) : null;
 
   const renderers: Record<string, () => React.ReactNode> = {
@@ -248,6 +255,7 @@ export async function renderPdf(
   const HeaderText = () => (
     <View
       style={{
+        ...s.headerText,
         flexGrow: 1,
         ...(photo && photoPos === "left" ? { marginLeft: 12 } : null),
         ...(photo && photoPos === "right" ? { marginRight: 12 } : null),
@@ -263,7 +271,13 @@ export async function renderPdf(
   const doc = (
     <Document>
       <Page size="A4" style={s.page}>
-        <View style={{ flexDirection: headerDir, alignItems: "center" }}>
+        <View
+          style={{
+            flexDirection: headerDir,
+            alignItems: photoPos === "center" ? "center" : "flex-start",
+            width: "100%",
+          }}
+        >
           {photo ? (
             // react-pdf <Image> has no alt prop (it renders to PDF, not the DOM).
             // eslint-disable-next-line jsx-a11y/alt-text
