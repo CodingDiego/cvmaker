@@ -5,7 +5,12 @@ import { users, type User } from "@/db/schema";
 import { hashPassword, verifyPassword } from "./password";
 import { signAccessToken } from "./jwt";
 import { createSession, rotateRefresh, revokeSessionById } from "./sessions";
-import { setAuthCookies, clearAuthCookies, readAuthCookies } from "./cookies";
+import {
+  setAuthCookies,
+  setAccessCookie,
+  clearAuthCookies,
+  readAuthCookies,
+} from "./cookies";
 import { randomToken } from "./crypto";
 import { kv } from "@/lib/redis";
 import type { RequestContext } from "./device";
@@ -133,10 +138,15 @@ export async function refreshSession(ctx: RequestContext): Promise<boolean> {
 
   const accessToken = await signAccessToken({
     userId: result.user.id,
-    sessionId: result.session.id,
+    sessionId: result.sessionId,
     email: result.user.email,
     name: result.user.name,
   });
-  await setAuthCookies(accessToken, result.refreshToken);
+  if (result.kind === "rotated") {
+    await setAuthCookies(accessToken, result.refreshToken);
+  } else {
+    // Revalidated within the grace window: a sibling owns the refresh cookie.
+    await setAccessCookie(accessToken);
+  }
   return true;
 }
