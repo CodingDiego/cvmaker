@@ -1,30 +1,23 @@
 import "server-only";
 import { cookies } from "next/headers";
+import {
+  ACCESS_COOKIE,
+  REFRESH_COOKIE,
+  accessCookie,
+  refreshCookie,
+} from "./cookie-config";
 
-export const ACCESS_COOKIE = "cv_at";
-export const REFRESH_COOKIE = "cv_rt";
-
-const ACCESS_MAX_AGE = 15 * 60; // 15 minutes
-const REFRESH_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
-
-function baseOptions() {
-  return {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    path: "/",
-  };
-}
+export { ACCESS_COOKIE, REFRESH_COOKIE };
 
 export async function setAuthCookies(accessToken: string, refreshToken: string) {
   const store = await cookies();
-  store.set(ACCESS_COOKIE, accessToken, { ...baseOptions(), maxAge: ACCESS_MAX_AGE });
-  store.set(REFRESH_COOKIE, refreshToken, { ...baseOptions(), maxAge: REFRESH_MAX_AGE });
+  store.set(accessCookie(accessToken));
+  store.set(refreshCookie(refreshToken));
 }
 
 export async function setAccessCookie(accessToken: string) {
   const store = await cookies();
-  store.set(ACCESS_COOKIE, accessToken, { ...baseOptions(), maxAge: ACCESS_MAX_AGE });
+  store.set(accessCookie(accessToken));
 }
 
 export async function clearAuthCookies() {

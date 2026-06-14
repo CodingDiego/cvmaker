@@ -57,6 +57,12 @@ export const sessions = pgTable("sessions", {
     .references(() => users.id, { onDelete: "cascade" }),
   // Hash of the current opaque refresh token (never store the raw token).
   refreshTokenHash: text("refresh_token_hash").notNull(),
+  // Hash of the immediately-previous refresh token. Accepted for a short grace
+  // window after rotation so concurrent in-flight requests (a single expiry
+  // fans out into many parallel proxy refreshes) aren't mistaken for token
+  // reuse and don't burn the whole family.
+  prevRefreshTokenHash: text("prev_refresh_token_hash"),
+  rotatedAt: timestamp("rotated_at", { withTimezone: true }),
   // Rotation lineage: all rotations of one login share a family id.
   family: uuid("family").notNull(),
   userAgent: text("user_agent"),

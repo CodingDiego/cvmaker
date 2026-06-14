@@ -7,6 +7,10 @@ import { hmac, randomToken, safeEqualHex } from "./crypto";
 import type { RequestContext } from "./device";
 
 const REFRESH_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+// After a rotation, the just-used token stays acceptable for this long so that
+// concurrent in-flight requests (one access-token expiry fans out into many
+// parallel proxy refreshes) are revalidated instead of being flagged as reuse.
+const ROTATION_GRACE_MS = 60 * 1000; // 60 seconds
 
 function buildToken(family: string): { token: string; hash: string } {
   const secret = randomToken(32);
