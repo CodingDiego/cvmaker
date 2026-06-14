@@ -212,20 +212,20 @@ export function EditorForm() {
       <SectionBlock title="Personal details">
         <PhotoField />
         <div className="grid gap-3 sm:grid-cols-2">
-          <TextField label="Full name" value={data.header.fullName} onChange={(v) => mutate((d) => { d.header.fullName = v; })} />
-          <TextField label="Job title" value={data.header.title} onChange={(v) => mutate((d) => { d.header.title = v; })} />
-          <TextField label="Email" type="email" value={data.header.contact.email} onChange={(v) => mutate((d) => { d.header.contact.email = v; })} />
-          <TextField label="Phone" value={data.header.contact.phone} onChange={(v) => mutate((d) => { d.header.contact.phone = v; })} />
-          <TextField label="Location" value={data.header.contact.location} onChange={(v) => mutate((d) => { d.header.contact.location = v; })} />
-          <LinkField label="Website" value={data.header.contact.website} onChange={(v) => mutate((d) => { d.header.contact.website = v; })} />
-          <LinkField label="LinkedIn" value={data.header.contact.linkedin} placeholder="linkedin.com/in/you" onChange={(v) => mutate((d) => { d.header.contact.linkedin = v; })} />
-          <LinkField label="GitHub" value={data.header.contact.github} placeholder="github.com/you" onChange={(v) => mutate((d) => { d.header.contact.github = v; })} />
+          <TextField label="Full name" placeholder={ph.header.fullName} value={data.header.fullName} onChange={(v) => mutate((d) => { d.header.fullName = v; })} />
+          <TextField label="Job title" placeholder={ph.header.title} value={data.header.title} onChange={(v) => mutate((d) => { d.header.title = v; })} />
+          <TextField label="Email" type="email" placeholder={ph.header.contact.email} value={data.header.contact.email} onChange={(v) => mutate((d) => { d.header.contact.email = v; })} />
+          <TextField label="Phone" placeholder={ph.header.contact.phone} value={data.header.contact.phone} onChange={(v) => mutate((d) => { d.header.contact.phone = v; })} />
+          <TextField label="Location" placeholder={ph.header.contact.location} value={data.header.contact.location} onChange={(v) => mutate((d) => { d.header.contact.location = v; })} />
+          <LinkField label="Website" placeholder={ph.header.contact.website} value={data.header.contact.website} onChange={(v) => mutate((d) => { d.header.contact.website = v; })} />
+          <LinkField label="LinkedIn" value={data.header.contact.linkedin} placeholder={ph.header.contact.linkedin} onChange={(v) => mutate((d) => { d.header.contact.linkedin = v; })} />
+          <LinkField label="GitHub" value={data.header.contact.github} placeholder={ph.header.contact.github} onChange={(v) => mutate((d) => { d.header.contact.github = v; })} />
         </div>
       </SectionBlock>
 
       {/* Summary */}
       <SectionBlock title="Summary">
-        <AreaField label="Professional summary" rows={4} value={data.summary} onChange={(v) => mutate((d) => { d.summary = v; })} />
+        <AreaField label="Professional summary" rows={4} placeholder={ph.summary} value={data.summary} onChange={(v) => mutate((d) => { d.summary = v; })} />
       </SectionBlock>
 
       {/* Experience */}
@@ -233,7 +233,9 @@ export function EditorForm() {
         title="Experience"
         onAdd={() => mutate((d) => { d.experience.push({ id: newId("exp"), company: "", role: "", location: "", startDate: "", endDate: "", current: false, bullets: [] }); })}
       >
-        {data.experience.map((e, i) => (
+        {data.experience.map((e, i) => {
+          const p = ph.experience.get(e.id);
+          return (
           <ItemCard
             key={e.id}
             onRemove={() => mutate((d) => { d.experience.splice(i, 1); })}
@@ -241,21 +243,22 @@ export function EditorForm() {
             onMoveDown={i < data.experience.length - 1 ? () => mutate((d) => { d.experience.splice(i + 1, 0, d.experience.splice(i, 1)[0]!); }) : undefined}
           >
             <div className="grid gap-3 sm:grid-cols-2">
-              <TextField label="Role" value={e.role} onChange={(v) => mutate((d) => { d.experience[i]!.role = v; })} />
-              <TextField label="Company" value={e.company} onChange={(v) => mutate((d) => { d.experience[i]!.company = v; })} />
-              <TextField label="Location" value={e.location} onChange={(v) => mutate((d) => { d.experience[i]!.location = v; })} />
+              <TextField label="Role" placeholder={p?.role} value={e.role} onChange={(v) => mutate((d) => { d.experience[i]!.role = v; })} />
+              <TextField label="Company" placeholder={p?.company} value={e.company} onChange={(v) => mutate((d) => { d.experience[i]!.company = v; })} />
+              <TextField label="Location" placeholder={p?.location} value={e.location} onChange={(v) => mutate((d) => { d.experience[i]!.location = v; })} />
               <div className="grid grid-cols-2 gap-2">
-                <TextField label="Start" value={e.startDate} onChange={(v) => mutate((d) => { d.experience[i]!.startDate = v; })} />
-                <TextField label="End" value={e.endDate} onChange={(v) => mutate((d) => { d.experience[i]!.endDate = v; })} />
+                <TextField label="Start" placeholder={p?.startDate} value={e.startDate} onChange={(v) => mutate((d) => { d.experience[i]!.startDate = v; })} />
+                <TextField label="End" placeholder={p?.endDate} value={e.endDate} onChange={(v) => mutate((d) => { d.experience[i]!.endDate = v; })} />
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Switch checked={e.current} onCheckedChange={(c) => mutate((d) => { d.experience[i]!.current = c; })} />
               <Label className="text-xs">I currently work here</Label>
             </div>
-            <BulletsField value={e.bullets} onChange={(v) => mutate((d) => { d.experience[i]!.bullets = v; })} />
+            <BulletsField placeholder={p?.bullets.join("\n")} value={e.bullets} onChange={(v) => mutate((d) => { d.experience[i]!.bullets = v; })} />
           </ItemCard>
-        ))}
+          );
+        })}
       </SectionBlock>
 
       {/* Education */}
