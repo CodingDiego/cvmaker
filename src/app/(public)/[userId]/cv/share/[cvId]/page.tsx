@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { connection } from "next/server";
 import { Download, FileText, FileType } from "lucide-react";
 import { getPublicCv, shareUrlFor } from "@/lib/cv/share-service";
 import { getTemplate } from "@/templates/registry";
@@ -13,15 +12,36 @@ import { personLd } from "@/lib/seo";
 
 type Params = Promise<{ userId: string; cvId: string }>;
 
-// Signals to Next that this route renders at request time (it reads dynamic
-// `params` to pick the CV). Wrapped in Suspense so the static shell still
-// prerenders; renders nothing.
-async function DynamicMarker() {
-  await connection();
-  return null;
+// The page reads dynamic `params` to pick the CV, which makes its content
+// request-time. We keep that read inside a Suspense boundary so the route still
+// produces a static shell (the background + footer below). Under Cache
+// Components, having a static shell is what lets Next reconcile the metadata —
+// which is necessarily dynamic on a `[userId]/[cvId]` route — without bailing
+// the whole build (next-prerender-dynamic-metadata).
+export default function SharedCvPage({ params }: { params: Params }) {
+  return (
+    <div className="relative flex min-h-svh flex-col">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.35]" />
+
+      <Suspense fallback={<div className="flex-1" aria-hidden />}>
+        <ShareContent params={params} />
+      </Suspense>
+
+      <footer className="border-t">
+        <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 px-4 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
+          <p className="text-sm text-muted-foreground">
+            Built with <span className="font-display font-semibold text-foreground">CVMaker</span> - free ATS-friendly resumes.
+          </p>
+          <Button variant="outline" size="sm" render={<Link href="/templates" />}>
+            <Download className="size-4 rotate-180" /> Make your own
+          </Button>
+        </div>
+      </footer>
+    </div>
+  );
 }
 
-export default async function SharedCvPage({ params }: { params: Params }) {
+async function ShareContent({ params }: { params: Params }) {
   const { userId, cvId } = await params;
   const cv = await getPublicCv(userId, cvId);
   if (!cv) notFound();
@@ -30,9 +50,8 @@ export default async function SharedCvPage({ params }: { params: Params }) {
   const name = cv.data.header?.fullName || cv.title;
 
   return (
-    <div className="relative flex min-h-svh flex-col">
+    <>
       <JsonLd data={personLd(cv.data, { url: shareUrlFor(userId, cvId) })} />
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.35]" />
 
       <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b bg-background/80 px-4 py-3 backdrop-blur sm:px-6">
         <div className="min-w-0">
@@ -77,10 +96,6 @@ export default async function SharedCvPage({ params }: { params: Params }) {
         </div>
       </header>
 
-      <Suspense fallback={null}>
-        <DynamicMarker />
-      </Suspense>
-
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6">
         <ScaledResume
           data={cv.data}
@@ -89,17 +104,6 @@ export default async function SharedCvPage({ params }: { params: Params }) {
           fontFamily={cv.fontFamily}
         />
       </main>
-
-      <footer className="border-t">
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 px-4 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
-          <p className="text-sm text-muted-foreground">
-            Built with <span className="font-display font-semibold text-foreground">CVMaker</span> - free ATS-friendly resumes.
-          </p>
-          <Button variant="outline" size="sm" render={<Link href="/templates" />}>
-            <Download className="size-4 rotate-180" /> Make your own
-          </Button>
-        </div>
-      </footer>
-    </div>
+    </>
   );
 }
