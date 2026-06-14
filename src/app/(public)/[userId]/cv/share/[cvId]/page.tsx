@@ -39,40 +39,63 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 // The page reads dynamic `params` to pick the CV, which makes its content
 // request-time. We keep that read inside a Suspense boundary so the route still
-// produces a static shell (the background + footer below). Under Cache
-// Components, having a static shell is what lets Next reconcile the metadata —
-// which is necessarily dynamic on a `[userId]/[cvId]` route — without bailing
-// the whole build (next-prerender-dynamic-metadata).
+// produces a static shell (the background + footer below). Because the metadata
+// is also dynamic on this `[userId]/[cvId]` route, Next needs the route to
+// "allow dynamic" or the build bails (next-prerender-dynamic-metadata).
+//
+// That flag is only set when a dynamic marker sits under a <Suspense> that is
+// itself directly under the route body — with NO DOM element in between. So the
+// marker can't live inside the page's wrapping <div>; it has to be hoisted to a
+// direct child of the top-level fragment, above any element. Hence the dedicated
+// <DynamicMarker /> below rather than an `await connection()` buried in
+// `ShareContent` (which is wrapped by the layout <div> and so wouldn't count).
 export default function SharedCvPage({ params }: { params: Params }) {
   return (
-    <div className="relative flex min-h-svh flex-col">
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.35]" />
+    <>
+      <DynamicMarker />
 
-      <Suspense fallback={<div className="flex-1" aria-hidden />}>
-        <ShareContent params={params} />
-      </Suspense>
+      <div className="relative flex min-h-svh flex-col">
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.35]" />
 
-      <footer className="border-t">
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 px-4 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
-          <p className="text-sm text-muted-foreground">
-            Built with <span className="font-display font-semibold text-foreground">CVMaker</span> - free ATS-friendly resumes.
-          </p>
-          <Button variant="outline" size="sm" render={<Link href="/templates" />}>
-            <Download className="size-4 rotate-180" /> Make your own
-          </Button>
-        </div>
-      </footer>
-    </div>
+        <Suspense fallback={<div className="flex-1" aria-hidden />}>
+          <ShareContent params={params} />
+        </Suspense>
+
+        <footer className="border-t">
+          <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 px-4 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
+            <p className="text-sm text-muted-foreground">
+              Built with <span className="font-display font-semibold text-foreground">CVMaker</span> - free ATS-friendly resumes.
+            </p>
+            <Button variant="outline" size="sm" render={<Link href="/templates" />}>
+              <Download className="size-4 rotate-180" /> Make your own
+            </Button>
+          </div>
+        </footer>
+      </div>
+    </>
+  );
+}
+
+// Renders nothing; the `await connection()` inside a <Suspense> that is a direct
+// child of the page's top-level fragment is what flips the route's "allowed
+// dynamic" flag, letting the dynamic metadata stream while the shell prerenders.
+const Connection = async () => {
+  await connection();
+  return null;
+};
+
+function DynamicMarker() {
+  return (
+    <Suspense>
+      <Connection />
+    </Suspense>
   );
 }
 
 async function ShareContent({ params }: { params: Params }) {
-  // Explicit dynamic marker: tells Cache Components this subtree renders at
-  // request time, which sets the route's "allowed dynamic" flag so the dynamic
-  // metadata on this `[userId]/[cvId]` route doesn't fail the build. (Reading
-  // `params` alone doesn't flip that flag.) It's already inside <Suspense>, so
-  // the static shell still prerenders.
-  await connection();
+  // Request-time content: reading `params` defers this subtree to request time.
+  // It's inside its own <Suspense>, so the surrounding shell still prerenders.
+  // (The "allowed dynamic" flag is set by <DynamicMarker /> above, not here.)
   const { userId, cvId } = await params;
   const cv = await getPublicCv(userId, cvId);
   if (!cv) notFound();
