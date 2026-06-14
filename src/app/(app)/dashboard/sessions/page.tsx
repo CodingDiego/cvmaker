@@ -15,17 +15,17 @@ export default async function SessionsPage() {
   queryClient.setQueryData(queryKeys.sessions.list(), withCurrent(rows, user.sessionId));
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Active sessions</h1>
+    <section aria-labelledby="sessions-title" className="space-y-6">
+      <header>
+        <h1 id="sessions-title" className="text-2xl font-semibold">Active sessions</h1>
         <p className="text-sm text-muted-foreground">
           Devices currently signed in to your account. Local/dev sessions are grouped to avoid
           clutter. Revoke any you don&apos;t recognize.
         </p>
-      </div>
+      </header>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <SessionList />
       </HydrationBoundary>
-    </div>
+    </section>
   );
 }

@@ -7,6 +7,7 @@ import { Link } from "@/components/link";
 export const metadata: Metadata = {
   title: "Checkout paused",
   description: "Return from Polar checkout to Free CV.",
+  robots: { index: false, follow: false },
 };
 
 const returnUrl = "https://free-cv.com/return";
@@ -15,7 +16,7 @@ export default function ReturnPage() {
   return (
     <div className="relative overflow-hidden">
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-glow" />
-      <div className="mx-auto flex min-h-[calc(100svh-14rem)] max-w-4xl items-center px-4 py-16 sm:px-6">
+      <section aria-labelledby="checkout-paused-title" className="mx-auto flex min-h-[calc(100svh-14rem)] max-w-4xl items-center px-4 py-16 sm:px-6">
         <Card className="w-full rounded-2xl">
           <CardContent className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="space-y-6">
@@ -24,7 +25,7 @@ export default function ReturnPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Polar checkout</p>
-                <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+                <h1 id="checkout-paused-title" className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
                   Checkout paused
                 </h1>
                 <p className="mt-3 max-w-xl text-pretty text-muted-foreground">
@@ -66,7 +67,7 @@ export default function ReturnPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </section>
     </div>
   );
 }

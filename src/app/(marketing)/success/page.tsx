@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { AlertTriangle, ArrowRight, CheckCircle2, Clock3, CreditCard, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +9,12 @@ import { loadPolarSuccessState } from "@/lib/polar-success-server";
 import { applyPolarCheckout } from "@/lib/billing/polar-checkout-server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
+
+export const metadata: Metadata = {
+  title: "Checkout Complete",
+  description: "Confirm your CVMaker Pro checkout status.",
+  robots: { index: false, follow: false },
+};
 
 const toneStyles = {
   success: {
@@ -58,7 +65,7 @@ export default async function SuccessPage({
   return (
     <div className="relative overflow-hidden">
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-glow" />
-      <div className="mx-auto flex min-h-[calc(100svh-14rem)] max-w-3xl items-center px-4 py-16 sm:px-6">
+      <section aria-labelledby="checkout-status-title" className="mx-auto flex min-h-[calc(100svh-14rem)] max-w-3xl items-center px-4 py-16 sm:px-6">
         <Card className="w-full rounded-2xl">
           <CardContent className="space-y-8 p-6 sm:p-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
@@ -69,7 +76,7 @@ export default async function SuccessPage({
                 <Badge className={cn("mb-4 ring-1", tone.badge)}>
                   {state.kind.replaceAll("-", " ")}
                 </Badge>
-                <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+                <h1 id="checkout-status-title" className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
                   {state.title}
                 </h1>
                 <p className="mt-3 text-pretty text-muted-foreground">{state.description}</p>
@@ -101,7 +108,7 @@ export default async function SuccessPage({
             </div>
           </CardContent>
         </Card>
-      </div>
+      </section>
     </div>
   );
 }

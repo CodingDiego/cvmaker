@@ -1,9 +1,26 @@
+import type { Metadata } from "next";
 import { Link } from "@/components/link";
 import { LegalArticle } from "@/components/legal/legal-article";
+import { JsonLd } from "@/components/seo/json-ld";
+import { webPageLd } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "How CVMaker collects, uses, stores, and protects account and resume data.",
+  alternates: { canonical: "/privacy" },
+};
 
 export default function PrivacyPage() {
   return (
     <LegalArticle title="Privacy Policy" updated="June 13, 2026">
+      <JsonLd
+        id="privacy-page-json-ld"
+        data={webPageLd({
+          name: "Privacy Policy",
+          description: "How CVMaker collects, uses, stores, and protects account and resume data.",
+          path: "/privacy",
+        })}
+      />
       <p>
         This Privacy Policy explains what information CVMaker (the &ldquo;Service&rdquo;) collects, how we
         use it, and the choices you have. By using the Service, you agree to the practices described here.

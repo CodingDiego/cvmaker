@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Link } from "@/components/link";
 import {
   ArrowRight,
@@ -13,9 +14,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { PreviewThumbnail } from "@/components/templates/preview-thumbnail";
 import { sampleResume } from "@/lib/cv/types";
-import { organizationLd, softwareApplicationLd, websiteLd } from "@/lib/seo";
+import { webPageLd } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/json-ld";
 import { TEMPLATES } from "@/templates/registry";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const HERO_TEMPLATES = ["executive", "modern-serif", "two-column-ats"] as const;
 const GALLERY_TEMPLATES = ["classic", "professional", "technical", "rose-editorial"] as const;
@@ -71,17 +76,26 @@ export default function LandingPage() {
 
   return (
     <div className="relative overflow-hidden">
-      <JsonLd data={organizationLd()} />
-      <JsonLd data={websiteLd()} />
-      <JsonLd data={softwareApplicationLd()} />
+      <JsonLd
+        id="home-page-json-ld"
+        data={webPageLd({
+          name: "CVMaker - Free ATS-friendly resume builder",
+          description:
+            "Build an ATS-friendly CV, switch templates, and export PDF or DOCX files from one reusable draft.",
+          path: "/",
+        })}
+      />
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-25 [mask-image:linear-gradient(to_bottom,black,transparent_55%)]" />
 
-      <section className="mx-auto grid min-h-[calc(100svh-3.5rem)] max-w-6xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.92fr_1.08fr] lg:py-16">
+      <section
+        aria-labelledby="home-hero-title"
+        className="mx-auto grid min-h-[calc(100svh-3.5rem)] max-w-6xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.92fr_1.08fr] lg:py-16"
+      >
         <div className="max-w-xl">
           <span className="mb-5 inline-flex items-center gap-1.5 rounded-full border bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground">
             <Check className="size-3.5 text-primary" /> Free forever. No watermarks.
           </span>
-          <h1 className="max-w-3xl font-display text-5xl font-semibold leading-[1.05] text-balance sm:text-6xl">
+          <h1 id="home-hero-title" className="max-w-3xl font-display text-5xl font-semibold leading-[1.05] text-balance sm:text-6xl">
             CVMaker
           </h1>
           <p className="mt-5 max-w-lg text-lg leading-8 text-pretty text-muted-foreground">
@@ -147,7 +161,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="border-y bg-secondary/45">
+      <section aria-labelledby="workflow-title" className="border-y bg-secondary/45">
+        <h2 id="workflow-title" className="sr-only">
+          How CVMaker Works
+        </h2>
         <div className="mx-auto grid max-w-6xl gap-0 px-4 py-12 sm:px-6 lg:grid-cols-3">
           {workflow.map(({ icon: Icon, title, description }, index) => (
             <div key={title} className="relative border-b py-6 last:border-b-0 lg:border-b-0 lg:border-r lg:px-8 lg:first:pl-0 lg:last:border-r-0 lg:last:pr-0">
@@ -164,9 +181,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr]">
+      <section aria-labelledby="exports-title" className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
-          <h2 className="font-display text-3xl font-semibold text-balance">A resume builder that respects the file at the end.</h2>
+          <h2 id="exports-title" className="font-display text-3xl font-semibold text-balance">A resume builder that respects the file at the end.</h2>
           <p className="mt-4 max-w-md leading-7 text-muted-foreground">
             The editor is useful only if the final download is reliable. CVMaker keeps export formats visible,
             direct and consistent with the preview.
@@ -184,10 +201,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
+      <section aria-labelledby="template-range-title" className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
         <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <h2 className="font-display text-3xl font-semibold">Template range</h2>
+            <h2 id="template-range-title" className="font-display text-3xl font-semibold">Template range</h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
               Conservative, technical, executive and editorial layouts share one draft model.
             </p>

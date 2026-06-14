@@ -10,11 +10,11 @@ export default async function SecurityPage() {
   const user = await requireUser("/dashboard/security");
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Security</h1>
+    <section aria-labelledby="security-title" className="space-y-6">
+      <header>
+        <h1 id="security-title" className="text-2xl font-semibold">Security</h1>
         <p className="text-sm text-muted-foreground">Manage 2FA and account verification.</p>
-      </div>
+      </header>
 
       <Card>
         <CardHeader>
@@ -43,6 +43,6 @@ export default async function SecurityPage() {
       </Card>
 
       <TwoFactorSetup enabled={user.twoFactorEnabled} />
-    </div>
+    </section>
   );
 }

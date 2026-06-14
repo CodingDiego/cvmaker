@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import { Link } from "@/components/link";
 import { CheckCircle2, MailCheck, XCircle } from "lucide-react";
 import { verifyEmailToken } from "@/lib/auth/email";
 import { getCurrentUser } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
 import { ResendVerification } from "@/components/auth/resend-verification";
+
+export const metadata: Metadata = {
+  title: "Verify Email",
+  description: "Verify your CVMaker account email address.",
+  robots: { index: false, follow: false },
+};
 
 function Shell({
   icon,
@@ -19,20 +26,23 @@ function Shell({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border bg-card/80 p-6 shadow-xl shadow-black/5 backdrop-blur-sm sm:p-8">
-      <div className="mb-6 flex flex-col items-center gap-3 text-center">
+    <section
+      aria-labelledby="auth-state-title"
+      className="rounded-2xl border bg-card/80 p-6 shadow-xl shadow-black/5 backdrop-blur-sm sm:p-8"
+    >
+      <header className="mb-6 flex flex-col items-center gap-3 text-center">
         <span
           className={`flex size-12 items-center justify-center rounded-xl border bg-background shadow-sm ${iconClassName ?? "text-foreground"}`}
         >
           {icon}
         </span>
         <div className="space-y-1.5">
-          <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+          <h1 id="auth-state-title" className="text-xl font-semibold tracking-tight">{title}</h1>
           <p className="text-sm text-balance text-muted-foreground">{description}</p>
         </div>
-      </div>
+      </header>
       {children}
-    </div>
+    </section>
   );
 }
 

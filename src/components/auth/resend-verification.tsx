@@ -28,7 +28,7 @@ export function ResendVerification() {
           })
         }
       >
-        {pending && <Loader2 className="size-4 animate-spin" />}
+        {pending && <Loader2 aria-hidden="true" className="size-4 animate-spin" />}
         {sent ? "Verification email sent" : "Resend verification email"}
       </Button>
       {error && (

@@ -12,11 +12,11 @@ export default async function BillingPage() {
   const isPro = plan === "pro";
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Billing</h1>
+    <section aria-labelledby="billing-title" className="space-y-6">
+      <header>
+        <h1 id="billing-title" className="text-2xl font-semibold">Billing</h1>
         <p className="text-sm text-muted-foreground">Manage your subscription, payment methods and invoices.</p>
-      </div>
+      </header>
 
       <Card>
         <CardHeader>
@@ -58,6 +58,6 @@ export default async function BillingPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </section>
   );
 }

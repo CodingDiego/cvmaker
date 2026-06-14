@@ -15,17 +15,17 @@ export default async function AssetsPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Assets</h1>
+    <section aria-labelledby="assets-title" className="space-y-6">
+      <header>
+        <h1 id="assets-title" className="text-2xl font-semibold">Assets</h1>
         <p className="text-sm text-muted-foreground">
           Files live in a private store. Toggle sharing to publish a synced copy to the public
           store; every update re-syncs automatically.
         </p>
-      </div>
+      </header>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <AssetManager />
       </HydrationBoundary>
-    </div>
+    </section>
   );
 }

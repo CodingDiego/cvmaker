@@ -21,20 +21,20 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <section aria-labelledby="dashboard-title" className="space-y-6">
+      <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">My CVs</h1>
+          <h1 id="dashboard-title" className="text-2xl font-semibold">My CVs</h1>
           <p className="text-sm text-muted-foreground">Create, edit and export your resumes.</p>
         </div>
         <Button render={<Link href="/templates" />}>
           <Plus className="size-4" /> New CV
         </Button>
-      </div>
+      </header>
 
       <HydrationBoundary state={dehydrate(queryClient)}>
         <CvList />
       </HydrationBoundary>
-    </div>
+    </section>
   );
 }

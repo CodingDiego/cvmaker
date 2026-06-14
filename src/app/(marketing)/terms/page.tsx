@@ -1,9 +1,26 @@
+import type { Metadata } from "next";
 import { Link } from "@/components/link";
 import { LegalArticle } from "@/components/legal/legal-article";
+import { JsonLd } from "@/components/seo/json-ld";
+import { webPageLd } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "Terms governing access to and use of CVMaker.",
+  alternates: { canonical: "/terms" },
+};
 
 export default function TermsPage() {
   return (
     <LegalArticle title="Terms of Service" updated="June 13, 2026">
+      <JsonLd
+        id="terms-page-json-ld"
+        data={webPageLd({
+          name: "Terms of Service",
+          description: "Terms governing access to and use of CVMaker.",
+          path: "/terms",
+        })}
+      />
       <p>
         These Terms of Service (&ldquo;Terms&rdquo;) govern your access to and use of CVMaker
         (the &ldquo;Service&rdquo;). By creating an account or using the Service, you agree to these

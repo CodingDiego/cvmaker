@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       // Keep private app surfaces and APIs out of the index.
-      disallow: ["/dashboard", "/editor", "/api/", "/verify", "/reset"],
+      disallow: ["/dashboard", "/editor", "/api/", "/verify", "/reset", "/success", "/return"],
     },
     sitemap: absoluteUrl("sitemap.xml"),
     host: siteHost(),

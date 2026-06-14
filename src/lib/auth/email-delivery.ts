@@ -11,7 +11,7 @@ type EmailRuntime = {
 type ResendErrorLike = {
   name?: string;
   message?: string;
-  statusCode?: number;
+  statusCode?: number | null;
 };
 
 export class EmailDeliveryError extends Error {

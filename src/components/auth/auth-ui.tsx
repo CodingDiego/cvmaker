@@ -28,7 +28,7 @@ export function AuthCard({
     <div className="rounded-2xl border bg-card/80 p-6 shadow-xl shadow-black/5 backdrop-blur-sm sm:p-8">
       <div className="mb-6 flex flex-col items-center gap-3 text-center">
         <span className="flex size-12 items-center justify-center rounded-xl border bg-background shadow-sm">
-          <Icon className="size-5 text-foreground" />
+          <Icon aria-hidden="true" className="size-5 text-foreground" />
         </span>
         <div className="space-y-1.5">
           <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
@@ -64,7 +64,7 @@ export function IconField({
         {labelAction}
       </div>
       <div className="relative">
-        <Icon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Icon aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           id={id}
           aria-invalid={Boolean(error) || undefined}
@@ -105,7 +105,7 @@ export function PasswordField({
         {labelAction}
       </div>
       <div className="relative">
-        <Icon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Icon aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           id={id}
           type={show ? "text" : "password"}
@@ -121,7 +121,7 @@ export function PasswordField({
           aria-label={show ? "Hide password" : "Show password"}
           className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"
         >
-          {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          {show ? <EyeOff aria-hidden="true" className="size-4" /> : <Eye aria-hidden="true" className="size-4" />}
         </button>
       </div>
       {error && (
@@ -142,7 +142,7 @@ export function SubmitButton({
 }) {
   return (
     <Button type="submit" size="lg" className="h-11 w-full" disabled={pending}>
-      {pending && <Loader2 className="size-4 animate-spin" />}
+      {pending && <Loader2 aria-hidden="true" className="size-4 animate-spin" />}
       {children}
     </Button>
   );

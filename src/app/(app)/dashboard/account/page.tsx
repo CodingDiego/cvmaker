@@ -6,11 +6,11 @@ export default async function AccountPage() {
   const user = await requireUser("/dashboard/account");
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Account</h1>
+    <section aria-labelledby="account-title" className="space-y-6">
+      <header>
+        <h1 id="account-title" className="text-2xl font-semibold">Account</h1>
         <p className="text-sm text-muted-foreground">Manage your profile information.</p>
-      </div>
+      </header>
 
       <Card>
         <CardHeader>
@@ -20,6 +20,6 @@ export default async function AccountPage() {
           <ProfileForm email={user.email} name={user.name} />
         </CardContent>
       </Card>
-    </div>
+    </section>
   );
 }
