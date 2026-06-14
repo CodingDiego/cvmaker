@@ -4,6 +4,11 @@ import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import { users, emailTokens } from "@/db/schema";
 import { env } from "@/lib/env";
+import {
+  assertEmailRuntime,
+  assertResendSendResult,
+  shouldLogEmailToConsole,
+} from "./email-delivery";
 import { hmac, randomToken } from "./crypto";
 import { hashPassword } from "./password";
 import { revokeOtherSessions } from "./sessions";
@@ -12,21 +17,69 @@ const VERIFY_TTL_MS = 24 * 60 * 60 * 1000;
 const RESET_TTL_MS = 60 * 60 * 1000;
 
 let _resend: Resend | null = null;
+let _resendApiKey: string | null = null;
 
-function resend(): Resend | null {
-  if (!env.hasResend()) return null;
-  if (!_resend) _resend = new Resend(env.resendApiKey()!);
+function resend(apiKey: string): Resend {
+  if (!_resend || _resendApiKey !== apiKey) {
+    _resend = new Resend(apiKey);
+    _resendApiKey = apiKey;
+  }
   return _resend;
 }
 
-async function sendEmail(to: string, subject: string, html: string) {
-  const client = resend();
-  if (!client) {
-    console.info(`\n[email -> ${to}] ${subject}\n${html.replace(/<[^>]+>/g, " ").trim()}\n`);
+function htmlToText(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
+
+async function sendEmail({
+  to,
+  subject,
+  html,
+  idempotencyKey,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+  idempotencyKey: string;
+}) {
+  const runtime = {
+    apiKey: env.resendApiKey(),
+    from: env.resendFrom(),
+    nodeEnv: process.env.NODE_ENV,
+    vercelEnv: env.vercelEnv(),
+  };
+
+  if (shouldLogEmailToConsole(runtime)) {
+    console.info(`\n[email -> ${to}] ${subject}\n${htmlToText(html)}\n`);
     return;
   }
 
-  await client.emails.send({ from: env.resendFrom(), to, subject, html });
+  const config = assertEmailRuntime(runtime);
+  const result = await resend(config.apiKey!).emails.send(
+    {
+      from: config.from,
+      to,
+      subject,
+      html,
+      text: htmlToText(html),
+    },
+    { headers: { "Idempotency-Key": idempotencyKey } },
+  );
+
+  assertResendSendResult(result, { to, subject });
 }
 
 function layout(title: string, body: string, cta?: { url: string; label: string }) {
@@ -54,15 +107,17 @@ export async function sendVerificationEmail(userId: string, email: string) {
   });
 
   const url = `${env.appUrl()}/verify?token=${raw}`;
-  await sendEmail(
-    email,
-    "Verify your Free CV email",
-    layout(
+  const tokenHash = hmac(raw);
+  await sendEmail({
+    to: email,
+    subject: "Verify your Free CV email",
+    html: layout(
       "Confirm your email",
       "Welcome to Free CV. Confirm your email address to unlock exports and keep your account secure.",
       { url, label: "Verify email" },
     ),
-  );
+    idempotencyKey: `verify-${tokenHash.slice(0, 32)}`,
+  });
 }
 
 export async function verifyEmailToken(raw: string): Promise<boolean> {
@@ -97,15 +152,17 @@ export async function sendPasswordResetEmail(email: string) {
   });
 
   const url = `${env.appUrl()}/reset?token=${raw}`;
-  await sendEmail(
-    normalized,
-    "Reset your Free CV password",
-    layout(
+  const tokenHash = hmac(raw);
+  await sendEmail({
+    to: normalized,
+    subject: "Reset your Free CV password",
+    html: layout(
       "Reset your password",
       "We received a request to reset your password. This link expires in 1 hour. If you did not request it, you can ignore this email.",
       { url, label: "Reset password" },
     ),
-  );
+    idempotencyKey: `reset-${tokenHash.slice(0, 32)}`,
+  });
 }
 
 export async function resetPassword(raw: string, newPassword: string): Promise<boolean> {

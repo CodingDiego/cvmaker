@@ -13,6 +13,7 @@ import {
 } from "./service";
 import { verifyTotpForUser, consumeBackupCode } from "./totp";
 import { sendVerificationEmail, sendPasswordResetEmail, resetPassword } from "./email";
+import { EmailDeliveryError } from "./email-delivery";
 import { getCurrentUser } from "./session";
 import { limiters } from "@/lib/redis";
 
@@ -56,6 +57,18 @@ export async function registerAction(
   } catch (e) {
     if (e instanceof AuthFailure && e.code === "email_taken") {
       return { status: "error", message: "An account with this email already exists." };
+    }
+    if (e instanceof EmailDeliveryError) {
+      console.error("Verification email delivery failed", {
+        code: e.code,
+        message: e.message,
+        details: e.details,
+      });
+      return {
+        status: "error",
+        message:
+          "Your account was created, but we couldn't send the verification email. Sign in and try Resend verification email.",
+      };
     }
     return { status: "error", message: "Something went wrong. Please try again." };
   }
@@ -142,7 +155,22 @@ export async function requestPasswordResetAction(
   const email = z.string().email().safeParse(formData.get("email"));
   if (!email.success) return { status: "error", message: "Enter a valid email." };
 
-  await sendPasswordResetEmail(email.data);
+  try {
+    await sendPasswordResetEmail(email.data);
+  } catch (e) {
+    if (e instanceof EmailDeliveryError) {
+      console.error("Password reset email delivery failed", {
+        code: e.code,
+        message: e.message,
+        details: e.details,
+      });
+      return {
+        status: "error",
+        message: "We couldn't send the reset email. Try again in a few minutes.",
+      };
+    }
+    throw e;
+  }
   // Always report success to avoid user enumeration.
   return { status: "success" };
 }
@@ -179,6 +207,21 @@ export async function resendVerificationAction(): Promise<ActionState> {
   if (user.emailVerified) return { status: "success" };
   const { success } = await limiters.otp.limit(user.id);
   if (!success) return { status: "error", message: "Please wait before requesting another email." };
-  await sendVerificationEmail(user.id, user.email);
+  try {
+    await sendVerificationEmail(user.id, user.email);
+  } catch (e) {
+    if (e instanceof EmailDeliveryError) {
+      console.error("Verification email resend failed", {
+        code: e.code,
+        message: e.message,
+        details: e.details,
+      });
+      return {
+        status: "error",
+        message: "We couldn't send the verification email. Try again in a few minutes.",
+      };
+    }
+    throw e;
+  }
   return { status: "success" };
 }

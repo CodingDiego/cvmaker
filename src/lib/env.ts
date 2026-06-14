@@ -67,7 +67,7 @@ export const env = {
 
   // Email (Resend) — optional in dev (logs link to console instead).
   resendApiKey: () => optional("RESEND_API_KEY"),
-  resendFrom: () => optional("RESEND_FROM_EMAIL") ?? "CVMaker <onboarding@resend.dev>",
+  resendFrom: () => optional("RESEND_FROM_EMAIL") ?? "CVMaker <noreply@free-cv.com>",
   hasResend: () => Boolean(optional("RESEND_API_KEY")),
 
   // Polar payments — optional in dev (payment routes degrade until configured).
