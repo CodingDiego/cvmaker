@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { Plus } from "lucide-react";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { requireUser } from "@/lib/auth/session";
