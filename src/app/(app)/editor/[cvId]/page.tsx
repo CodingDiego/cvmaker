@@ -5,11 +5,13 @@ import { getQueryClient } from "@/lib/query/client";
 import { queryKeys } from "@/lib/query/keys";
 import { getCvDetailCached } from "@/lib/cv/cv-reads";
 import { EditorShell } from "@/components/editor/editor-shell";
-import { connection } from "next/server";
 
+// Auth-gated, per-user editor: inherently fully dynamic with no static shell.
+// Opt out of instant/static-shell validation so the route builds under Cache
+// Components (next-prerender-dynamic-metadata).
+export const unstable_instant = false;
 
 export default async function EditorPage({ params }: { params: Promise<{ cvId: string }> }) {
-  await connection()
   const { cvId } = await params;
   if (!cvId) notFound();
 

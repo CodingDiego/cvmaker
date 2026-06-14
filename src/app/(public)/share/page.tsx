@@ -9,6 +9,12 @@ import { ShareUnavailable } from "./share-unavailable";
 
 type PageProps = { searchParams: Promise<SearchParams> };
 
+// A shared CV is resolved from `searchParams` + a per-request DB read, so this
+// route is inherently fully dynamic and has no meaningful static shell. Opting
+// out of instant/static-shell validation lets the dynamic `generateMetadata`
+// (per-CV title/OG) build instead of tripping next-prerender-dynamic-metadata.
+export const unstable_instant = false;
+
 // Keep personal resumes out of search indexes regardless of outcome.
 const baseMetadata: Metadata = { robots: { index: false, follow: true } };
 
