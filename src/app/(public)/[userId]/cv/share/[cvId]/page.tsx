@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Download, FileText, FileType } from "lucide-react";
 import { getPublicCv, shareUrlFor } from "@/lib/cv/share-service";
 import { getTemplate } from "@/templates/registry";
@@ -10,6 +12,14 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { personLd } from "@/lib/seo";
 
 type Params = Promise<{ userId: string; cvId: string }>;
+
+// Signals to Next that this route renders at request time (it reads dynamic
+// `params` to pick the CV). Wrapped in Suspense so the static shell still
+// prerenders; renders nothing.
+async function DynamicMarker() {
+  await connection();
+  return null;
+}
 
 export default async function SharedCvPage({ params }: { params: Params }) {
   const { userId, cvId } = await params;
@@ -66,6 +76,10 @@ export default async function SharedCvPage({ params }: { params: Params }) {
           <ThemeToggle />
         </div>
       </header>
+
+      <Suspense fallback={null}>
+        <DynamicMarker />
+      </Suspense>
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6">
         <ScaledResume
