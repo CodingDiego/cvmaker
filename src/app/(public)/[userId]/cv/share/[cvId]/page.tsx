@@ -63,26 +63,9 @@ export default function SharedCvPage({ params }: { params: Params }) {
   );
 }
 
-// Renders nothing; the `await connection()` inside a <Suspense> that is a direct
-// child of the page's top-level fragment is what flips the route's "allowed
-// dynamic" flag, letting the dynamic metadata stream while the shell prerenders.
-const Connection = async () => {
-  await connection();
-  return null;
-};
-
-function DynamicMarker() {
-  return (
-    <Suspense>
-      <Connection />
-    </Suspense>
-  );
-}
-
 async function ShareContent({ params }: { params: Params }) {
   // Request-time content: reading `params` defers this subtree to request time.
   // It's inside its own <Suspense>, so the surrounding shell still prerenders.
-  // (The "allowed dynamic" flag is set by <DynamicMarker /> above, not here.)
   const { userId, cvId } = await params;
   const cv = await getPublicCv(userId, cvId);
   if (!cv) notFound();
