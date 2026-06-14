@@ -266,19 +266,22 @@ export function EditorForm() {
         title="Education"
         onAdd={() => mutate((d) => { d.education.push({ id: newId("edu"), institution: "", degree: "", field: "", location: "", startDate: "", endDate: "", details: "" }); })}
       >
-        {data.education.map((e, i) => (
+        {data.education.map((e, i) => {
+          const p = ph.education.get(e.id);
+          return (
           <ItemCard key={e.id} onRemove={() => mutate((d) => { d.education.splice(i, 1); })}>
             <div className="grid gap-3 sm:grid-cols-2">
-              <TextField label="Institution" value={e.institution} onChange={(v) => mutate((d) => { d.education[i]!.institution = v; })} />
-              <TextField label="Degree" value={e.degree} onChange={(v) => mutate((d) => { d.education[i]!.degree = v; })} />
-              <TextField label="Field of study" value={e.field} onChange={(v) => mutate((d) => { d.education[i]!.field = v; })} />
-              <TextField label="Location" value={e.location} onChange={(v) => mutate((d) => { d.education[i]!.location = v; })} />
-              <TextField label="Start" value={e.startDate} onChange={(v) => mutate((d) => { d.education[i]!.startDate = v; })} />
-              <TextField label="End" value={e.endDate} onChange={(v) => mutate((d) => { d.education[i]!.endDate = v; })} />
+              <TextField label="Institution" placeholder={p?.institution} value={e.institution} onChange={(v) => mutate((d) => { d.education[i]!.institution = v; })} />
+              <TextField label="Degree" placeholder={p?.degree} value={e.degree} onChange={(v) => mutate((d) => { d.education[i]!.degree = v; })} />
+              <TextField label="Field of study" placeholder={p?.field} value={e.field} onChange={(v) => mutate((d) => { d.education[i]!.field = v; })} />
+              <TextField label="Location" placeholder={p?.location} value={e.location} onChange={(v) => mutate((d) => { d.education[i]!.location = v; })} />
+              <TextField label="Start" placeholder={p?.startDate} value={e.startDate} onChange={(v) => mutate((d) => { d.education[i]!.startDate = v; })} />
+              <TextField label="End" placeholder={p?.endDate} value={e.endDate} onChange={(v) => mutate((d) => { d.education[i]!.endDate = v; })} />
             </div>
             <AreaField label="Details (optional)" rows={2} value={e.details} onChange={(v) => mutate((d) => { d.education[i]!.details = v; })} />
           </ItemCard>
-        ))}
+          );
+        })}
       </SectionBlock>
 
       {/* Skills */}
