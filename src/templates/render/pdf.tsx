@@ -11,6 +11,7 @@ import {
 import type { ResumeData } from "@/lib/cv/types";
 import { resolveSectionOrder } from "@/lib/cv/types";
 import { getTemplate } from "@/templates/registry";
+import { pdfHeaderTextStyle, pdfHeaderTypography } from "./pdf-layout";
 
 function hrefFor(value: string, kind: "url" | "email" | "phone" = "url"): string {
   const v = value.trim();
@@ -36,17 +37,29 @@ export async function renderPdf(
   const boldFont = serif ? "Times-Bold" : "Helvetica-Bold";
   const headerAlign = tokens.headerAlign === "center" ? "center" : "left";
   const titleColor = tokens.accent === "heading" ? accent : "#111827";
+  const headerType = pdfHeaderTypography();
 
   const s = StyleSheet.create({
     page: { paddingVertical: 36, paddingHorizontal: 40, fontFamily, fontSize: 9.5, color: "#1f2937", lineHeight: 1.4 },
-    name: { fontSize: 22, fontFamily: boldFont, color: tokens.accent === "name" ? accent : "#111827", textAlign: headerAlign },
-    role: { fontSize: 11, color: "#4b5563", marginTop: 2, textAlign: headerAlign },
-    headerText: { flexGrow: 1, flexShrink: 1, flexBasis: 0 },
+    name: {
+      fontSize: 22,
+      fontFamily: boldFont,
+      lineHeight: headerType.nameLineHeight,
+      color: tokens.accent === "name" ? accent : "#111827",
+      textAlign: headerAlign,
+    },
+    role: {
+      fontSize: 11,
+      lineHeight: headerType.roleLineHeight,
+      color: "#4b5563",
+      marginTop: headerType.roleMarginTop,
+      textAlign: headerAlign,
+    },
     contactRow: {
       flexDirection: "row",
       flexWrap: "wrap",
       justifyContent: headerAlign === "center" ? "center" : "flex-start",
-      marginTop: 4,
+      marginTop: headerType.contactMarginTop,
     },
     contactItem: { fontSize: 8.5, color: "#6b7280", marginRight: 8, marginBottom: 2 },
     section: { marginTop: 12 },
@@ -253,15 +266,7 @@ export async function renderPdf(
     photoPos === "center" ? "column" : photoPos === "right" ? "row-reverse" : "row";
 
   const HeaderText = () => (
-    <View
-      style={{
-        ...s.headerText,
-        flexGrow: 1,
-        ...(photo && photoPos === "left" ? { marginLeft: 12 } : null),
-        ...(photo && photoPos === "right" ? { marginRight: 12 } : null),
-        ...(photo && photoPos === "center" ? { marginTop: 6 } : null),
-      }}
-    >
+    <View style={pdfHeaderTextStyle({ hasPhoto: Boolean(photo), photoPosition: photoPos })}>
       <Text style={s.name}>{data.header.fullName || "Your Name"}</Text>
       {data.header.title ? <Text style={s.role}>{data.header.title}</Text> : null}
       <ContactLine />
