@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import type { SearchParams } from "nuqs/server";
 import { shareSearchParamsCache } from "@/lib/cv/share-search-params";
 import { getPublicCv } from "@/lib/cv/share-service";
@@ -35,7 +37,32 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   };
 }
 
-export default async function SharedCvPage({ searchParams }: PageProps) {
+/**
+ * `generateMetadata` reads `searchParams` (request data), so under Cache
+ * Components the route's metadata defers to request time. Rendering this
+ * request-time marker as a dynamic island keeps the rest of the route deferred
+ * too, so they stay consistent and the build doesn't flag
+ * next-prerender-dynamic-metadata.
+ */
+async function RequestTimeMarker() {
+  await connection();
+  return null;
+}
+
+export default function SharedCvPage({ searchParams }: PageProps) {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <RequestTimeMarker />
+      </Suspense>
+      <Suspense fallback={<div className="min-h-svh" aria-hidden />}>
+        <ShareResolver searchParams={searchParams} />
+      </Suspense>
+    </>
+  );
+}
+
+async function ShareResolver({ searchParams }: PageProps) {
   const { u: userId, c: cvId } = await shareSearchParamsCache.parse(searchParams);
 
   if (!userId || !cvId) return <ShareUnavailable reason="missing-params" />;
