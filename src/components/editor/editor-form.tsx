@@ -305,16 +305,19 @@ export function EditorForm() {
         title="Projects"
         onAdd={() => mutate((d) => { d.projects.push({ id: newId("prj"), name: "", link: "", description: "", bullets: [] }); })}
       >
-        {data.projects.map((p, i) => (
+        {data.projects.map((p, i) => {
+          const ex = ph.projects.get(p.id);
+          return (
           <ItemCard key={p.id} onRemove={() => mutate((d) => { d.projects.splice(i, 1); })}>
             <div className="grid gap-3 sm:grid-cols-2">
-              <TextField label="Name" value={p.name} onChange={(v) => mutate((d) => { d.projects[i]!.name = v; })} />
-              <LinkField label="Link" value={p.link} onChange={(v) => mutate((d) => { d.projects[i]!.link = v; })} />
+              <TextField label="Name" placeholder={ex?.name} value={p.name} onChange={(v) => mutate((d) => { d.projects[i]!.name = v; })} />
+              <LinkField label="Link" placeholder={ex?.link} value={p.link} onChange={(v) => mutate((d) => { d.projects[i]!.link = v; })} />
             </div>
-            <AreaField label="Description" rows={2} value={p.description} onChange={(v) => mutate((d) => { d.projects[i]!.description = v; })} />
-            <BulletsField value={p.bullets} onChange={(v) => mutate((d) => { d.projects[i]!.bullets = v; })} />
+            <AreaField label="Description" rows={2} placeholder={ex?.description} value={p.description} onChange={(v) => mutate((d) => { d.projects[i]!.description = v; })} />
+            <BulletsField placeholder={ex?.bullets.join("\n")} value={p.bullets} onChange={(v) => mutate((d) => { d.projects[i]!.bullets = v; })} />
           </ItemCard>
-        ))}
+          );
+        })}
       </SectionBlock>
 
       {/* Certifications */}
@@ -322,16 +325,19 @@ export function EditorForm() {
         title="Certifications"
         onAdd={() => mutate((d) => { d.certifications.push({ id: newId("cert"), name: "", issuer: "", date: "", url: "" }); })}
       >
-        {data.certifications.map((c, i) => (
+        {data.certifications.map((c, i) => {
+          const p = ph.certifications.get(c.id);
+          return (
           <ItemCard key={c.id} onRemove={() => mutate((d) => { d.certifications.splice(i, 1); })}>
             <div className="grid gap-3 sm:grid-cols-3">
-              <TextField label="Name" value={c.name} onChange={(v) => mutate((d) => { d.certifications[i]!.name = v; })} />
-              <TextField label="Issuer" value={c.issuer} onChange={(v) => mutate((d) => { d.certifications[i]!.issuer = v; })} />
-              <TextField label="Date" value={c.date} onChange={(v) => mutate((d) => { d.certifications[i]!.date = v; })} />
+              <TextField label="Name" placeholder={p?.name} value={c.name} onChange={(v) => mutate((d) => { d.certifications[i]!.name = v; })} />
+              <TextField label="Issuer" placeholder={p?.issuer} value={c.issuer} onChange={(v) => mutate((d) => { d.certifications[i]!.issuer = v; })} />
+              <TextField label="Date" placeholder={p?.date} value={c.date} onChange={(v) => mutate((d) => { d.certifications[i]!.date = v; })} />
             </div>
-            <LinkField label="Credential link (optional)" value={c.url} placeholder="credly.com/badges/…" onChange={(v) => mutate((d) => { d.certifications[i]!.url = v; })} />
+            <LinkField label="Credential link (optional)" value={c.url} placeholder={p?.url ?? "credly.com/badges/…"} onChange={(v) => mutate((d) => { d.certifications[i]!.url = v; })} />
           </ItemCard>
-        ))}
+          );
+        })}
       </SectionBlock>
 
       {/* Languages */}
@@ -339,14 +345,17 @@ export function EditorForm() {
         title="Languages"
         onAdd={() => mutate((d) => { d.languages.push({ id: newId("lng"), name: "", level: "" }); })}
       >
-        {data.languages.map((l, i) => (
+        {data.languages.map((l, i) => {
+          const p = ph.languages.get(l.id);
+          return (
           <ItemCard key={l.id} onRemove={() => mutate((d) => { d.languages.splice(i, 1); })}>
             <div className="grid gap-3 sm:grid-cols-2">
-              <TextField label="Language" value={l.name} onChange={(v) => mutate((d) => { d.languages[i]!.name = v; })} />
-              <TextField label="Level" value={l.level} onChange={(v) => mutate((d) => { d.languages[i]!.level = v; })} />
+              <TextField label="Language" placeholder={p?.name} value={l.name} onChange={(v) => mutate((d) => { d.languages[i]!.name = v; })} />
+              <TextField label="Level" placeholder={p?.level} value={l.level} onChange={(v) => mutate((d) => { d.languages[i]!.level = v; })} />
             </div>
           </ItemCard>
-        ))}
+          );
+        })}
       </SectionBlock>
 
       {/* Custom sections — user-defined, reorderable */}
