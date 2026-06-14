@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { getPublicCv } from "@/lib/cv/share-service";
 import { getTemplate } from "@/templates/registry";
 import { ShareView } from "./share-view";
