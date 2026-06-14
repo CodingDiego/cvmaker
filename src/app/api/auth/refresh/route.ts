@@ -10,7 +10,8 @@ function safeNext(raw: string | null): string {
   return raw;
 }
 
-// GET: invoked by the edge proxy on a redirect — rotate then bounce back.
+// GET: manual/fallback rotate-then-bounce (the Proxy now refreshes inline, so
+// this is only reached if someone hits the endpoint directly).
 export async function GET(request: NextRequest) {
   const ctx = describeRequest(request.headers);
   const next = safeNext(request.nextUrl.searchParams.get("next"));
