@@ -217,24 +217,31 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
   // --- Built-in section renderers (main column) ---
   const renderers: Record<string, () => ReactNode> = {
     summary: () =>
-      data.summary?.trim()
-        ? sectionNode("Summary", <p style={{ margin: 0 }}>{data.summary}</p>, "summary")
+      data.summary?.trim() || placeholder?.summary
+        ? sectionNode("Summary", <p style={{ margin: 0 }}>{gv(data.summary, placeholder?.summary)}</p>, "summary")
         : null,
 
     experience: () =>
       data.experience.length
         ? sectionNode(
             "Experience",
-            data.experience.map((e) => (
-              <div key={e.id} style={{ marginBottom: sp.item }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                  <strong>{e.role}</strong>
-                  <span style={{ whiteSpace: "nowrap", color: SUBTLE }}>{dateRange(e.startDate, e.endDate, e.current)}</span>
+            data.experience.map((e) => {
+              const p = phExp?.get(e.id);
+              const companyLine = [e.company, e.location].filter(Boolean).join(" · ");
+              const phCompanyLine = p ? [p.company, p.location].filter(Boolean).join(" · ") : "";
+              return (
+                <div key={e.id} style={{ marginBottom: sp.item }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                    <strong>{gv(e.role, p?.role)}</strong>
+                    <span style={{ whiteSpace: "nowrap", color: SUBTLE }}>
+                      {gv(dateRange(e.startDate, e.endDate, e.current), p && dateRange(p.startDate, p.endDate, p.current))}
+                    </span>
+                  </div>
+                  <div style={{ color: accent, fontWeight: 600 }}>{gv(companyLine, phCompanyLine)}</div>
+                  {bulletsNode(e.bullets, p?.bullets)}
                 </div>
-                <div style={{ color: accent, fontWeight: 600 }}>{[e.company, e.location].filter(Boolean).join(" · ")}</div>
-                {bulletsNode(e.bullets)}
-              </div>
-            )),
+              );
+            }),
             "experience",
           )
         : null,
@@ -243,18 +250,27 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
       data.education.length
         ? sectionNode(
             "Education",
-            data.education.map((e) => (
-              <div key={e.id} style={{ marginBottom: sp.item }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                  <strong>{e.institution}</strong>
-                  <span style={{ whiteSpace: "nowrap", color: SUBTLE }}>{dateRange(e.startDate, e.endDate)}</span>
+            data.education.map((e) => {
+              const p = phEdu?.get(e.id);
+              const degreeLine = [[e.degree, e.field].filter(Boolean).join(", "), e.location].filter(Boolean).join(" · ");
+              const phDegreeLine = p ? [[p.degree, p.field].filter(Boolean).join(", "), p.location].filter(Boolean).join(" · ") : "";
+              return (
+                <div key={e.id} style={{ marginBottom: sp.item }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                    <strong>{gv(e.institution, p?.institution)}</strong>
+                    <span style={{ whiteSpace: "nowrap", color: SUBTLE }}>
+                      {gv(dateRange(e.startDate, e.endDate), p && dateRange(p.startDate, p.endDate))}
+                    </span>
+                  </div>
+                  <div style={{ color: "#374151" }}>{gv(degreeLine, phDegreeLine)}</div>
+                  {e.details ? (
+                    <div style={{ color: "#4b5563" }}>{e.details}</div>
+                  ) : p?.details ? (
+                    <div style={{ color: "#4b5563" }}>{ghost(p.details)}</div>
+                  ) : null}
                 </div>
-                <div style={{ color: "#374151" }}>
-                  {[[e.degree, e.field].filter(Boolean).join(", "), e.location].filter(Boolean).join(" · ")}
-                </div>
-                {e.details && <div style={{ color: "#4b5563" }}>{e.details}</div>}
-              </div>
-            )),
+              );
+            }),
             "education",
           )
         : null,
@@ -263,12 +279,21 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
       data.skills.length
         ? sectionNode(
             "Skills",
-            data.skills.map((g) => (
-              <div key={g.id} style={{ marginBottom: 4 }}>
-                {g.category && <strong>{g.category}: </strong>}
-                <span>{g.items.filter(Boolean).join(", ")}</span>
-              </div>
-            )),
+            data.skills.map((g) => {
+              const p = phSkill?.get(g.id);
+              const items = g.items.filter(Boolean).join(", ");
+              const phItems = p ? p.items.filter(Boolean).join(", ") : "";
+              return (
+                <div key={g.id} style={{ marginBottom: 4 }}>
+                  {g.category ? (
+                    <strong>{g.category}: </strong>
+                  ) : p?.category ? (
+                    <strong style={{ opacity: 0.4 }}>{p.category}: </strong>
+                  ) : null}
+                  <span>{gv(items, phItems)}</span>
+                </div>
+              );
+            }),
             "skills",
           )
         : null,
@@ -277,16 +302,27 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
       data.projects.length
         ? sectionNode(
             "Projects",
-            data.projects.map((p) => (
-              <div key={p.id} style={{ marginBottom: sp.item }}>
-                <div>
-                  <strong>{p.name}</strong>
-                  {p.link && <span style={{ marginLeft: 6 }}>{linkNode(p.link, p.link)}</span>}
+            data.projects.map((p) => {
+              const x = phProj?.get(p.id);
+              return (
+                <div key={p.id} style={{ marginBottom: sp.item }}>
+                  <div>
+                    <strong>{gv(p.name, x?.name)}</strong>
+                    {p.link ? (
+                      <span style={{ marginLeft: 6 }}>{linkNode(p.link, p.link)}</span>
+                    ) : x?.link ? (
+                      <span style={{ marginLeft: 6, opacity: 0.4, color: accent }}>{x.link}</span>
+                    ) : null}
+                  </div>
+                  {p.description ? (
+                    <div style={{ color: "#374151" }}>{p.description}</div>
+                  ) : x?.description ? (
+                    <div style={{ color: "#374151" }}>{ghost(x.description)}</div>
+                  ) : null}
+                  {bulletsNode(p.bullets, x?.bullets)}
                 </div>
-                {p.description && <div style={{ color: "#374151" }}>{p.description}</div>}
-                {bulletsNode(p.bullets)}
-              </div>
-            )),
+              );
+            }),
             "projects",
           )
         : null,
@@ -295,15 +331,22 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
       data.certifications.length
         ? sectionNode(
             "Certifications",
-            data.certifications.map((c) => (
-              <div key={c.id} style={{ display: "flex", justifyContent: "space-between", gap: 8, marginBottom: 2 }}>
-                <span>
-                  {c.url ? linkNode(c.url, c.name || c.url) : <span>{c.name}</span>}
-                  {c.issuer && <span style={{ color: "#374151" }}> — {c.issuer}</span>}
-                </span>
-                <span style={{ color: SUBTLE, whiteSpace: "nowrap" }}>{c.date}</span>
-              </div>
-            )),
+            data.certifications.map((c) => {
+              const p = phCert?.get(c.id);
+              return (
+                <div key={c.id} style={{ display: "flex", justifyContent: "space-between", gap: 8, marginBottom: 2 }}>
+                  <span>
+                    {c.url ? linkNode(c.url, c.name || c.url) : c.name ? <span>{c.name}</span> : p?.name ? ghost(p.name) : null}
+                    {c.issuer ? (
+                      <span style={{ color: "#374151" }}> — {c.issuer}</span>
+                    ) : p?.issuer ? (
+                      <span style={{ color: "#374151", opacity: 0.4 }}> — {p.issuer}</span>
+                    ) : null}
+                  </span>
+                  <span style={{ color: SUBTLE, whiteSpace: "nowrap" }}>{gv(c.date, p?.date)}</span>
+                </div>
+              );
+            }),
             "certifications",
           )
         : null,
@@ -312,12 +355,19 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
       data.languages.length
         ? sectionNode(
             "Languages",
-            data.languages.map((l) => (
-              <span key={l.id} style={{ marginRight: 12 }}>
-                {l.name}
-                {l.level && <span style={{ color: SUBTLE }}> ({l.level})</span>}
-              </span>
-            )),
+            data.languages.map((l) => {
+              const p = phLang?.get(l.id);
+              return (
+                <span key={l.id} style={{ marginRight: 12 }}>
+                  {gv(l.name, p?.name)}
+                  {l.level ? (
+                    <span style={{ color: SUBTLE }}> ({l.level})</span>
+                  ) : p?.level ? (
+                    <span style={{ color: SUBTLE, opacity: 0.4 }}> ({p.level})</span>
+                  ) : null}
+                </span>
+              );
+            }),
             "languages",
           )
         : null,
