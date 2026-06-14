@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
@@ -12,6 +13,29 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { personLd } from "@/lib/seo";
 
 type Params = Promise<{ userId: string; cvId: string }>;
+
+// Dynamic metadata: it reads `params` and the (cached) CV, so under Cache
+// Components it defers to request time. The doc-sanctioned way to allow that on
+// an otherwise-prerenderable route is to co-locate `generateMetadata` with a
+// dynamic marker in the SAME route segment — here, the `await connection()`
+// inside <Suspense> in `ShareContent` below. That marker tells Next the route's
+// dynamic rendering is intentional, so the metadata streams in (rather than
+// failing the build with next-prerender-dynamic-metadata) while the surrounding
+// shell still prerenders. `getPublicCv` is itself `use cache`, so calling it
+// here and again in `ShareContent` hits the same cached row, not the DB twice.
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { userId, cvId } = await params;
+  const cv = await getPublicCv(userId, cvId);
+  if (!cv) return { title: "Shared CV", robots: { index: false } };
+
+  const name = cv.data.header?.fullName || cv.title;
+  const role = cv.data.header?.title;
+  return {
+    title: role ? `${name} - ${role}` : name,
+    description: `${name}'s resume, shared via CVMaker.`,
+    robots: { index: false },
+  };
+}
 
 // The page reads dynamic `params` to pick the CV, which makes its content
 // request-time. We keep that read inside a Suspense boundary so the route still
