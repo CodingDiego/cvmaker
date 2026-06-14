@@ -1,19 +1,23 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { sans, display, geistMono, cvFontVariables } from "@/lib/fonts";
-import { Providers } from "@/lib/providers";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { siteConfig } from "@/lib/seo";
 import { Suspense } from "react";
+import type { Metadata } from "next";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { display, geistMono, sans, cvFontVariables } from "@/lib/fonts";
+import { Providers } from "@/lib/providers";
+import "./globals.css";
+
+const SITE_NAME = "CVMaker";
+const SITE_URL = "https://free-cv.com";
+const SITE_DESCRIPTION =
+  "Create, edit and export ATS-friendly resumes. Start with free templates, then unlock Pro CV designs, live preview, PDF and DOCX export.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "CVMaker — Free ATS-friendly resume builder",
-    template: "%s · CVMaker",
+    default: "CVMaker - Free ATS-friendly resume builder",
+    template: "%s - CVMaker",
   },
-  description: siteConfig.description,
-  applicationName: siteConfig.name,
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
   keywords: [
     "resume builder",
     "CV maker",
@@ -23,20 +27,21 @@ export const metadata: Metadata = {
     "DOCX resume",
     "online CV",
   ],
-  authors: [{ name: siteConfig.name }],
-  creator: siteConfig.name,
+  authors: [{ name: SITE_NAME }],
+  creator: SITE_NAME,
+  icons: { icon: "/favicon.ico" },
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
-    siteName: siteConfig.name,
-    title: "CVMaker — Free ATS-friendly resume builder",
-    description: siteConfig.description,
-    url: siteConfig.url,
+    siteName: SITE_NAME,
+    title: "CVMaker - Free ATS-friendly resume builder",
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
   },
   twitter: {
     card: "summary_large_image",
-    title: "CVMaker — Free ATS-friendly resume builder",
-    description: siteConfig.description,
+    title: "CVMaker - Free ATS-friendly resume builder",
+    description: SITE_DESCRIPTION,
   },
   robots: {
     index: true,
@@ -59,9 +64,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <Providers>
           <TooltipProvider>
-            <Suspense>
-              {children}
-            </Suspense>
+            <Suspense>{children}</Suspense>
           </TooltipProvider>
         </Providers>
       </body>

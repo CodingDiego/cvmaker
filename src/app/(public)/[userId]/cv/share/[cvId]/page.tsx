@@ -1,23 +1,19 @@
 import { Suspense } from "react";
-import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Download, FileText, FileType, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ScaledResume } from "@/components/templates/scaled-resume";
-import { JsonLd } from "@/components/seo/json-ld";
-import { getPublicCv, shareUrlFor } from "@/lib/cv/share-service";
-import { personLd } from "@/lib/seo";
+import { getPublicCv } from "@/lib/cv/share-service";
 import { getTemplate } from "@/templates/registry";
 
 type Params = Promise<{ userId: string; cvId: string }>;
+const STATIC_VALIDATION_ID = "00000000-0000-4000-8000-000000000000";
 
-export const metadata: Metadata = {
-  title: "Shared CV",
-  description: "A public resume shared via CVMaker.",
-  robots: { index: false },
-};
+export async function generateStaticParams() {
+  return [{ userId: STATIC_VALIDATION_ID, cvId: STATIC_VALIDATION_ID }];
+}
 
 export default function SharedCvPage({ params }: { params: Params }) {
   return (
@@ -53,8 +49,6 @@ async function ShareContent({ userId, cvId }: { userId: string; cvId: string }) 
 
   return (
     <>
-      <JsonLd data={personLd(cv.data, { url: shareUrlFor(userId, cvId) })} />
-
       <header className="sticky top-0 z-10 border-b bg-background/85 backdrop-blur">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 flex-1 items-center gap-3">

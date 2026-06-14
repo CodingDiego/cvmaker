@@ -6,8 +6,16 @@ import { queryKeys } from "@/lib/query/keys";
 import { getCvDetailCached } from "@/lib/cv/cv-reads";
 import { EditorShell } from "@/components/editor/editor-shell";
 
+const STATIC_VALIDATION_CV_ID = "00000000-0000-4000-8000-000000000000";
+
+export async function generateStaticParams() {
+  return [{ cvId: STATIC_VALIDATION_CV_ID }];
+}
+
 export default async function EditorPage({ params }: { params: Promise<{ cvId: string }> }) {
   const { cvId } = await params;
+  if (cvId === STATIC_VALIDATION_CV_ID) notFound();
+
   const user = await requireUser(`/editor/${cvId}`);
 
   // Read through the cached layer (already normalized to the schema shape), 404
