@@ -60,6 +60,8 @@ export async function createSession(
         .update(sessions)
         .set({
           refreshTokenHash: hash,
+          prevRefreshTokenHash: null,
+          rotatedAt: null,
           ip: ctx.ip,
           userAgent: ctx.userAgent,
           lastActiveAt: new Date(),
