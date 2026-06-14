@@ -41,6 +41,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 }
 
 export default async function SharedCvPage({ params }: { params: Params }) {
+  // generateMetadata for this route reads `params` (runtime data), so under Cache
+  // Components its metadata defers to request time. Opting the page into request-
+  // time rendering too keeps the two consistent and avoids the build-time
+  // next-prerender-dynamic-metadata mismatch.
+  await connection();
   const { userId, cvId } = await params;
   const cv = await getPublicCv(userId, cvId);
   if (!cv) notFound();
