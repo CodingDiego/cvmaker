@@ -25,7 +25,9 @@ export default function SharedCvPage({ params }: { params: Params }) {
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.35]" />
 
       <Suspense fallback={<div className="flex-1" aria-hidden />}>
-        <ShareContent params={params} />
+        {params.then(({ userId, cvId }) => (
+          <ShareContent userId={userId} cvId={cvId} />
+        ))}
       </Suspense>
 
       <footer className="border-t">
@@ -42,8 +44,7 @@ export default function SharedCvPage({ params }: { params: Params }) {
   );
 }
 
-async function ShareContent({ params }: { params: Params }) {
-  const { userId, cvId } = await params;
+async function ShareContent({ userId, cvId }: { userId: string; cvId: string }) {
   const cv = await getPublicCv(userId, cvId);
   if (!cv) notFound();
 
