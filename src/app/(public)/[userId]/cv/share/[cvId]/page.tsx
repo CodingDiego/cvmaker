@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Download, FileText, FileType } from "lucide-react";
 import { getPublicCv, shareUrlFor } from "@/lib/cv/share-service";
 import { getTemplate } from "@/templates/registry";
@@ -42,6 +43,12 @@ export default function SharedCvPage({ params }: { params: Params }) {
 }
 
 async function ShareContent({ params }: { params: Params }) {
+  // Explicit dynamic marker: tells Cache Components this subtree renders at
+  // request time, which sets the route's "allowed dynamic" flag so the dynamic
+  // metadata on this `[userId]/[cvId]` route doesn't fail the build. (Reading
+  // `params` alone doesn't flip that flag.) It's already inside <Suspense>, so
+  // the static shell still prerenders.
+  await connection();
   const { userId, cvId } = await params;
   const cv = await getPublicCv(userId, cvId);
   if (!cv) notFound();
