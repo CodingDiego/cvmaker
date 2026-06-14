@@ -4,6 +4,7 @@ import { sans, display, geistMono, cvFontVariables } from "@/lib/fonts";
 import { Providers } from "@/lib/providers";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { siteConfig } from "@/lib/seo";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -51,7 +52,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-return (
+  return (
     <html
       lang="en"
       className={`${sans.variable} ${display.variable} ${geistMono.variable} ${cvFontVariables} h-full antialiased`}
@@ -59,7 +60,9 @@ return (
       <body className="min-h-full flex flex-col">
         <Providers>
           <TooltipProvider>
-            {children}
+            <Suspense>
+              {children}
+            </Suspense>
           </TooltipProvider>
         </Providers>
       </body>
