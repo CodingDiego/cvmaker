@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Download, FileText, FileType, Loader2, Package } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { startExportAction } from "@/lib/cv/export-actions";
-import { exportStatusOptions } from "@/lib/cv/export-queries";
+import { exportCvAction } from "@/lib/cv/export-actions";
 import type { ExportFormat } from "@/workflows/export-cv";
 
 const FORMAT_LABEL: Record<ExportFormat, string> = {
@@ -25,44 +24,32 @@ const FORMAT_LABEL: Record<ExportFormat, string> = {
 };
 
 export function ExportMenu({ cvId }: { cvId: string }) {
-  const [exportId, setExportId] = useState<string | null>(null);
   const [activeFormat, setActiveFormat] = useState<ExportFormat | null>(null);
+  const [readyUrl, setReadyUrl] = useState<string | null>(null);
 
-  const startMutation = useMutation({
-    mutationFn: (format: ExportFormat) => startExportAction(cvId, format),
-    onSuccess: ({ exportId }) => setExportId(exportId),
-    onError: () => {
-      toast.error("Couldn't start export", { description: "Blob storage may not be configured yet." });
+  const exportMutation = useMutation({
+    mutationFn: (format: ExportFormat) => exportCvAction(cvId, format),
+    onSuccess: ({ url }) => {
+      setReadyUrl(url);
+      toast.success("Export ready", {
+        description: `Your ${FORMAT_LABEL[activeFormat ?? "pdf"]} is ready to download.`,
+      });
+    },
+    onError: (error) => {
+      toast.error("Couldn't export CV", {
+        description: error instanceof Error ? error.message : "Blob storage may not be configured yet.",
+      });
       setActiveFormat(null);
     },
   });
 
-  const { data: status } = useQuery(exportStatusOptions(exportId));
-
-  // Toast once per terminal poll result. Only side effects here (no setState) —
-  // the download UI is derived from `status` directly, avoiding popup-blocked
-  // auto-opens and cascading re-renders.
-  const toastedRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!status || !exportId || toastedRef.current === exportId) return;
-    if (status.status === "done" && status.url) {
-      toastedRef.current = exportId;
-      toast.success("Export ready", { description: `Your ${FORMAT_LABEL[activeFormat ?? "pdf"]} is ready to download.` });
-    } else if (status.status === "error") {
-      toastedRef.current = exportId;
-      toast.error("Export failed", { description: status.error ?? undefined });
-    }
-  }, [status, exportId, activeFormat]);
-
-  const done = status?.status === "done" || status?.status === "error";
-  const busy = startMutation.isPending || (!!exportId && !done);
-  const readyUrl = status?.status === "done" ? status.url : null;
+  const busy = exportMutation.isPending;
 
   function run(format: ExportFormat) {
-    toastedRef.current = null;
     setActiveFormat(format);
-    startMutation.mutate(format);
-    toast.info(`Generating ${FORMAT_LABEL[format]}…`);
+    setReadyUrl(null);
+    exportMutation.mutate(format);
+    toast.info(`Generating ${FORMAT_LABEL[format]}...`);
   }
 
   return (
@@ -81,7 +68,7 @@ export function ExportMenu({ cvId }: { cvId: string }) {
       <DropdownMenu>
         <DropdownMenuTrigger render={<Button variant="default" size="sm" className="h-9" disabled={busy} />}>
           {busy ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-          {busy ? `Exporting ${activeFormat ? FORMAT_LABEL[activeFormat] : ""}…` : "Export"}
+          {busy ? `Exporting ${activeFormat ? FORMAT_LABEL[activeFormat] : ""}...` : "Export"}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuGroup>

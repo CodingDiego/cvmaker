@@ -19,9 +19,9 @@ export default function proxy(request: NextRequest) {
 
 export const config = {
   // Run on every route (incl. API routes, so SPA fetches keep the session warm)
-  // EXCEPT static assets, Next internals, and metadata files. For auth, running
-  // on all routes is the recommended posture.
+  // EXCEPT static assets, Next internals, Workflow internals, and metadata
+  // files. Workflow queue calls must bypass proxy so exports can start.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff2?)$).*)",
+    "/((?!_next/static|_next/image|\\.well-known/workflow/|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff2?)$).*)",
   ],
 };

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Download, FileText, FileType } from "lucide-react";
 import { getPublicCv, shareUrlFor } from "@/lib/cv/share-service";
 import { getTemplate } from "@/templates/registry";
@@ -19,7 +20,6 @@ type Params = Promise<{ userId: string; cvId: string }>;
 // into the cache key (one entry per user/CV) and `getPublicCv` is itself cached,
 // so the metadata becomes prerenderable — no runtime/auth data is involved here.
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  "use cache";
   const { userId, cvId } = await params;
   const cv = await getPublicCv(userId, cvId);
   if (!cv) return { title: "Shared CV", robots: { index: false } };
@@ -33,16 +33,20 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   };
 }
 
-// The page reads dynamic `params` to pick the CV, which makes its content
-// request-time. We keep that read inside a Suspense boundary so the route still
-// produces a static shell (the background + footer below) and the CV content
-// streams in. The metadata is cached (see `generateMetadata`), so there's no
-// metadata/shell mismatch to reconcile here.
+async function RequestTimeMarker() {
+  await connection();
+  return null;
+}
+
 export default function SharedCvPage({ params }: { params: Params }) {
   return (
     <>
       <div className="relative flex min-h-svh flex-col">
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.35]" />
+
+        <Suspense fallback={null}>
+          <RequestTimeMarker />
+        </Suspense>
 
         <Suspense fallback={<div className="flex-1" aria-hidden />}>
           <ShareContent params={params} />
