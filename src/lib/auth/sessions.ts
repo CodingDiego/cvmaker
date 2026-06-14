@@ -91,20 +91,35 @@ export async function createSession(
   return { sessionId: row!.id, refreshToken: token, expiresAt };
 }
 
-export interface RotateResult {
-  session: Session;
-  user: User;
-  refreshToken: string;
+/**
+ * Outcome of presenting a refresh token:
+ * - `rotated`     — the live token; a new refresh token was minted (set both cookies).
+ * - `revalidated` — a recent predecessor presented inside the grace window by a
+ *                   concurrent request; mint a fresh access token only, leave the
+ *                   refresh cookie to the sibling request that won the rotation.
+ * - `null`        — invalid / expired / reused → caller should clear cookies.
+ */
+export type RotateOutcome =
+  | { kind: "rotated"; user: User; sessionId: string; refreshToken: string }
+  | { kind: "revalidated"; user: User; sessionId: string }
+  | null;
+
+async function loadUser(userId: string): Promise<User | null> {
+  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  return user ?? null;
 }
 
 /**
- * Validate + rotate a refresh token. Implements reuse detection: presenting an
- * already-rotated token revokes the whole family (all logins on that lineage).
+ * Validate + rotate a refresh token with reuse detection. Rotation is a
+ * compare-and-swap (the UPDATE is guarded by the presented hash) so that out of
+ * N concurrent requests exactly one wins the rotation; the losers fall into the
+ * grace window and are revalidated. Presenting a token that is neither the live
+ * one nor a recent predecessor is treated as compromise and burns the family.
  */
 export async function rotateRefresh(
   presentedToken: string,
   ctx: RequestContext,
-): Promise<RotateResult | null> {
+): Promise<RotateOutcome> {
   const family = familyOf(presentedToken);
   if (!family) return null;
 
@@ -122,28 +137,51 @@ export async function rotateRefresh(
   }
 
   const presentedHash = hmac(presentedToken);
-  if (!safeEqualHex(presentedHash, session.refreshTokenHash)) {
-    // Reuse of a stale token → compromise. Burn the whole family.
-    await revokeFamily(family);
-    return null;
+
+  // Live token → attempt to rotate. The WHERE guard on the current hash makes
+  // this atomic against siblings: only the first request flips the row.
+  if (safeEqualHex(presentedHash, session.refreshTokenHash)) {
+    const { token, hash } = buildToken(family);
+    const won = await db
+      .update(sessions)
+      .set({
+        refreshTokenHash: hash,
+        prevRefreshTokenHash: presentedHash,
+        rotatedAt: new Date(),
+        ip: ctx.ip,
+        userAgent: ctx.userAgent,
+        lastActiveAt: new Date(),
+      })
+      .where(and(eq(sessions.id, session.id), eq(sessions.refreshTokenHash, presentedHash)))
+      .returning({ id: sessions.id });
+
+    const user = await loadUser(session.userId);
+    if (!user) return null;
+
+    // Won the race → hand back the freshly minted refresh token.
+    if (won.length > 0) {
+      return { kind: "rotated", user, sessionId: session.id, refreshToken: token };
+    }
+    // A sibling rotated first; our token is now the predecessor → revalidate.
+    return { kind: "revalidated", user, sessionId: session.id };
   }
 
-  // Valid → rotate in place.
-  const { token, hash } = buildToken(family);
-  await db
-    .update(sessions)
-    .set({
-      refreshTokenHash: hash,
-      ip: ctx.ip,
-      userAgent: ctx.userAgent,
-      lastActiveAt: new Date(),
-    })
-    .where(eq(sessions.id, session.id));
+  // Grace window: the immediately-previous token, presented by a straggler that
+  // started before a sibling's rotation landed. Legitimate, not reuse.
+  if (
+    session.prevRefreshTokenHash &&
+    session.rotatedAt &&
+    Date.now() - session.rotatedAt.getTime() < ROTATION_GRACE_MS &&
+    safeEqualHex(presentedHash, session.prevRefreshTokenHash)
+  ) {
+    const user = await loadUser(session.userId);
+    if (!user) return null;
+    return { kind: "revalidated", user, sessionId: session.id };
+  }
 
-  const [user] = await db.select().from(users).where(eq(users.id, session.userId)).limit(1);
-  if (!user) return null;
-
-  return { session, user, refreshToken: token };
+  // Neither live nor a recent predecessor → stolen/replayed token. Burn family.
+  await revokeFamily(family);
+  return null;
 }
 
 export async function revokeSessionById(sessionId: string) {
