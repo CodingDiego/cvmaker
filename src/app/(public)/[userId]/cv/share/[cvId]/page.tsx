@@ -13,16 +13,13 @@ import { personLd } from "@/lib/seo";
 
 type Params = Promise<{ userId: string; cvId: string }>;
 
-// Dynamic metadata: it reads `params` and the (cached) CV, so under Cache
-// Components it defers to request time. The doc-sanctioned way to allow that on
-// an otherwise-prerenderable route is to co-locate `generateMetadata` with a
-// dynamic marker in the SAME route segment — here, the `await connection()`
-// inside <Suspense> in `ShareContent` below. That marker tells Next the route's
-// dynamic rendering is intentional, so the metadata streams in (rather than
-// failing the build with next-prerender-dynamic-metadata) while the surrounding
-// shell still prerenders. `getPublicCv` is itself `use cache`, so calling it
-// here and again in `ShareContent` hits the same cached row, not the DB twice.
+// Metadata reads `params` and the CV. Under Cache Components that would defer to
+// request time and, since the page body prerenders a shell, fail the build with
+// next-prerender-dynamic-metadata. We mark it `'use cache'`: `params` serialize
+// into the cache key (one entry per user/CV) and `getPublicCv` is itself cached,
+// so the metadata becomes prerenderable — no runtime/auth data is involved here.
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  "use cache";
   const { userId, cvId } = await params;
   const cv = await getPublicCv(userId, cvId);
   if (!cv) return { title: "Shared CV", robots: { index: false } };
