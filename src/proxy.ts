@@ -1,36 +1,27 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { verifyAccessToken } from "@/lib/auth/jwt";
-import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/lib/auth/cookies";
+import { type NextRequest } from "next/server";
+import { keepSessionAlive } from "@/lib/auth/session-proxy";
 
 /**
- * Edge proxy (Next 16's renamed middleware). Guards app routes:
- *  - valid access token  → continue
- *  - expired access but refresh present → delegate to the Node refresh route,
- *    which rotates tokens then redirects back (DB/Argon work can't run on edge)
- *  - otherwise → redirect to /login
+ * Proxy (Next.js 16's renamed Middleware). Runs on the Node.js runtime, so it
+ * can do real refresh-token rotation against the database — but it only does so
+ * when the short-lived access token has actually expired; the common case is a
+ * networkless JWT verify with no DB round-trip.
+ *
+ * Unlike a redirect-based "handshake", refresh happens inline: the new token is
+ * forwarded to the current render and written to the response in one pass. This
+ * works for document navigations, RSC requests, server actions, and `fetch()`
+ * calls alike (a fetch can't follow an HTML redirect to a refresh endpoint).
+ * See `keepSessionAlive` for the full strategy.
  */
-export async function proxy(request: NextRequest) {
-  const { pathname, search } = request.nextUrl;
-  const accessToken = request.cookies.get(ACCESS_COOKIE)?.value;
-
-  if (accessToken && (await verifyAccessToken(accessToken))) {
-    return NextResponse.next();
-  }
-
-  const hasRefresh = Boolean(request.cookies.get(REFRESH_COOKIE)?.value);
-  const next = encodeURIComponent(pathname + search);
-
-  if (hasRefresh) {
-    const url = new URL("/api/auth/refresh", request.url);
-    url.searchParams.set("next", pathname + search);
-    return NextResponse.redirect(url);
-  }
-
-  const loginUrl = new URL(`/login?next=${next}`, request.url);
-  return NextResponse.redirect(loginUrl);
+export default function proxy(request: NextRequest) {
+  return keepSessionAlive(request);
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/editor/:path*"],
+  // Run on every route (incl. API routes, so SPA fetches keep the session warm)
+  // EXCEPT static assets, Next internals, and metadata files. For auth, running
+  // on all routes is the recommended posture.
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff2?)$).*)",
+  ],
 };
