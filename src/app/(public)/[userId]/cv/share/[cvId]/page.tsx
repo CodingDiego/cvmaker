@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { connection } from "next/server";
 import { Download, FileText, FileType } from "lucide-react";
 import { getPublicCv, shareUrlFor } from "@/lib/cv/share-service";
 import { getTemplate } from "@/templates/registry";
