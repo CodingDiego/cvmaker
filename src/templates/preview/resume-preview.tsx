@@ -457,8 +457,14 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
 
   const nameTitleBlock = (
     <>
-      <h1 style={nameStyle}>{data.header.fullName || "Your Name"}</h1>
-      {data.header.title && (
+      <h1 style={nameStyle}>
+        {data.header.fullName
+          ? data.header.fullName
+          : placeholder?.header.fullName
+            ? ghost(placeholder.header.fullName)
+            : "Your Name"}
+      </h1>
+      {(data.header.title || placeholder?.header.title) && (
         <div
           style={{
             fontSize: 13,
@@ -469,7 +475,7 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
             textTransform: tokens.sectionTitle === "smallcaps" ? "uppercase" : undefined,
           }}
         >
-          {data.header.title}
+          {gv(data.header.title, placeholder?.header.title)}
         </div>
       )}
     </>
@@ -524,7 +530,7 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
           letterSpacing: 1,
         }}
       >
-        {initialsOf(data.header.fullName || "")}
+        {initialsOf(data.header.fullName || placeholder?.header.fullName || "")}
       </div>
     ) : null;
 
@@ -621,7 +627,7 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
           marginBottom: 12,
         }}
       >
-        {initialsOf(data.header.fullName || "")}
+        {initialsOf(data.header.fullName || placeholder?.header.fullName || "")}
       </div>
     ) : null;
 
@@ -655,11 +661,15 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
       >
         {sidePhoto}
         <h1 style={{ fontSize: Math.min(tokens.nameSize, 28), margin: 0, fontWeight: 700, lineHeight: 1.1, color: "#fff" }}>
-          {data.header.fullName || "Your Name"}
+          {data.header.fullName
+            ? data.header.fullName
+            : placeholder?.header.fullName
+              ? ghost(placeholder.header.fullName)
+              : "Your Name"}
         </h1>
-        {data.header.title && (
+        {(data.header.title || placeholder?.header.title) && (
           <div style={{ fontSize: 12, marginTop: 4, fontWeight: 600, color: "rgba(255,255,255,0.85)" }}>
-            {data.header.title}
+            {gv(data.header.title, placeholder?.header.title)}
           </div>
         )}
         {contactEntries.length > 0 && (
@@ -679,38 +689,62 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
             return (
               <div key={k} style={{ marginTop: 16 }}>
                 {sideTitle("Skills")}
-                {data.skills.map((g) => (
-                  <div key={g.id} style={{ marginBottom: 6 }}>
-                    {g.category && <div style={{ fontWeight: 700, color: "#fff" }}>{g.category}</div>}
-                    <div style={{ color: "rgba(255,255,255,0.88)" }}>{g.items.filter(Boolean).join(", ")}</div>
-                  </div>
-                ))}
+                {data.skills.map((g) => {
+                  const p = phSkill?.get(g.id);
+                  return (
+                    <div key={g.id} style={{ marginBottom: 6 }}>
+                      {g.category ? (
+                        <div style={{ fontWeight: 700, color: "#fff" }}>{g.category}</div>
+                      ) : p?.category ? (
+                        <div style={{ fontWeight: 700, color: "#fff", opacity: 0.4 }}>{p.category}</div>
+                      ) : null}
+                      <div style={{ color: "rgba(255,255,255,0.88)" }}>
+                        {gv(g.items.filter(Boolean).join(", "), p ? p.items.filter(Boolean).join(", ") : undefined)}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             );
           if (k === "languages" && data.languages.length)
             return (
               <div key={k} style={{ marginTop: 16 }}>
                 {sideTitle("Languages")}
-                {data.languages.map((l) => (
-                  <div key={l.id} style={{ marginBottom: 2, color: "rgba(255,255,255,0.9)" }}>
-                    {l.name}
-                    {l.level && <span style={{ color: "rgba(255,255,255,0.65)" }}> · {l.level}</span>}
-                  </div>
-                ))}
+                {data.languages.map((l) => {
+                  const p = phLang?.get(l.id);
+                  return (
+                    <div key={l.id} style={{ marginBottom: 2, color: "rgba(255,255,255,0.9)" }}>
+                      {gv(l.name, p?.name)}
+                      {l.level ? (
+                        <span style={{ color: "rgba(255,255,255,0.65)" }}> · {l.level}</span>
+                      ) : p?.level ? (
+                        <span style={{ color: "rgba(255,255,255,0.65)", opacity: 0.4 }}> · {p.level}</span>
+                      ) : null}
+                    </div>
+                  );
+                })}
               </div>
             );
           if (k === "certifications" && data.certifications.length)
             return (
               <div key={k} style={{ marginTop: 16 }}>
                 {sideTitle("Certifications")}
-                {data.certifications.map((c) => (
-                  <div key={c.id} style={{ marginBottom: 4 }}>
-                    <div style={{ color: "#fff" }}>{c.name || c.url}</div>
-                    {(c.issuer || c.date) && (
-                      <div style={{ color: "rgba(255,255,255,0.65)" }}>{[c.issuer, c.date].filter(Boolean).join(" · ")}</div>
-                    )}
-                  </div>
-                ))}
+                {data.certifications.map((c) => {
+                  const p = phCert?.get(c.id);
+                  const phMeta = p ? [p.issuer, p.date].filter(Boolean).join(" · ") : "";
+                  return (
+                    <div key={c.id} style={{ marginBottom: 4 }}>
+                      <div style={{ color: "#fff" }}>
+                        {c.name || c.url ? c.name || c.url : p?.name ? ghost(p.name) : null}
+                      </div>
+                      {c.issuer || c.date ? (
+                        <div style={{ color: "rgba(255,255,255,0.65)" }}>{[c.issuer, c.date].filter(Boolean).join(" · ")}</div>
+                      ) : phMeta ? (
+                        <div style={{ color: "rgba(255,255,255,0.65)", opacity: 0.4 }}>{phMeta}</div>
+                      ) : null}
+                    </div>
+                  );
+                })}
               </div>
             );
           return null;
