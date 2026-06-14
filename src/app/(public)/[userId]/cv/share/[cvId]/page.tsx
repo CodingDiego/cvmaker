@@ -35,21 +35,12 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 // The page reads dynamic `params` to pick the CV, which makes its content
 // request-time. We keep that read inside a Suspense boundary so the route still
-// produces a static shell (the background + footer below). Because the metadata
-// is also dynamic on this `[userId]/[cvId]` route, Next needs the route to
-// "allow dynamic" or the build bails (next-prerender-dynamic-metadata).
-//
-// That flag is only set when a dynamic marker sits under a <Suspense> that is
-// itself directly under the route body — with NO DOM element in between. So the
-// marker can't live inside the page's wrapping <div>; it has to be hoisted to a
-// direct child of the top-level fragment, above any element. Hence the dedicated
-// <DynamicMarker /> below rather than an `await connection()` buried in
-// `ShareContent` (which is wrapped by the layout <div> and so wouldn't count).
+// produces a static shell (the background + footer below) and the CV content
+// streams in. The metadata is cached (see `generateMetadata`), so there's no
+// metadata/shell mismatch to reconcile here.
 export default function SharedCvPage({ params }: { params: Params }) {
   return (
     <>
-      <DynamicMarker />
-
       <div className="relative flex min-h-svh flex-col">
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.35]" />
 
