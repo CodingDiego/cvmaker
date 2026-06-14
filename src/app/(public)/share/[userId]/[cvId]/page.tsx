@@ -1,8 +1,6 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { connection } from "next/server";
 import { Download, FileText, FileType, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -13,12 +11,9 @@ import { getTemplate } from "@/templates/registry";
 type Params = Promise<{ userId: string; cvId: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  await connection()
-  console.log("[generateMetadata] enter");
+  "use cache";
   const { userId, cvId } = await params;
-  console.log("[generateMetadata] params resolved", { userId, cvId });
   const cv = await getPublicCv(userId, cvId);
-  console.log("[generateMetadata] cv fetched", { userId, cvId, found: Boolean(cv) });
   if (!cv) return {};
 
   const name = cv.data.header?.fullName || cv.title || "Resume";
@@ -49,41 +44,19 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   };
 }
 
-export default function SharedCvPage({ params }: { params: Params }) {
-  return (
-    <div className="relative flex min-h-svh flex-col">
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.35]" />
-
-      <Suspense fallback={<div className="flex-1" aria-hidden />}>
-        <ShareContent params={params} />
-      </Suspense>
-      <footer className="border-t">
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 px-4 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
-          <p className="text-sm text-muted-foreground">
-            Built with <span className="font-display font-semibold text-foreground">CVMaker</span> - free ATS-friendly resumes.
-          </p>
-          <Button variant="outline" size="sm" render={<Link href="/templates" />}>
-            <Download className="size-4 rotate-180" /> Make your own
-          </Button>
-        </div>
-      </footer>
-    </div>
-  );
-}
-
-async function ShareContent({ params }: { params: Params }) {
-  console.log("[ShareContent] enter");
+export default async function SharedCvPage({ params }: { params: Params }) {
+  "use cache";
   const { userId, cvId } = await params;
-  console.log("[ShareContent] params resolved", { userId, cvId });
   const cv = await getPublicCv(userId, cvId);
-  console.log("[ShareContent] cv fetched", { userId, cvId, found: Boolean(cv) });
   if (!cv) notFound();
 
   const tokens = getTemplate(cv.templateId);
   const name = cv.data.header?.fullName || cv.title;
 
   return (
-    <>
+    <div className="relative flex min-h-svh flex-col">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.35]" />
+
       <header className="sticky top-0 z-10 border-b bg-background/85 backdrop-blur">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -150,6 +123,17 @@ async function ShareContent({ params }: { params: Params }) {
           fontFamily={cv.fontFamily}
         />
       </main>
-    </>
+
+      <footer className="border-t">
+        <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 px-4 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
+          <p className="text-sm text-muted-foreground">
+            Built with <span className="font-display font-semibold text-foreground">CVMaker</span> - free ATS-friendly resumes.
+          </p>
+          <Button variant="outline" size="sm" render={<Link href="/templates" />}>
+            <Download className="size-4 rotate-180" /> Make your own
+          </Button>
+        </div>
+      </footer>
+    </div>
   );
 }

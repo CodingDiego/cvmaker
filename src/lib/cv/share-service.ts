@@ -121,12 +121,10 @@ export async function getPublicCv(userId: string, cvId: string): Promise<Cv | nu
   "use cache";
   cacheTag(tags.cv(cvId));
 
-  console.log("[getPublicCv] enter", { userId, cvId });
   const [row] = await db
     .select()
     .from(cvs)
     .where(and(eq(cvs.id, cvId), eq(cvs.userId, userId), eq(cvs.isPublic, true)))
     .limit(1);
-  console.log("[getPublicCv] result", { userId, cvId, found: Boolean(row) });
   return row ?? null;
 }
