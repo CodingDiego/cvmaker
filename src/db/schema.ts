@@ -97,7 +97,7 @@ export const cvs = pgTable("cvs", {
   accentColor: text("accent_color").notNull().default("#2563eb"),
   fontFamily: text("font_family").notNull().default("inter"),
   // Public sharing: when shared, rendered PDF/DOCX live in the PUBLIC blob store
-  // and the CV is viewable at /share/[userId]/[cvId].
+  // and the CV is viewable at /share?u=[userId]&c=[cvId].
   isPublic: boolean("is_public").notNull().default(false),
   publicPdfUrl: text("public_pdf_url"),
   publicDocxUrl: text("public_docx_url"),

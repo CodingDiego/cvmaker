@@ -5,9 +5,11 @@ import { getQueryClient } from "@/lib/query/client";
 import { queryKeys } from "@/lib/query/keys";
 import { getCvDetailCached } from "@/lib/cv/cv-reads";
 import { EditorShell } from "@/components/editor/editor-shell";
+import { connection } from "next/server";
 
 
 export default async function EditorPage({ params }: { params: Promise<{ cvId: string }> }) {
+  await connection()
   const { cvId } = await params;
   if (!cvId) notFound();
 

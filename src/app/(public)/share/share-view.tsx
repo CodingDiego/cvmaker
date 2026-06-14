@@ -1,7 +1,7 @@
 "use client";
 
-import { Link } from "@/components/link";
 import { Download, FileText, FileType, Home } from "lucide-react";
+import { Link } from "@/components/link";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ScaledResume } from "@/components/templates/scaled-resume";
@@ -9,7 +9,7 @@ import type { Cv } from "@/db/schema";
 import type { TemplateTokens } from "@/templates/types";
 
 /**
- * Presentational shell for a shared CV. Receives the resolved route params and
+ * Presentational shell for a shared CV. Receives the resolved query params and
  * the already-fetched CV as props so the server page stays a thin data loader.
  */
 export function ShareView({

@@ -7,12 +7,13 @@ import { tags } from "@/lib/cache-tags";
 import { renderPdf } from "@/templates/render/pdf";
 import { renderDocx } from "@/templates/render/docx";
 import { putToStore, delFromStore } from "@/lib/blob";
+import { serializeShareParams } from "@/lib/cv/share-search-params";
 import { env } from "@/lib/env";
 
 /**
  * Public CV sharing. A shared CV has its PDF + DOCX rendered into the PUBLIC
  * blob store and is viewable (and downloadable) by anyone at
- * /share/[userId]/[cvId]. Re-sharing re-renders so the public copy always
+ * /share?u=[userId]&c=[cvId]. Re-sharing re-renders so the public copy always
  * matches the latest content.
  */
 
@@ -28,7 +29,7 @@ export interface ShareInfo {
 }
 
 export function shareUrlFor(userId: string, cvId: string): string {
-  return `${env.appUrl()}/share/${userId}/${cvId}`;
+  return `${env.appUrl()}${serializeShareParams("/share", { u: userId, c: cvId })}`;
 }
 
 export async function getShareInfo(userId: string, cvId: string): Promise<ShareInfo | null> {
