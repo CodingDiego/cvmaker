@@ -12,7 +12,7 @@ import { env } from "@/lib/env";
 /**
  * Public CV sharing. A shared CV has its PDF + DOCX rendered into the PUBLIC
  * blob store and is viewable (and downloadable) by anyone at
- * /[userId]/cv/share/[cvId]. Re-sharing re-renders so the public copy always
+ * /share/[userId]/[cvId]. Re-sharing re-renders so the public copy always
  * matches the latest content.
  */
 
@@ -28,7 +28,7 @@ export interface ShareInfo {
 }
 
 export function shareUrlFor(userId: string, cvId: string): string {
-  return `${env.appUrl()}/${userId}/cv/share/${cvId}`;
+  return `${env.appUrl()}/share/${userId}/${cvId}`;
 }
 
 export async function getShareInfo(userId: string, cvId: string): Promise<ShareInfo | null> {
@@ -121,10 +121,12 @@ export async function getPublicCv(userId: string, cvId: string): Promise<Cv | nu
   "use cache";
   cacheTag(tags.cv(cvId));
 
+  console.log("[getPublicCv] enter", { userId, cvId });
   const [row] = await db
     .select()
     .from(cvs)
     .where(and(eq(cvs.id, cvId), eq(cvs.userId, userId), eq(cvs.isPublic, true)))
     .limit(1);
+  console.log("[getPublicCv] result", { userId, cvId, found: Boolean(row) });
   return row ?? null;
 }

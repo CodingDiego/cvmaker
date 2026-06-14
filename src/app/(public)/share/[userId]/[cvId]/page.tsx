@@ -1,6 +1,8 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Download, FileText, FileType, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -9,10 +11,42 @@ import { getPublicCv } from "@/lib/cv/share-service";
 import { getTemplate } from "@/templates/registry";
 
 type Params = Promise<{ userId: string; cvId: string }>;
-const STATIC_VALIDATION_ID = "00000000-0000-4000-8000-000000000000";
 
-export async function generateStaticParams() {
-  return [{ userId: STATIC_VALIDATION_ID, cvId: STATIC_VALIDATION_ID }];
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  await connection()
+  console.log("[generateMetadata] enter");
+  const { userId, cvId } = await params;
+  console.log("[generateMetadata] params resolved", { userId, cvId });
+  const cv = await getPublicCv(userId, cvId);
+  console.log("[generateMetadata] cv fetched", { userId, cvId, found: Boolean(cv) });
+  if (!cv) return {};
+
+  const name = cv.data.header?.fullName || cv.title || "Resume";
+  const role = cv.data.header?.title;
+  const title = role ? `${name} - ${role}` : name;
+  const description =
+    cv.data.summary?.trim() ||
+    `${name}'s resume${role ? `, ${role}` : ""} - built with CVMaker.`;
+  const canonical = `/share/${userId}/${cvId}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "profile",
+      title,
+      description,
+      url: canonical,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    // Public, but a personal resume — keep it out of the index.
+    robots: { index: false, follow: true },
+  };
 }
 
 export default function SharedCvPage({ params }: { params: Params }) {
@@ -21,11 +55,8 @@ export default function SharedCvPage({ params }: { params: Params }) {
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.35]" />
 
       <Suspense fallback={<div className="flex-1" aria-hidden />}>
-        {params.then(({ userId, cvId }) => (
-          <ShareContent userId={userId} cvId={cvId} />
-        ))}
+        <ShareContent params={params} />
       </Suspense>
-
       <footer className="border-t">
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 px-4 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
           <p className="text-sm text-muted-foreground">
@@ -40,8 +71,12 @@ export default function SharedCvPage({ params }: { params: Params }) {
   );
 }
 
-async function ShareContent({ userId, cvId }: { userId: string; cvId: string }) {
+async function ShareContent({ params }: { params: Params }) {
+  console.log("[ShareContent] enter");
+  const { userId, cvId } = await params;
+  console.log("[ShareContent] params resolved", { userId, cvId });
   const cv = await getPublicCv(userId, cvId);
+  console.log("[ShareContent] cv fetched", { userId, cvId, found: Boolean(cv) });
   if (!cv) notFound();
 
   const tokens = getTemplate(cv.templateId);
