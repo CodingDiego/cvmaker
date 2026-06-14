@@ -52,6 +52,7 @@ async function copyPrivateToPublic(snap: AssetSnapshot): Promise<{ url: string; 
   const stored = await putToStore("public", pathname, bytes, {
     contentType: snap.contentType,
     allowOverwrite: true,
+    addRandomSuffix: true,
   });
   return { url: stored.url, pathname: stored.pathname };
 }
