@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { connection } from "next/server";
 import type { SearchParams } from "nuqs/server";
 import { shareSearchParamsCache } from "@/lib/cv/share-search-params";
 import { getPublicCv } from "@/lib/cv/share-service";
@@ -10,16 +9,15 @@ import { ShareUnavailable } from "./share-unavailable";
 
 type PageProps = { searchParams: Promise<SearchParams> };
 
+// Keep personal resumes out of search indexes regardless of outcome.
+const baseMetadata: Metadata = { robots: { index: false, follow: true } };
+
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const { u: userId, c: cvId } = await shareSearchParamsCache.parse(searchParams);
-
-  // Keep personal resumes out of search indexes regardless of outcome.
-  const base: Metadata = { robots: { index: false, follow: true } };
-
-  if (!userId || !cvId) return { ...base, title: "Shared resume" };
+  if (!userId || !cvId) return { ...baseMetadata, title: "Shared resume" };
 
   const cv = await getPublicCv(userId, cvId);
-  if (!cv) return { ...base, title: "Resume not found" };
+  if (!cv) return { ...baseMetadata, title: "Resume not found" };
 
   const name = cv.data.header?.fullName || cv.title || "Resume";
   const role = cv.data.header?.title;
@@ -29,7 +27,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     `${name}'s resume${role ? `, ${role}` : ""} - built with CVMaker.`;
 
   return {
-    ...base,
+    ...baseMetadata,
     title,
     description,
     openGraph: { type: "profile", title, description },
@@ -37,28 +35,15 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   };
 }
 
-/**
- * `generateMetadata` reads `searchParams` (request data), so under Cache
- * Components the route's metadata defers to request time. Rendering this
- * request-time marker as a dynamic island keeps the rest of the route deferred
- * too, so they stay consistent and the build doesn't flag
- * next-prerender-dynamic-metadata.
- */
-async function RequestTimeMarker() {
-  await connection();
-  return null;
-}
-
 export default function SharedCvPage({ searchParams }: PageProps) {
+  // The resolved view depends on `searchParams` + a DB read, so it's dynamic.
+  // Keeping that work inside <Suspense> is what opts the route into dynamic
+  // rendering (Cache Components) and lets the dynamic `generateMetadata` stream
+  // instead of failing the build (next-prerender-dynamic-metadata).
   return (
-    <>
-      <Suspense fallback={null}>
-        <RequestTimeMarker />
-      </Suspense>
-      <Suspense fallback={<div className="min-h-svh" aria-hidden />}>
-        <ShareResolver searchParams={searchParams} />
-      </Suspense>
-    </>
+    <Suspense fallback={<div className="min-h-svh" aria-hidden />}>
+      <ShareResolver searchParams={searchParams} />
+    </Suspense>
   );
 }
 
