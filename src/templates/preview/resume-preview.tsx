@@ -384,18 +384,32 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
 
   // --- Header / contact ---
   const contact = data.header.contact;
-  const contactEntries: { label: string; value: string; kind?: "url" | "email" | "phone" }[] = [
-    contact.email && { label: contact.email, value: contact.email, kind: "email" as const },
-    contact.phone && { label: contact.phone, value: contact.phone, kind: "phone" as const },
-    contact.location && { label: contact.location, value: "" },
-    contact.website && { label: contact.website, value: contact.website },
-    contact.linkedin && { label: contact.linkedin, value: contact.linkedin },
-    contact.github && { label: contact.github, value: contact.github },
-  ].filter(Boolean) as { label: string; value: string; kind?: "url" | "email" | "phone" }[];
+  // Each entry's `label` is a node (so empty fields can show faded placeholder
+  // text); `value` is the real href target, empty for placeholders so they
+  // render as plain (non-linked) ghost text.
+  type ContactEntry = { label: ReactNode; value: string; kind?: "url" | "email" | "phone" };
+  const contactItem = (
+    real: string,
+    fallback: string | undefined,
+    value: string,
+    kind?: "url" | "email" | "phone",
+  ): ContactEntry | null => {
+    if (real) return { label: real, value, kind };
+    if (fallback) return { label: ghost(fallback), value: "", kind };
+    return null;
+  };
+  const contactEntries = [
+    contactItem(contact.email, phContact?.email, contact.email, "email"),
+    contactItem(contact.phone, phContact?.phone, contact.phone, "phone"),
+    contactItem(contact.location, phContact?.location, ""),
+    contactItem(contact.website, phContact?.website, contact.website),
+    contactItem(contact.linkedin, phContact?.linkedin, contact.linkedin),
+    contactItem(contact.github, phContact?.github, contact.github),
+  ].filter(Boolean) as ContactEntry[];
 
   const contactColor = onBand ? "rgba(255,255,255,0.85)" : SUBTLE;
 
-  const contactNode = (e: (typeof contactEntries)[number]) =>
+  const contactNode = (e: ContactEntry) =>
     e.value ? linkNode(e.value, e.label, e.kind) : <span>{e.label}</span>;
 
   const contactBlock = () => {
