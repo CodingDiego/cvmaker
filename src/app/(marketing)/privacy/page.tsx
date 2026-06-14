@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { LegalArticle } from "@/components/legal/legal-article";
 
 export default function PrivacyPage() {

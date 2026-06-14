@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { CheckCircle2, MailCheck, XCircle } from "lucide-react";
 import { verifyEmailToken } from "@/lib/auth/email";
 import { getCurrentUser } from "@/lib/auth/session";

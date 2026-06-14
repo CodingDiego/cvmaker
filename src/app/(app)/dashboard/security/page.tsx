@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { MailCheck, MailWarning } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";

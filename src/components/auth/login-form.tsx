@@ -1,7 +1,7 @@
 "use client";
 
 import { startTransition, useActionState, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { KeyRound, Lock, LogIn, Mail, ShieldCheck } from "lucide-react";

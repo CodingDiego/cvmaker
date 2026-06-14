@@ -1,7 +1,7 @@
 "use client";
 
 import { startTransition, useActionState } from "react";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, KeyRound, Lock, Mail, MailCheck } from "lucide-react";
 import { useForm } from "react-hook-form";
