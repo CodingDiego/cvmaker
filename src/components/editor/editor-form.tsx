@@ -289,12 +289,15 @@ export function EditorForm() {
         title="Skills"
         onAdd={() => mutate((d) => { d.skills.push({ id: newId("sk"), category: "", items: [] }); })}
       >
-        {data.skills.map((g, i) => (
+        {data.skills.map((g, i) => {
+          const p = ph.skills.get(g.id);
+          return (
           <ItemCard key={g.id} onRemove={() => mutate((d) => { d.skills.splice(i, 1); })}>
-            <TextField label="Category" value={g.category} onChange={(v) => mutate((d) => { d.skills[i]!.category = v; })} />
-            <AreaField label="Skills (comma separated)" rows={2} value={g.items.join(", ")} onChange={(v) => mutate((d) => { d.skills[i]!.items = v.split(",").map((s) => s.trim()); })} />
+            <TextField label="Category" placeholder={p?.category} value={g.category} onChange={(v) => mutate((d) => { d.skills[i]!.category = v; })} />
+            <AreaField label="Skills (comma separated)" rows={2} placeholder={p?.items.join(", ")} value={g.items.join(", ")} onChange={(v) => mutate((d) => { d.skills[i]!.items = v.split(",").map((s) => s.trim()); })} />
           </ItemCard>
-        ))}
+          );
+        })}
       </SectionBlock>
 
       {/* Projects */}
