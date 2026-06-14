@@ -6,7 +6,7 @@ import { UserMenu } from "@/components/auth/user-menu";
 
 function Wordmark() {
   return (
-    <Link href="/" className="group flex items-center gap-2">
+    <Link href="/" aria-label="CVMaker home" className="group flex items-center gap-2">
       <span className="flex size-7 items-center justify-center rounded-lg bg-primary font-display text-sm font-bold text-primary-foreground shadow-sm transition-transform group-hover:-rotate-6">
         CV
       </span>
@@ -23,7 +23,7 @@ export async function SiteHeader() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
         <Wordmark />
 
-        <nav className="hidden items-center gap-1 text-sm sm:flex">
+        <nav aria-label="Primary navigation" className="hidden items-center gap-1 text-sm sm:flex">
           <Button variant="ghost" size="sm" render={<Link href="/templates" />}>
             Templates
           </Button>

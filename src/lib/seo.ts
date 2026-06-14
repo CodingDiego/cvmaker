@@ -1,10 +1,13 @@
 import "server-only";
 import type {
   EducationalOrganization,
+  BreadcrumbList,
+  CollectionPage,
   ItemList,
   Organization,
   Person,
   SoftwareApplication,
+  WebPage,
   WebSite,
   WithContext,
 } from "schema-dts";
@@ -67,6 +70,55 @@ export function softwareApplicationLd(): WithContext<SoftwareApplication> {
     description: siteConfig.description,
     url: siteConfig.url,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  };
+}
+
+export function webPageLd({
+  name,
+  description,
+  path,
+}: {
+  name: string;
+  description: string;
+  path: string;
+}): WithContext<WebPage> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name,
+    description,
+    url: absoluteUrl(path),
+    isPartOf: {
+      "@type": "WebSite",
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+  };
+}
+
+export function templatesCollectionPageLd(): WithContext<CollectionPage> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Resume templates",
+    description: "Browse ATS-friendly free and premium resume templates for CVMaker.",
+    url: absoluteUrl("templates"),
+    mainEntity: templatesItemListLd(),
+  };
+}
+
+export function breadcrumbLd(
+  items: Array<{ name: string; path: string }>,
+): WithContext<BreadcrumbList> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: absoluteUrl(item.path),
+    })),
   };
 }
 

@@ -20,7 +20,11 @@ export function ShareUnavailable({ reason }: { reason: Reason }) {
   const { title, body } = COPY[reason];
 
   return (
-    <div className="relative flex min-h-svh flex-col items-center justify-center px-4 text-center">
+    <main
+      id="main-content"
+      className="relative flex min-h-svh flex-col items-center justify-center px-4 text-center"
+      tabIndex={-1}
+    >
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.35]" />
 
       <div className="flex max-w-md flex-col items-center gap-4">
@@ -36,6 +40,6 @@ export function ShareUnavailable({ reason }: { reason: Reason }) {
           </Button>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

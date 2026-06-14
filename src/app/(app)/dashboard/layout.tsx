@@ -33,9 +33,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <aside className="md:sticky md:top-20 md:self-start">
             <DashboardNav />
           </aside>
-          <div className="min-w-0">
+          <main id="main-content" className="min-w-0" tabIndex={-1}>
             <Suspense fallback={<Skeleton className="h-64 rounded-xl" />}>{children}</Suspense>
-          </div>
+          </main>
         </div>
       </div>
     </div>

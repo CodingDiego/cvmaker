@@ -16,7 +16,9 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <Suspense fallback={<div className="h-14 border-b" />}>
         <SiteHeader />
       </Suspense>
-      <main className="flex-1">{children}</main>
+      <main id="main-content" className="flex-1" tabIndex={-1}>
+        {children}
+      </main>
       <MarketingFooter />
     </div>
   );

@@ -57,7 +57,7 @@ export function EditorShell({ cvId }: { cvId: string }) {
         ))}
       </div>
 
-      <div className="grid min-h-0 flex-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <main id="main-content" className="grid min-h-0 flex-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" tabIndex={-1}>
         <Activity mode={formMode}>
           <div className="min-h-0 overflow-y-auto border-r p-4">
             <EditorForm />
@@ -68,7 +68,7 @@ export function EditorShell({ cvId }: { cvId: string }) {
             <LivePreview />
           </div>
         </Activity>
-      </div>
+      </main>
     </div>
   );
 }
