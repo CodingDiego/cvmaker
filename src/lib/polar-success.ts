@@ -21,6 +21,21 @@ export function firstSearchParam(value: string | string[] | undefined): string |
   return value;
 }
 
+function nonEmptySearchParam(value: string | string[] | undefined): string | undefined {
+  const param = firstSearchParam(value)?.trim();
+  return param || undefined;
+}
+
+export function polarCheckoutIdFromSearchParams(
+  params: Record<string, string | string[] | undefined>,
+): string | undefined {
+  return (
+    nonEmptySearchParam(params.checkout_id) ??
+    nonEmptySearchParam(params.checkoutId) ??
+    nonEmptySearchParam(params["CHECKOUT_ID}"])
+  );
+}
+
 export function getPolarSuccessState({
   checkoutId,
   hasPolar,

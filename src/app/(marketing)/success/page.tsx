@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "@/components/link";
-import { firstSearchParam } from "@/lib/polar-success";
+import { polarCheckoutIdFromSearchParams } from "@/lib/polar-success";
 import { loadPolarSuccessState } from "@/lib/polar-success-server";
 import { applyPolarCheckout } from "@/lib/billing/polar-checkout-server";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -35,16 +35,20 @@ const toneStyles = {
 export default async function SuccessPage({
   searchParams,
 }: {
-  searchParams: Promise<{ checkout_id?: string | string[] }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const checkoutId = firstSearchParam(params.checkout_id);
+  const checkoutId = polarCheckoutIdFromSearchParams(params);
 
   // Grant Pro instantly on return from checkout (idempotent + ownership-checked
   // + anti-replay). The webhook still reconciles as the source of truth.
   const user = await getCurrentUser();
   if (checkoutId && user) {
-    await applyPolarCheckout(checkoutId, user);
+    try {
+      await applyPolarCheckout(checkoutId, user);
+    } catch (error) {
+      console.error("[polar] success checkout apply failed", { checkoutId, error });
+    }
   }
 
   const state = await loadPolarSuccessState(checkoutId);

@@ -8,14 +8,25 @@ function firstSubscription(
   return subscriptions?.[0] ?? null;
 }
 
+function metadataUserId(metadata: Record<string, unknown> | undefined): string | undefined {
+  const value =
+    metadata?.appUserId ??
+    metadata?.userId ??
+    metadata?.reference_id ??
+    metadata?.referenceId;
+
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
 export const POST = Webhooks({
   webhookSecret: env.polarWebhookSecret() ?? "",
 
   onCustomerStateChanged: async (payload) => {
     const state = payload.data;
     const subscription = firstSubscription(state.activeSubscriptions);
+    const externalId = state.externalId ?? metadataUserId(state.metadata);
     const result = await syncPolarPlan({
-      externalId: state.externalId,
+      externalId,
       email: state.email,
       customerId: state.id,
       subscriptionId: subscription?.id,
@@ -25,7 +36,7 @@ export const POST = Webhooks({
 
     console.log("[polar] customer.state_changed", {
       synced: result.ok,
-      externalId: state.externalId,
+      externalId,
       email: state.email,
       activeSubscriptions: state.activeSubscriptions.length,
     });
@@ -33,8 +44,12 @@ export const POST = Webhooks({
 
   onOrderPaid: async (payload) => {
     const order = payload.data;
+    const externalId =
+      order.customer.externalId ??
+      metadataUserId(order.metadata) ??
+      metadataUserId(order.customer.metadata);
     const result = await syncPolarPlan({
-      externalId: order.customer.externalId,
+      externalId,
       email: order.customer.email,
       customerId: order.customer.id,
       subscriptionId: order.subscriptionId,
@@ -45,7 +60,7 @@ export const POST = Webhooks({
     console.log("[polar] order.paid", {
       synced: result.ok,
       orderId: order.id,
-      externalId: order.customer.externalId,
+      externalId,
       productId: order.productId,
     });
   },
@@ -56,8 +71,12 @@ export const POST = Webhooks({
 
   onSubscriptionRevoked: async (payload) => {
     const sub = payload.data;
+    const externalId =
+      sub.customer.externalId ??
+      metadataUserId(sub.metadata) ??
+      metadataUserId(sub.customer.metadata);
     const result = await syncPolarPlan({
-      externalId: sub.customer.externalId,
+      externalId,
       email: sub.customer.email,
       customerId: sub.customer.id,
       subscriptionId: sub.id,
@@ -67,7 +86,7 @@ export const POST = Webhooks({
 
     console.log("[polar] subscription.revoked", {
       synced: result.ok,
-      externalId: sub.customer.externalId,
+      externalId,
     });
   },
 

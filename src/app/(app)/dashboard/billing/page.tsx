@@ -6,11 +6,6 @@ import { Link } from "@/components/link";
 import { requireUser } from "@/lib/auth/session";
 import { getUserPlan } from "@/lib/billing/entitlements-server";
 
-// Hosted Polar checkout link. Direct purchase — no server-side product config
-// needed. After payment, the Polar webhook flips the account to Pro.
-const POLAR_CHECKOUT_URL =
-  "https://buy.polar.sh/polar_cl_VlsKymtErz3wGyNzSgnqKFDwHM8OvM5Q9V1zB3C5yMX";
-
 export default async function BillingPage() {
   const user = await requireUser("/dashboard/billing");
   const plan = await getUserPlan(user.id);
@@ -38,12 +33,7 @@ export default async function BillingPage() {
         </CardHeader>
         {!isPro && (
           <CardContent>
-            {/* Direct Polar checkout link — no server-side product config needed. */}
-            <Button
-              render={
-                <a href={POLAR_CHECKOUT_URL} target="_blank" rel="noreferrer noopener" />
-              }
-            >
+            <Button render={<Link href="/api/checkout" />}>
               <Crown className="size-4" /> Upgrade to Pro
             </Button>
           </CardContent>
