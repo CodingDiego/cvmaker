@@ -11,7 +11,6 @@ import { getTemplate } from "@/templates/registry";
 type Params = Promise<{ userId: string; cvId: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  "use cache";
   const { userId, cvId } = await params;
   const cv = await getPublicCv(userId, cvId);
   if (!cv) return {};
@@ -45,7 +44,6 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 }
 
 export default async function SharedCvPage({ params }: { params: Params }) {
-  "use cache";
   const { userId, cvId } = await params;
   const cv = await getPublicCv(userId, cvId);
   if (!cv) notFound();
