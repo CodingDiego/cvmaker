@@ -84,6 +84,9 @@ export const env = {
     optional("POLAR_SERVER") === "production" ? "production" : "sandbox",
   hasPolar: () => Boolean(optional("POLAR_ACCESS_TOKEN")),
 
+  // Vercel Cron — shared secret sent as `Authorization: Bearer <CRON_SECRET>`.
+  cronSecret: () => optional("CRON_SECRET"),
+
   // App URL.
   appUrl: () => optional("APP_URL") ?? "https://free-cv.com",
 

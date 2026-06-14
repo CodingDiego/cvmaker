@@ -179,6 +179,20 @@ export const twoFactorBackupCodes = pgTable("two_factor_backup_codes", {
 }, (t) => [index("backup_codes_user_idx").on(t.userId)]);
 
 // ---------------------------------------------------------------------------
+// Polar checkouts — ledger of checkout_ids already redeemed on /success. The
+// id is the primary key, so a given Polar checkout can upgrade exactly one
+// account exactly once (anti-replay / no cross-account reuse).
+// ---------------------------------------------------------------------------
+export const polarCheckouts = pgTable("polar_checkouts", {
+  checkoutId: text("checkout_id").primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  status: text("status").notNull(),
+  appliedAt: timestamp("applied_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [index("polar_checkouts_user_idx").on(t.userId)]);
+
+// ---------------------------------------------------------------------------
 // Inferred types
 // ---------------------------------------------------------------------------
 export type User = typeof users.$inferSelect;
@@ -189,3 +203,4 @@ export type NewCv = typeof cvs.$inferInsert;
 export type ExportRow = typeof exports.$inferSelect;
 export type Asset = typeof assets.$inferSelect;
 export type NewAsset = typeof assets.$inferInsert;
+export type PolarCheckout = typeof polarCheckouts.$inferSelect;
