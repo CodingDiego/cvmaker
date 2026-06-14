@@ -5,13 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Link } from "@/components/link";
 import { requireUser } from "@/lib/auth/session";
 import { getUserPlan } from "@/lib/billing/entitlements-server";
-import { env } from "@/lib/env";
+
+// Hosted Polar checkout link. Direct purchase — no server-side product config
+// needed. After payment, the Polar webhook flips the account to Pro.
+const POLAR_CHECKOUT_URL =
+  "https://buy.polar.sh/polar_cl_VlsKymtErz3wGyNzSgnqKFDwHM8OvM5Q9V1zB3C5yMX";
 
 export default async function BillingPage() {
   const user = await requireUser("/dashboard/billing");
   const plan = await getUserPlan(user.id);
   const isPro = plan === "pro";
-  const hasPolar = env.hasPolar();
 
   return (
     <div className="space-y-6">
@@ -35,38 +38,36 @@ export default async function BillingPage() {
         </CardHeader>
         {!isPro && (
           <CardContent>
-            {hasPolar ? (
-              // Goes through /api/checkout (not a raw Polar link) so the signed-in
-              // user's identity is stamped onto the checkout server-side.
-              <Button render={<Link href="/api/checkout" />}>
-                <Crown className="size-4" /> Upgrade to Pro
-              </Button>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Checkout isn&apos;t configured yet. Set <code>POLAR_ACCESS_TOKEN</code> and{" "}
-                <code>POLAR_PRODUCT_PRO</code> to enable payments.
-              </p>
-            )}
+            {/* Direct Polar checkout link — no server-side product config needed. */}
+            <Button
+              render={
+                <a href={POLAR_CHECKOUT_URL} target="_blank" rel="noreferrer noopener" />
+              }
+            >
+              <Crown className="size-4" /> Upgrade to Pro
+            </Button>
           </CardContent>
         )}
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="size-5" />
-            Polar customer portal
-          </CardTitle>
-          <CardDescription>
-            Billing changes are handled securely in Polar. After changes complete, webhook events keep your account in sync.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button variant={isPro ? "default" : "outline"} render={<Link href="/api/portal" />}>
-            Open billing portal <ExternalLink className="size-4" />
-          </Button>
-        </CardContent>
-      </Card>
+      {isPro && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="size-5" />
+              Polar customer portal
+            </CardTitle>
+            <CardDescription>
+              Manage your subscription, payment methods and invoices securely in Polar.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button render={<Link href="/api/portal" />}>
+              Open billing portal <ExternalLink className="size-4" />
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
