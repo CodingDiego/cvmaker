@@ -4,6 +4,7 @@ import { CheckCircle2, MailCheck, XCircle } from "lucide-react";
 import { verifyEmailToken } from "@/lib/auth/email";
 import { getCurrentUser } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
+import { EmailVerificationPoller } from "@/components/auth/email-verification-poller";
 import { ResendVerification } from "@/components/auth/resend-verification";
 
 export const metadata: Metadata = {
@@ -74,6 +75,21 @@ export default async function VerifyPage({
   }
 
   const user = await getCurrentUser();
+
+  if (user?.emailVerified) {
+    return (
+      <Shell
+        icon={<CheckCircle2 className="size-5" />}
+        title="Email verified"
+        description="Your email is confirmed. You're all set."
+      >
+        <Button className="h-11 w-full" render={<Link href="/dashboard" />}>
+          Go to dashboard
+        </Button>
+      </Shell>
+    );
+  }
+
   return (
     <Shell
       icon={<MailCheck className="size-5" />}
@@ -84,6 +100,7 @@ export default async function VerifyPage({
           : "We sent you a verification link. Click it to confirm your address."
       }
     >
+      <EmailVerificationPoller enabled={Boolean(user && !user.emailVerified)} />
       {user && !user.emailVerified && <ResendVerification />}
     </Shell>
   );
