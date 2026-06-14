@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { connection } from "next/server";
 
 export const metadata: Metadata = {
   title: {
@@ -7,6 +8,11 @@ export const metadata: Metadata = {
     template: "%s · Editor",
   },
 };
+
+async function RequestTimeMarker() {
+  await connection();
+  return null;
+}
 
 export default function EditorLayout({ children }: { children: React.ReactNode }) {
   // The page reads request data (`requireUser` → `cookies()`), which under Cache
@@ -16,8 +22,13 @@ export default function EditorLayout({ children }: { children: React.ReactNode }
   // fails the build (next-prerender-dynamic-metadata). Isolating the page behind
   // <Suspense> lets the static shell + metadata prerender while the page streams.
   return (
-    <Suspense fallback={<div className="min-h-svh" aria-hidden />}>
-      {children}
-    </Suspense>
+    <>
+      <Suspense fallback={null}>
+        <RequestTimeMarker />
+      </Suspense>
+      <Suspense fallback={<div className="min-h-svh" aria-hidden />}>
+        {children}
+      </Suspense>
+    </>
   );
 }

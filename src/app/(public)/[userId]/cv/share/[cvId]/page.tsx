@@ -2,8 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { connection } from "next/server";
-import { Download, FileText, FileType } from "lucide-react";
+import { Download, FileText, FileType, Home } from "lucide-react";
 import { getPublicCv, shareUrlFor } from "@/lib/cv/share-service";
 import { getTemplate } from "@/templates/registry";
 import { Button } from "@/components/ui/button";
@@ -14,29 +13,12 @@ import { personLd } from "@/lib/seo";
 
 type Params = Promise<{ userId: string; cvId: string }>;
 
-// Metadata reads `params` and the CV. Under Cache Components that would defer to
-// request time and, since the page body prerenders a shell, fail the build with
-// next-prerender-dynamic-metadata. We mark it `'use cache'`: `params` serialize
-// into the cache key (one entry per user/CV) and `getPublicCv` is itself cached,
 // so the metadata becomes prerenderable — no runtime/auth data is involved here.
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const { userId, cvId } = await params;
-  const cv = await getPublicCv(userId, cvId);
-  if (!cv) return { title: "Shared CV", robots: { index: false } };
-
-  const name = cv.data.header?.fullName || cv.title;
-  const role = cv.data.header?.title;
-  return {
-    title: role ? `${name} - ${role}` : name,
-    description: `${name}'s resume, shared via CVMaker.`,
-    robots: { index: false },
-  };
-}
-
-async function RequestTimeMarker() {
-  await connection();
-  return null;
-}
+export const metadata: Metadata = {
+  title: "Shared CV",
+  description: "A public resume shared via CVMaker.",
+  robots: { index: false },
+};
 
 export default function SharedCvPage({ params }: { params: Params }) {
   return (

@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { requireUser } from "@/lib/auth/session";
 import { SiteHeader } from "@/components/site-header";
 import { DashboardNav } from "@/components/dashboard/dashboard-nav";
@@ -12,10 +13,18 @@ export const metadata: Metadata = {
   },
 };
 
+async function RequestTimeMarker() {
+  await connection();
+  return null;
+}
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   await requireUser("/dashboard");
   return (
     <div className="flex min-h-svh flex-col">
+      <Suspense fallback={null}>
+        <RequestTimeMarker />
+      </Suspense>
       <Suspense fallback={<div className="h-14 border-b" />}>
         <SiteHeader />
       </Suspense>
