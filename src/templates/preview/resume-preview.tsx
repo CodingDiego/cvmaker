@@ -20,6 +20,14 @@ interface PreviewProps {
    * Link), which would otherwise nest anchors and break hydration.
    */
   interactive?: boolean;
+  /**
+   * Example content (matched to `data` by item id) shown as faded placeholder
+   * text wherever a field is empty. Lets a CV started from a template look
+   * populated while every blank field still reads as a placeholder that
+   * disappears the instant the user types a real value. Only the live editor
+   * preview passes this; thumbnails, exports and saved data are unaffected.
+   */
+  placeholder?: ResumeData;
 }
 
 const INK = "#1f2937";
@@ -46,7 +54,7 @@ function initialsOf(name: string): string {
   return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
 }
 
-export function ResumePreview({ data, tokens, accentColor, fontFamily, interactive = true }: PreviewProps) {
+export function ResumePreview({ data, tokens, accentColor, fontFamily, interactive = true, placeholder }: PreviewProps) {
   const accent = accentColor || tokens.accentColor;
   const font = fontById(fontFamily ?? tokens.font);
   const sp = DENSITY_SPACING[tokens.density];
@@ -58,6 +66,21 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
   const bullet = tokens.bullet ?? "disc";
   const onBand = tokens.headerStyle === "band";
   const centered = tokens.headerAlign === "center" && !isTwoCol;
+
+  // --- Placeholder ("ghost") support -------------------------------------
+  // When a placeholder document is supplied, empty fields fall back to faded
+  // example text matched by item id. Maps are null (and `gv` is a no-op) for
+  // thumbnails/exports that pass no placeholder, so their output is unchanged.
+  const phExp = placeholder ? new Map(placeholder.experience.map((e) => [e.id, e])) : null;
+  const phEdu = placeholder ? new Map(placeholder.education.map((e) => [e.id, e])) : null;
+  const phSkill = placeholder ? new Map(placeholder.skills.map((g) => [g.id, g])) : null;
+  const phProj = placeholder ? new Map(placeholder.projects.map((p) => [p.id, p])) : null;
+  const phCert = placeholder ? new Map(placeholder.certifications.map((c) => [c.id, c])) : null;
+  const phLang = placeholder ? new Map(placeholder.languages.map((l) => [l.id, l])) : null;
+  const phContact = placeholder?.header.contact;
+  const ghost = (text: string): ReactNode => <span style={{ opacity: 0.4 }}>{text}</span>;
+  /** Real value if non-empty, else faded placeholder text (when one exists). */
+  const gv = (real: string, fallback?: string): ReactNode => (real ? real : fallback ? ghost(fallback) : real);
 
   const page: CSSProperties = {
     width: PAGE_WIDTH,
@@ -152,12 +175,14 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
   };
 
   const markers: Record<string, string> = { disc: "•", dash: "–", square: "▪", none: "" };
-  const bulletsNode = (items: string[]) => {
-    const list = items.filter(Boolean);
+  const bulletsNode = (items: string[], phItems?: string[]) => {
+    const real = items.filter(Boolean);
+    const isGhost = real.length === 0 && !!phItems && phItems.filter(Boolean).length > 0;
+    const list = isGhost ? phItems!.filter(Boolean) : real;
     if (!list.length) return null;
     if (bullet === "none")
       return (
-        <div style={{ margin: "4px 0 0" }}>
+        <div style={{ margin: "4px 0 0", ...(isGhost ? { opacity: 0.4 } : null) }}>
           {list.map((b, i) => (
             <p key={i} style={{ margin: "0 0 2px" }}>
               {b}
@@ -166,7 +191,7 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
         </div>
       );
     return (
-      <ul style={{ margin: "4px 0 0", padding: 0, listStyle: "none" }}>
+      <ul style={{ margin: "4px 0 0", padding: 0, listStyle: "none", ...(isGhost ? { opacity: 0.4 } : null) }}>
         {list.map((b, i) => (
           <li key={i} style={{ display: "flex", gap: 6, marginBottom: 2 }}>
             <span style={{ color: accent, lineHeight: sp.line }}>{markers[bullet]}</span>
