@@ -24,5 +24,11 @@ export function sessionListOptions() {
   return queryOptions({
     queryKey: queryKeys.sessions.list(),
     queryFn: () => fetchJson<SessionView[]>("/api/sessions"),
+    // Sessions change out-of-band (logins, token rotation, revokes elsewhere),
+    // so always show the live list: treat cached data as stale and refetch when
+    // the panel mounts or the tab regains focus.
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 }

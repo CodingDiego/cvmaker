@@ -75,7 +75,7 @@ export function UserMenu({
           <Settings className="size-4" /> Account
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleLogout(); }}>
+        <DropdownMenuItem onClick={() => handleLogout()}>
           <LogOut className="size-4" /> Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>

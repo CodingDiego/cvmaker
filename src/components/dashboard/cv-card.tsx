@@ -126,7 +126,7 @@ export function CvCard({
             <DropdownMenuItem render={<Link href={`/editor/${id}`} />}>
               <Pencil className="size-4" /> Edit
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => setRenaming(true)}>
+            <DropdownMenuItem onClick={() => setRenaming(true)}>
               <Pencil className="size-4" /> Rename
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -134,7 +134,7 @@ export function CvCard({
               // Defer to the next tick so the click that closes the menu doesn't
               // also register as an outside-press that immediately dismisses the
               // just-opened confirmation dialog.
-              onSelect={() => setTimeout(() => setConfirmingDelete(true), 0)}
+              onClick={() => setTimeout(() => setConfirmingDelete(true), 0)}
             >
               <Trash2 className="size-4" /> Delete
             </DropdownMenuItem>

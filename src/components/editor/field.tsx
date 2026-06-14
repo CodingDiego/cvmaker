@@ -108,10 +108,12 @@ export function BulletsField({
   label = "Bullet points (one per line)",
   value,
   onChange,
+  placeholder = "Delivered X by doing Y\nReduced Z by N%",
 }: {
   label?: string;
   value: string[];
   onChange: (v: string[]) => void;
+  placeholder?: string;
 }) {
   return (
     <AreaField
@@ -119,7 +121,7 @@ export function BulletsField({
       rows={4}
       value={value.join("\n")}
       onChange={(v) => onChange(v.split("\n"))}
-      placeholder={"Delivered X by doing Y\nReduced Z by N%"}
+      placeholder={placeholder}
     />
   );
 }

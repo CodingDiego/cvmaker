@@ -154,6 +154,54 @@ export function emptyResume(): ResumeData {
   });
 }
 
+/**
+ * The document a CV is seeded with when created from a template. It mirrors the
+ * *structure* of {@link sampleResume} — same section items, same ids — but every
+ * editable value is blank. The sample then doubles as the placeholder source
+ * (`PLACEHOLDER_RESUME`), so the editor can show example text as a placeholder
+ * (matched by id) that vanishes the moment the user types a real value, while
+ * the stored/exported document only ever contains what the user actually wrote.
+ */
+export function templateStarter(): ResumeData {
+  const s = sampleResume();
+  return resumeSchema.parse({
+    header: {
+      fullName: "",
+      title: "",
+      photo: "",
+      photoPosition: s.header.photoPosition,
+      contact: {},
+    },
+    summary: "",
+    experience: s.experience.map((e) => ({
+      id: e.id,
+      company: "",
+      role: "",
+      location: "",
+      startDate: "",
+      endDate: "",
+      current: false,
+      bullets: [],
+    })),
+    education: s.education.map((e) => ({
+      id: e.id,
+      institution: "",
+      degree: "",
+      field: "",
+      location: "",
+      startDate: "",
+      endDate: "",
+      details: "",
+    })),
+    skills: s.skills.map((g) => ({ id: g.id, category: "", items: [] })),
+    projects: s.projects.map((p) => ({ id: p.id, name: "", link: "", description: "", bullets: [] })),
+    certifications: s.certifications.map((c) => ({ id: c.id, name: "", issuer: "", date: "", url: "" })),
+    languages: s.languages.map((l) => ({ id: l.id, name: "", level: "" })),
+    custom: [],
+    sectionOrder: s.sectionOrder,
+  });
+}
+
 /** A friendly sample document so a new CV isn't blank. */
 export function sampleResume(): ResumeData {
   return resumeSchema.parse({

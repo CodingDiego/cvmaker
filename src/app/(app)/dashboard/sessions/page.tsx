@@ -2,7 +2,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { requireUser } from "@/lib/auth/session";
 import { getQueryClient } from "@/lib/query/client";
 import { queryKeys } from "@/lib/query/keys";
-import { getSessionListCached, withCurrent } from "@/lib/auth/session-reads";
+import { getSessionList, withCurrent } from "@/lib/auth/session-reads";
 import { SessionList } from "@/components/dashboard/session-list";
 
 export default async function SessionsPage() {
@@ -11,7 +11,7 @@ export default async function SessionsPage() {
   // Prefetch with the per-request `current` flag already applied so hydration
   // matches what GET /api/sessions returns.
   const queryClient = getQueryClient();
-  const rows = await getSessionListCached(user.id);
+  const rows = await getSessionList(user.id);
   queryClient.setQueryData(queryKeys.sessions.list(), withCurrent(rows, user.sessionId));
 
   return (

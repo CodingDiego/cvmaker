@@ -1,6 +1,4 @@
 import "server-only";
-import { cacheLife, cacheTag } from "next/cache";
-import { tags } from "@/lib/cache-tags";
 import type { Session } from "@/db/schema";
 import { listActiveSessions } from "./sessions";
 import type { SessionBase, SessionView } from "./session-queries";
@@ -15,11 +13,16 @@ function toSessionBase(s: Session): SessionBase {
   };
 }
 
-/** Cached, per-user (no `current` — that's stamped per request). */
-export async function getSessionListCached(userId: string): Promise<SessionBase[]> {
-  "use cache";
-  cacheTag(tags.sessionList(userId));
-  cacheLife("hours");
+/**
+ * The active-session list (no `current` — that's stamped per request).
+ *
+ * Deliberately NOT wrapped in `use cache`: the list changes on every login and
+ * on every refresh-token rotation (which updates `lastActiveAt`), and those
+ * writes happen in the Proxy where `updateTag` isn't available. A stale,
+ * hours-long cache made revoked/rotated sessions linger in the panel, so we read
+ * straight from the DB — the list is tiny and per-user, so it's cheap.
+ */
+export async function getSessionList(userId: string): Promise<SessionBase[]> {
   const rows = await listActiveSessions(userId);
   return rows.map(toSessionBase);
 }

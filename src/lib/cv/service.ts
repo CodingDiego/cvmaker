@@ -8,7 +8,7 @@ import {
 } from "@/lib/billing/entitlements";
 import { getUserPlan } from "@/lib/billing/entitlements-server";
 import { getTemplate } from "@/templates/registry";
-import { sampleResume, type ResumeData } from "./types";
+import { templateStarter, type ResumeData } from "./types";
 
 export async function listCvs(userId: string): Promise<Cv[]> {
   return db.select().from(cvs).where(eq(cvs.userId, userId)).orderBy(desc(cvs.updatedAt));
@@ -38,7 +38,7 @@ export async function createCv(
       userId,
       title: input.title?.trim() || "Untitled CV",
       templateId,
-      data: sampleResume(),
+      data: templateStarter(),
     })
     .returning();
   return row!;

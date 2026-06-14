@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import Image from "next/image";
 import { ChevronDown, ChevronUp, ImageUp, Plus, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCvStore, newId } from "@/lib/cv/store";
+import { sampleResume } from "@/lib/cv/types";
 import { TextField, AreaField, BulletsField, LinkField } from "./field";
+
+/**
+ * Example content shown as *placeholders* in the editor. A CV created from a
+ * template starts blank (see `templateStarter`) but with the same item ids as
+ * this sample, so each field can surface a matching example until the user types
+ * a real value. Built once — it's static.
+ */
+function usePlaceholders() {
+  return useMemo(() => {
+    const s = sampleResume();
+    const byId = <T extends { id: string }>(rows: T[]) => new Map(rows.map((r) => [r.id, r]));
+    return {
+      header: s.header,
+      summary: s.summary,
+      experience: byId(s.experience),
+      education: byId(s.education),
+      skills: byId(s.skills),
+      projects: byId(s.projects),
+      certifications: byId(s.certifications),
+      languages: byId(s.languages),
+    };
+  }, []);
+}
 
 /** Downscale + re-encode a chosen image to a small JPEG data URL so the resume
  * document (autosaved as JSON) stays lightweight. */
@@ -178,6 +202,7 @@ function ItemCard({
 export function EditorForm() {
   const data = useCvStore((s) => s.data);
   const mutate = useCvStore((s) => s.mutate);
+  const ph = usePlaceholders();
 
   if (!data.header) return null;
 
