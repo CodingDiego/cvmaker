@@ -151,6 +151,11 @@ export async function rotateRefresh(
         ip: ctx.ip,
         userAgent: ctx.userAgent,
         lastActiveAt: new Date(),
+        // Slide the absolute expiry forward on every rotation so the 30-day
+        // window is rolling (resets as you keep using the app), matching the
+        // rotating cookie's maxAge — instead of a hard cap 30 days after the
+        // original login.
+        expiresAt: new Date(Date.now() + REFRESH_TTL_MS),
       })
       .where(and(eq(sessions.id, session.id), eq(sessions.refreshTokenHash, presentedHash)))
       .returning({ id: sessions.id });
