@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { keepSessionAlive } from "@/lib/auth/session-proxy";
-import { defaultLocale, isLocale } from "@/i18n/config";
+import { defaultLocale, isLocale, isLocalizablePath } from "@/i18n/config";
 
 /**
  * Proxy (Next.js 16's renamed Middleware). Two jobs, both on the Node.js runtime:
@@ -16,17 +16,6 @@ import { defaultLocale, isLocale } from "@/i18n/config";
 
 const LOCALE_COOKIE = "NEXT_LOCALE";
 const ONE_YEAR = 60 * 60 * 24 * 365;
-const HAS_EXTENSION = /\.[^/]+$/;
-
-/** Page routes that participate in locale prefixing (not API/internals/files). */
-function isLocalizablePath(pathname: string): boolean {
-  return !(
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/.well-known") ||
-    HAS_EXTENSION.test(pathname)
-  );
-}
 
 function pickLocale(request: NextRequest): string {
   const cookie = request.cookies.get(LOCALE_COOKIE)?.value;

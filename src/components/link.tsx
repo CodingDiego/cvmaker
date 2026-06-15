@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { forwardRef, useCallback } from "react";
 import { getQueryClient } from "@/lib/query/client";
 import { prefetchForPath } from "@/lib/query/prefetch-registry";
-import { defaultLocale, isLocale, localeFromPathname, type Locale } from "@/i18n/config";
+import { defaultLocale, isLocale, isLocalizablePath, localeFromPathname, type Locale } from "@/i18n/config";
 import { useOptionalLocale } from "@/i18n/provider";
 
 /**
@@ -28,6 +28,7 @@ const prefetched = new Set<string>();
 function localizeHref(href: LinkProps["href"], locale: Locale): LinkProps["href"] {
   if (typeof href !== "string") return href;
   if (!href.startsWith("/") || href.startsWith("//")) return href;
+  if (!isLocalizablePath(href)) return href; // /api, files, internals stay raw
   if (localeFromPathname(href)) return href; // already has a locale prefix
   return `/${locale}${href === "/" ? "" : href}`;
 }
