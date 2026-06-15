@@ -121,7 +121,10 @@ export function LoginForm() {
         <SubmitButton pending={pending}>Sign in</SubmitButton>
         <p className="text-center text-sm text-muted-foreground">
           No account?{" "}
-          <Link href="/register" className="font-medium text-foreground hover:underline">
+          <Link
+            href={next === "/dashboard" ? "/register" : `/register?next=${encodeURIComponent(next)}`}
+            className="font-medium text-foreground hover:underline"
+          >
             Create one
           </Link>
         </p>

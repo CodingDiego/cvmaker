@@ -34,7 +34,7 @@ export function LivePreview() {
   if (!data.header) return null;
 
   return (
-    <div ref={containerRef} className="flex justify-center overflow-auto p-4">
+    <div ref={containerRef} className="flex justify-center overflow-auto px-4 py-6 sm:py-8">
       <div
         style={{
           width: PAGE_WIDTH * scale,

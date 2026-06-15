@@ -135,24 +135,53 @@ function PhotoField() {
   );
 }
 
+/** Inline-editable heading for a built-in section (lets the user rename it). */
+function EditableSectionTitle({ sectionKey, defaultLabel }: { sectionKey: string; defaultLabel: string }) {
+  const value = useCvStore((s) => s.data.sectionTitles?.[sectionKey] ?? "");
+  const mutate = useCvStore((s) => s.mutate);
+  return (
+    <input
+      value={value}
+      placeholder={defaultLabel}
+      onChange={(e) =>
+        mutate((d) => {
+          d.sectionTitles = { ...d.sectionTitles, [sectionKey]: e.target.value };
+        })
+      }
+      aria-label={`${defaultLabel} section title`}
+      title="Rename this section"
+      className="w-full rounded-sm bg-transparent font-semibold text-foreground outline-none placeholder:text-foreground focus:bg-muted/60 focus:px-1"
+    />
+  );
+}
+
 function SectionBlock({
   title,
+  titleKey,
   hint,
   children,
   onAdd,
   addLabel = "Add",
+  error,
 }: {
   title: string;
+  /** When set, the heading becomes an editable rename field for this section. */
+  titleKey?: string;
   hint?: string;
   children: React.ReactNode;
   onAdd?: () => void;
   addLabel?: string;
+  error?: string;
 }) {
   return (
-    <section className="space-y-3 rounded-xl border bg-card p-4 shadow-sm">
+    <section className="space-y-4 rounded-xl border bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between gap-2">
-        <div>
-          <h3 className="font-semibold">{title}</h3>
+        <div className="min-w-0 flex-1">
+          {titleKey ? (
+            <EditableSectionTitle sectionKey={titleKey} defaultLabel={title} />
+          ) : (
+            <h3 className="font-semibold">{title}</h3>
+          )}
           {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
         </div>
         {onAdd && (
@@ -161,10 +190,13 @@ function SectionBlock({
           </Button>
         )}
       </div>
+      {error && <p className="text-xs font-medium text-destructive">{error}</p>}
       {children}
     </section>
   );
 }
+
+const EMPTY_SECTION_ERROR = "This section is empty — add details or remove it before exporting.";
 
 function ItemCard({
   children,
@@ -202,12 +234,16 @@ function ItemCard({
 export function EditorForm() {
   const data = useCvStore((s) => s.data);
   const mutate = useCvStore((s) => s.mutate);
+  const sectionErrors = useCvStore((s) => s.sectionErrors);
   const ph = usePlaceholders();
 
   if (!data.header) return null;
 
+  const errorSet = new Set(sectionErrors);
+  const sectionError = (key: string) => (errorSet.has(key) ? EMPTY_SECTION_ERROR : undefined);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Header */}
       <SectionBlock title="Personal details">
         <PhotoField />
@@ -224,13 +260,15 @@ export function EditorForm() {
       </SectionBlock>
 
       {/* Summary */}
-      <SectionBlock title="Summary">
+      <SectionBlock title="Summary" titleKey="summary">
         <AreaField label="Professional summary" rows={4} placeholder={ph.summary} value={data.summary} onChange={(v) => mutate((d) => { d.summary = v; })} />
       </SectionBlock>
 
       {/* Experience */}
       <SectionBlock
         title="Experience"
+        titleKey="experience"
+        error={sectionError("experience")}
         onAdd={() => mutate((d) => { d.experience.push({ id: newId("exp"), company: "", role: "", location: "", startDate: "", endDate: "", current: false, bullets: [] }); })}
       >
         {data.experience.map((e, i) => {
@@ -264,6 +302,8 @@ export function EditorForm() {
       {/* Education */}
       <SectionBlock
         title="Education"
+        titleKey="education"
+        error={sectionError("education")}
         onAdd={() => mutate((d) => { d.education.push({ id: newId("edu"), institution: "", degree: "", field: "", location: "", startDate: "", endDate: "", details: "" }); })}
       >
         {data.education.map((e, i) => {
@@ -287,6 +327,8 @@ export function EditorForm() {
       {/* Skills */}
       <SectionBlock
         title="Skills"
+        titleKey="skills"
+        error={sectionError("skills")}
         onAdd={() => mutate((d) => { d.skills.push({ id: newId("sk"), category: "", items: [] }); })}
       >
         {data.skills.map((g, i) => {
@@ -303,6 +345,8 @@ export function EditorForm() {
       {/* Projects */}
       <SectionBlock
         title="Projects"
+        titleKey="projects"
+        error={sectionError("projects")}
         onAdd={() => mutate((d) => { d.projects.push({ id: newId("prj"), name: "", link: "", description: "", bullets: [] }); })}
       >
         {data.projects.map((p, i) => {
@@ -323,6 +367,8 @@ export function EditorForm() {
       {/* Certifications */}
       <SectionBlock
         title="Certifications"
+        titleKey="certifications"
+        error={sectionError("certifications")}
         onAdd={() => mutate((d) => { d.certifications.push({ id: newId("cert"), name: "", issuer: "", date: "", url: "" }); })}
       >
         {data.certifications.map((c, i) => {
@@ -343,6 +389,8 @@ export function EditorForm() {
       {/* Languages */}
       <SectionBlock
         title="Languages"
+        titleKey="languages"
+        error={sectionError("languages")}
         onAdd={() => mutate((d) => { d.languages.push({ id: newId("lng"), name: "", level: "" }); })}
       >
         {data.languages.map((l, i) => {
@@ -375,6 +423,9 @@ export function EditorForm() {
             onMoveUp={i > 0 ? () => mutate((d) => { d.custom.splice(i - 1, 0, d.custom.splice(i, 1)[0]!); }) : undefined}
             onMoveDown={i < data.custom.length - 1 ? () => mutate((d) => { d.custom.splice(i + 1, 0, d.custom.splice(i, 1)[0]!); }) : undefined}
           >
+            {sectionError(`custom:${cs.id}`) && (
+              <p className="text-xs font-medium text-destructive">{EMPTY_SECTION_ERROR}</p>
+            )}
             <TextField label="Section title" value={cs.title} placeholder="Awards" onChange={(v) => mutate((d) => { d.custom[i]!.title = v; })} />
             <BulletsField
               label="Items (one per line)"

@@ -9,7 +9,7 @@ import {
   renderToBuffer,
 } from "@react-pdf/renderer";
 import type { ResumeData } from "@/lib/cv/types";
-import { resolveSectionOrder } from "@/lib/cv/types";
+import { resolveSectionOrder, resolveSectionTitle } from "@/lib/cv/types";
 import { getTemplate } from "@/templates/registry";
 import { pdfHeaderTextStyle, pdfHeaderTypography } from "./pdf-layout";
 
@@ -140,14 +140,14 @@ export async function renderPdf(
     summary: () =>
       data.summary?.trim() ? (
         <View style={s.section} key="summary">
-          <SecTitle>Summary</SecTitle>
+          <SecTitle>{resolveSectionTitle(data, "summary")}</SecTitle>
           <Text>{data.summary}</Text>
         </View>
       ) : null,
     experience: () =>
       data.experience.length ? (
         <View style={s.section} key="experience">
-          <SecTitle>Experience</SecTitle>
+          <SecTitle>{resolveSectionTitle(data, "experience")}</SecTitle>
           {data.experience.map((e) => (
             <View style={s.item} key={e.id}>
               <View style={s.row}>
@@ -163,7 +163,7 @@ export async function renderPdf(
     education: () =>
       data.education.length ? (
         <View style={s.section} key="education">
-          <SecTitle>Education</SecTitle>
+          <SecTitle>{resolveSectionTitle(data, "education")}</SecTitle>
           {data.education.map((e) => (
             <View style={s.item} key={e.id}>
               <View style={s.row}>
@@ -181,7 +181,7 @@ export async function renderPdf(
     skills: () =>
       data.skills.length ? (
         <View style={s.section} key="skills">
-          <SecTitle>Skills</SecTitle>
+          <SecTitle>{resolveSectionTitle(data, "skills")}</SecTitle>
           {data.skills.map((g) => (
             <Text key={g.id}>
               {g.category ? <Text style={s.bold}>{g.category}: </Text> : null}
@@ -193,7 +193,7 @@ export async function renderPdf(
     projects: () =>
       data.projects.length ? (
         <View style={s.section} key="projects">
-          <SecTitle>Projects</SecTitle>
+          <SecTitle>{resolveSectionTitle(data, "projects")}</SecTitle>
           {data.projects.map((p) => (
             <View style={s.item} key={p.id}>
               <Text>
@@ -216,7 +216,7 @@ export async function renderPdf(
     certifications: () =>
       data.certifications.length ? (
         <View style={s.section} key="certifications">
-          <SecTitle>Certifications</SecTitle>
+          <SecTitle>{resolveSectionTitle(data, "certifications")}</SecTitle>
           {data.certifications.map((ct) => (
             <View style={s.row} key={ct.id}>
               <Text>
@@ -237,7 +237,7 @@ export async function renderPdf(
     languages: () =>
       data.languages.length ? (
         <View style={s.section} key="languages">
-          <SecTitle>Languages</SecTitle>
+          <SecTitle>{resolveSectionTitle(data, "languages")}</SecTitle>
           <Text>{data.languages.map((l) => (l.level ? `${l.name} (${l.level})` : l.name)).join(",   ")}</Text>
         </View>
       ) : null,

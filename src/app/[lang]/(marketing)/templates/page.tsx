@@ -70,7 +70,7 @@ export default async function TemplatesPage() {
           </p>
         </header>
 
-        <TemplateGallery drafts={draftsByTemplate} plan={plan} draftCount={draftCount} />
+        <TemplateGallery drafts={draftsByTemplate} plan={plan} draftCount={draftCount} isAuthed={!!user} />
       </section>
     </div>
   );

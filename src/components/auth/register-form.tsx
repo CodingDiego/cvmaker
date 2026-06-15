@@ -2,7 +2,7 @@
 
 import { startTransition, useActionState, useEffect } from "react";
 import { Link } from "@/components/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Mail, User, UserPlus } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -14,6 +14,8 @@ const initial: ActionState = { status: "idle" };
 
 export function RegisterForm() {
   const router = useRouter();
+  const params = useSearchParams();
+  const next = params.get("next") || "/dashboard";
   const [state, action, pending] = useActionState(registerAction, initial);
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
@@ -22,10 +24,10 @@ export function RegisterForm() {
 
   useEffect(() => {
     if (state.status === "success") {
-      router.push("/dashboard");
+      router.push(next);
       router.refresh();
     }
-  }, [state.status, router]);
+  }, [state.status, next, router]);
 
   return (
     <AuthCard
@@ -79,7 +81,10 @@ export function RegisterForm() {
         <SubmitButton pending={pending}>Create account</SubmitButton>
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-foreground hover:underline">
+          <Link
+            href={next === "/dashboard" ? "/login" : `/login?next=${encodeURIComponent(next)}`}
+            className="font-medium text-foreground hover:underline"
+          >
             Sign in
           </Link>
         </p>

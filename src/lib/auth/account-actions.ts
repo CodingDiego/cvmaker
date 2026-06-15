@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { profileSchema } from "@/lib/auth/auth-schemas";
+import { isVerifiedHuman } from "@/lib/security/botid";
 import { requireUser } from "./session";
 
 export type AccountActionState =
@@ -16,6 +17,9 @@ export async function updateProfileAction(
   _prev: AccountActionState,
   formData: FormData,
 ): Promise<AccountActionState> {
+  if (!(await isVerifiedHuman())) {
+    return { status: "error", message: "Automated request blocked. Please try again." };
+  }
   const user = await requireUser();
   const parsed = profileSchema.safeParse({ name: formData.get("name") });
   if (!parsed.success) {

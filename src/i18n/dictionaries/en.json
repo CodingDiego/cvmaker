@@ -1,0 +1,76 @@
+{
+  "common": {
+    "language": "Language"
+  },
+  "header": {
+    "homeAria": "CVMaker home",
+    "templates": "Templates",
+    "dashboard": "Dashboard",
+    "signIn": "Sign in",
+    "getStarted": "Get started"
+  },
+  "footer": {
+    "tagline": "Free, ATS-friendly resumes. Build, share by link, and export to PDF or DOCX in minutes.",
+    "product": "Product",
+    "account": "Account",
+    "legal": "Legal",
+    "templates": "Templates",
+    "createCv": "Create a CV",
+    "dashboard": "Dashboard",
+    "login": "Log in",
+    "signup": "Sign up",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "rights": "All rights reserved.",
+    "builtBy": "Built by",
+    "install": "Install app"
+  },
+  "home": {
+    "badge": "Free forever. No watermarks.",
+    "lead": "Build an ATS-friendly CV that still looks designed. Edit your draft once, switch templates freely, then download the exact file format you need.",
+    "chooseTemplate": "Choose a template",
+    "createAccount": "Create free account",
+    "livePreview": "Live template preview",
+    "step": "Step {n}",
+    "outcomes": [
+      { "value": "PDF", "label": "clean, selectable text" },
+      { "value": "DOCX", "label": "editable Word export" },
+      { "value": "ZIP", "label": "one click for every format" }
+    ],
+    "heroBadges": ["ATS-safe text", "Editable exports", "Public sharing"],
+    "workflowTitle": "How CVMaker Works",
+    "workflow": [
+      {
+        "title": "Pick the structure",
+        "description": "Start from ATS-safe templates with real layout differences, not just color swaps."
+      },
+      {
+        "title": "Edit once",
+        "description": "Your sections, ordering, accent color and typography stay reusable across designs."
+      },
+      {
+        "title": "Export directly",
+        "description": "Download PDF, DOCX or ZIP from the editor without waiting on a background queue."
+      }
+    ],
+    "exportsTitle": "A resume builder that respects the file at the end.",
+    "exportsLead": "The editor is useful only if the final download is reliable. CVMaker keeps export formats visible, direct and consistent with the preview.",
+    "trust": [
+      {
+        "title": "ATS first",
+        "description": "Every export keeps the resume as selectable text with predictable section hierarchy."
+      },
+      {
+        "title": "Shareable links",
+        "description": "Publish a public CV page with navigation, downloads and a fast reader-friendly preview."
+      },
+      {
+        "title": "Private drafts",
+        "description": "Your working drafts stay behind your account until you explicitly publish them."
+      }
+    ],
+    "rangeTitle": "Template range",
+    "rangeLead": "Conservative, technical, executive and editorial layouts share one draft model.",
+    "seeAll": "See all templates"
+  }
+}

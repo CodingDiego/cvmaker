@@ -15,10 +15,13 @@ interface CvState extends CvMeta {
   data: ResumeData;
   /** Monotonic counter bumped on every change — drives debounced autosave. */
   revision: number;
+  /** Section keys flagged empty on the last export attempt (cleared on edit). */
+  sectionErrors: string[];
   init: (payload: CvMeta & { data: ResumeData }) => void;
   /** Immer-style mutation without the dependency, via structuredClone. */
   mutate: (recipe: (draft: ResumeData) => void) => void;
   setMeta: (meta: Partial<CvMeta>) => void;
+  setSectionErrors: (keys: string[]) => void;
 }
 
 export const useCvStore = create<CvState>((set) => ({
@@ -29,6 +32,7 @@ export const useCvStore = create<CvState>((set) => ({
   fontFamily: "inter",
   data: {} as ResumeData,
   revision: 0,
+  sectionErrors: [],
   init: (payload) =>
     set({
       cvId: payload.cvId,
@@ -38,14 +42,21 @@ export const useCvStore = create<CvState>((set) => ({
       fontFamily: payload.fontFamily,
       data: payload.data,
       revision: 0,
+      sectionErrors: [],
     }),
   mutate: (recipe) =>
     set((state) => {
       const draft = structuredClone(state.data);
       recipe(draft);
-      return { data: draft, revision: state.revision + 1 };
+      return {
+        data: draft,
+        revision: state.revision + 1,
+        // Any edit invalidates the last export-time validation.
+        ...(state.sectionErrors.length ? { sectionErrors: [] } : null),
+      };
     }),
   setMeta: (meta) => set((state) => ({ ...state, ...meta, revision: state.revision + 1 })),
+  setSectionErrors: (keys) => set({ sectionErrors: keys }),
 }));
 
 /** Stable id generator for new list items (no Math.random at module load). */

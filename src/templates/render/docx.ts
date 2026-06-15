@@ -10,7 +10,7 @@ import {
   type ISectionOptions,
 } from "docx";
 import type { ResumeData } from "@/lib/cv/types";
-import { resolveSectionOrder } from "@/lib/cv/types";
+import { resolveSectionOrder, resolveSectionTitle } from "@/lib/cv/types";
 import { fontById } from "@/lib/font-config";
 import { getTemplate } from "@/templates/registry";
 
@@ -134,12 +134,12 @@ export async function renderDocx(
   const renderers: Record<string, () => void> = {
     summary: () => {
       if (!data.summary?.trim()) return;
-      children.push(sectionTitle("Summary"));
+      children.push(sectionTitle(resolveSectionTitle(data, "summary")));
       children.push(line([{ text: data.summary }]));
     },
     experience: () => {
       if (!data.experience.length) return;
-      children.push(sectionTitle("Experience"));
+      children.push(sectionTitle(resolveSectionTitle(data, "experience")));
       for (const e of data.experience) {
         const dates = [e.startDate, e.current ? "Present" : e.endDate].filter(Boolean).join(" – ");
         children.push(line([{ text: e.role, bold: true }, { text: dates ? `   ${dates}` : "", color: "666666" }]));
@@ -149,7 +149,7 @@ export async function renderDocx(
     },
     education: () => {
       if (!data.education.length) return;
-      children.push(sectionTitle("Education"));
+      children.push(sectionTitle(resolveSectionTitle(data, "education")));
       for (const e of data.education) {
         const dates = [e.startDate, e.endDate].filter(Boolean).join(" – ");
         children.push(line([{ text: e.institution, bold: true }, { text: dates ? `   ${dates}` : "", color: "666666" }]));
@@ -159,14 +159,14 @@ export async function renderDocx(
     },
     skills: () => {
       if (!data.skills.length) return;
-      children.push(sectionTitle("Skills"));
+      children.push(sectionTitle(resolveSectionTitle(data, "skills")));
       for (const g of data.skills) {
         children.push(line([{ text: g.category ? `${g.category}: ` : "", bold: true }, { text: g.items.filter(Boolean).join(", ") }]));
       }
     },
     projects: () => {
       if (!data.projects.length) return;
-      children.push(sectionTitle("Projects"));
+      children.push(sectionTitle(resolveSectionTitle(data, "projects")));
       for (const p of data.projects) {
         children.push(
           new Paragraph({
@@ -183,7 +183,7 @@ export async function renderDocx(
     },
     certifications: () => {
       if (!data.certifications.length) return;
-      children.push(sectionTitle("Certifications"));
+      children.push(sectionTitle(resolveSectionTitle(data, "certifications")));
       for (const ct of data.certifications) {
         children.push(
           new Paragraph({
@@ -201,7 +201,7 @@ export async function renderDocx(
     },
     languages: () => {
       if (!data.languages.length) return;
-      children.push(sectionTitle("Languages"));
+      children.push(sectionTitle(resolveSectionTitle(data, "languages")));
       children.push(line([{ text: data.languages.map((l) => (l.level ? `${l.name} (${l.level})` : l.name)).join(",  ") }]));
     },
   };

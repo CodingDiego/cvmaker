@@ -42,3 +42,9 @@ next-env.d.ts
 
 .vercel
 .env*.local
+
+# local tooling
+/graphify-out
+
+# private premium template overlay (tracked in its own private repo)
+/.premium

@@ -23,10 +23,12 @@ export function TemplateGallery({
   drafts,
   plan,
   draftCount,
+  isAuthed,
 }: {
   drafts: Record<string, TemplateDraft>;
   plan: BillingPlan;
   draftCount: number;
+  isAuthed: boolean;
 }) {
   const sample = useMemo(() => sampleResume(), []);
 
@@ -130,6 +132,7 @@ export function TemplateGallery({
                     draft={drafts[tokens.id]}
                     plan={plan}
                     draftCount={draftCount}
+                    isAuthed={isAuthed}
                   />
                 </div>
               </article>

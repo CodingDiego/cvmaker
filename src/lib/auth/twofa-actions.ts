@@ -11,6 +11,7 @@ import {
   disableTwoFactor,
   regenerateBackupCodes,
 } from "./totp";
+import { isVerifiedHuman } from "@/lib/security/botid";
 import { kv } from "@/lib/redis";
 
 const SETUP_TTL = 10 * 60;
@@ -37,6 +38,9 @@ export type TwoFaResult =
 
 /** Confirm enrollment with a valid TOTP code → enable 2FA + return backup codes. */
 export async function confirmTwoFactorSetupAction(code: string): Promise<TwoFaResult> {
+  if (!(await isVerifiedHuman())) {
+    return { ok: false, error: "Automated request blocked. Please try again." };
+  }
   const user = await requireUser();
   const secret = await kv().get<string>(`2fa-setup:${user.id}`);
   if (!secret) return { ok: false, error: "Setup expired. Start again." };

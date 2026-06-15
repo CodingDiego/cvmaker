@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import Image from "next/image";
 import type { ResumeData } from "@/lib/cv/types";
-import { resolveSectionOrder } from "@/lib/cv/types";
+import { resolveSectionOrder, resolveSectionTitle } from "@/lib/cv/types";
 import { fontById } from "@/lib/font-config";
 import { DENSITY_SPACING, type TemplateTokens } from "@/templates/types";
 
@@ -218,13 +218,13 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
   const renderers: Record<string, () => ReactNode> = {
     summary: () =>
       data.summary?.trim() || placeholder?.summary
-        ? sectionNode("Summary", <p style={{ margin: 0 }}>{gv(data.summary, placeholder?.summary)}</p>, "summary")
+        ? sectionNode(resolveSectionTitle(data, "summary"), <p style={{ margin: 0 }}>{gv(data.summary, placeholder?.summary)}</p>, "summary")
         : null,
 
     experience: () =>
       data.experience.length
         ? sectionNode(
-            "Experience",
+            resolveSectionTitle(data, "experience"),
             data.experience.map((e) => {
               const p = phExp?.get(e.id);
               const companyLine = [e.company, e.location].filter(Boolean).join(" · ");
@@ -249,7 +249,7 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
     education: () =>
       data.education.length
         ? sectionNode(
-            "Education",
+            resolveSectionTitle(data, "education"),
             data.education.map((e) => {
               const p = phEdu?.get(e.id);
               const degreeLine = [[e.degree, e.field].filter(Boolean).join(", "), e.location].filter(Boolean).join(" · ");
@@ -278,7 +278,7 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
     skills: () =>
       data.skills.length
         ? sectionNode(
-            "Skills",
+            resolveSectionTitle(data, "skills"),
             data.skills.map((g) => {
               const p = phSkill?.get(g.id);
               const items = g.items.filter(Boolean).join(", ");
@@ -301,7 +301,7 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
     projects: () =>
       data.projects.length
         ? sectionNode(
-            "Projects",
+            resolveSectionTitle(data, "projects"),
             data.projects.map((p) => {
               const x = phProj?.get(p.id);
               return (
@@ -330,7 +330,7 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
     certifications: () =>
       data.certifications.length
         ? sectionNode(
-            "Certifications",
+            resolveSectionTitle(data, "certifications"),
             data.certifications.map((c) => {
               const p = phCert?.get(c.id);
               return (
@@ -354,7 +354,7 @@ export function ResumePreview({ data, tokens, accentColor, fontFamily, interacti
     languages: () =>
       data.languages.length
         ? sectionNode(
-            "Languages",
+            resolveSectionTitle(data, "languages"),
             data.languages.map((l) => {
               const p = phLang?.get(l.id);
               return (

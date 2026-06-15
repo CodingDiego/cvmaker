@@ -30,12 +30,14 @@ export function UseTemplateButton({
   access = "free",
   plan,
   draftCount,
+  isAuthed = true,
 }: {
   templateId: string;
   draft?: TemplateDraft | null;
   access?: TemplateAccess;
   plan: BillingPlan;
   draftCount: number;
+  isAuthed?: boolean;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -51,6 +53,20 @@ export function UseTemplateButton({
       const result = await createCvAction(templateId);
       if (result?.ok === false) setError(result.error);
     });
+  }
+
+  // Logged-out: carry the intent through sign-up. After auth, `/start/<id>`
+  // creates the CV and drops the user straight into the editor.
+  if (!isAuthed) {
+    return (
+      <Button
+        size="sm"
+        className="w-full"
+        render={<Link href={`/register?next=${encodeURIComponent(`/start/${templateId}`)}`} />}
+      >
+        <ArrowRight className="size-4" /> Use this template
+      </Button>
+    );
   }
 
   if (requiresUpgrade) {

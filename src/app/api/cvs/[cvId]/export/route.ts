@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/auth/session";
 import { notFoundJson, unauthorized } from "@/lib/api/response";
 import { renderCvExport } from "@/lib/cv/export-service";
+import { isCvLimitError } from "@/lib/billing/entitlements";
 import type { ExportFormat } from "@/workflows/export-cv";
 
 const FORMATS = new Set<ExportFormat>(["pdf", "docx", "zip"]);
@@ -41,6 +42,9 @@ export async function GET(
   } catch (error) {
     if (error instanceof Error && error.message === "CV not found") {
       return notFoundJson();
+    }
+    if (isCvLimitError(error)) {
+      return Response.json({ error: error.message }, { status: 403 });
     }
     throw error;
   }

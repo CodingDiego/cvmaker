@@ -154,4 +154,16 @@
       radial-gradient(60% 50% at 50% 0%, color-mix(in oklch, var(--primary) 18%, transparent), transparent 70%),
       radial-gradient(40% 40% at 85% 30%, color-mix(in oklch, var(--chart-3) 14%, transparent), transparent 70%);
   }
+  /* Skip rendering work for a CV thumbnail until it is scrolled near the
+     viewport. The wrapping box already reserves its pixel size, so this only
+     defers paint/layout of the (heavy) preview contents. */
+  .cv-thumb {
+    content-visibility: auto;
+  }
+  /* Defer rendering of below-the-fold marketing sections. The intrinsic size
+     keeps the scrollbar stable before they paint. */
+  .cv-defer {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 520px;
+  }
 }

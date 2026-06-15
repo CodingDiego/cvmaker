@@ -7,6 +7,8 @@ import { cvs, exports } from "@/db/schema";
 import { renderPdf } from "@/templates/render/pdf";
 import { renderDocx } from "@/templates/render/docx";
 import { uploadExport } from "@/lib/blob";
+import { requireTemplateAccess } from "@/lib/billing/entitlements";
+import { getUserPlan } from "@/lib/billing/entitlements-server";
 import { exportCvWorkflow, type ExportFormat } from "@/workflows/export-cv";
 
 interface CvContext {
@@ -88,6 +90,9 @@ export async function renderCvExport(
 ): Promise<CvExportFile> {
   const ctx = await loadCvContext(userId, cvId);
   if (!ctx) throw new Error("CV not found");
+  // Re-validate entitlement at export time: a CV created under Pro must not be
+  // exportable once the plan lapses to free. Create/update gate the same way.
+  requireTemplateAccess(await getUserPlan(userId), ctx.templateId);
   if (format === "pdf") return renderPdfFile(ctx);
   if (format === "docx") return renderDocxFile(ctx);
   return renderZipFile(ctx);

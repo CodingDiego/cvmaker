@@ -15,7 +15,14 @@ import { verifyTotpForUser, consumeBackupCode } from "./totp";
 import { sendVerificationEmail, sendPasswordResetEmail, resetPassword } from "./email";
 import { EmailDeliveryError } from "./email-delivery";
 import { getCurrentUser } from "./session";
+import { isVerifiedHuman } from "@/lib/security/botid";
 import { limiters } from "@/lib/redis";
+
+/** Shared bot-rejection result for the form actions below. */
+const BOT_BLOCKED: ActionState = {
+  status: "error",
+  message: "Automated request blocked. Please try again.",
+};
 
 export type ActionState =
   | { status: "idle" }
@@ -37,6 +44,7 @@ export async function registerAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  if (!(await isVerifiedHuman())) return BOT_BLOCKED;
   const c = await ctx();
   const { success } = await limiters.register.limit(c.ip);
   if (!success) return { status: "error", message: "Too many attempts. Try again later." };
@@ -83,6 +91,7 @@ export async function loginAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  if (!(await isVerifiedHuman())) return BOT_BLOCKED;
   const c = await ctx();
   const { success } = await limiters.login.limit(c.ip);
   if (!success) return { status: "error", message: "Too many attempts. Try again later." };
@@ -113,6 +122,7 @@ export async function verifyLoginTwoFactorAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  if (!(await isVerifiedHuman())) return BOT_BLOCKED;
   const c = await ctx();
   const { success } = await limiters.otp.limit(c.ip);
   if (!success) return { status: "error", message: "Too many attempts. Try again later." };
@@ -148,6 +158,7 @@ export async function requestPasswordResetAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  if (!(await isVerifiedHuman())) return BOT_BLOCKED;
   const c = await ctx();
   const { success } = await limiters.reset.limit(c.ip);
   if (!success) return { status: "error", message: "Too many attempts. Try again later." };
@@ -184,6 +195,7 @@ export async function performPasswordResetAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  if (!(await isVerifiedHuman())) return BOT_BLOCKED;
   const c = await ctx();
   const { success } = await limiters.reset.limit(c.ip);
   if (!success) return { status: "error", message: "Too many attempts. Try again later." };

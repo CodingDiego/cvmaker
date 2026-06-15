@@ -88,6 +88,10 @@ export const resumeSchema = z.object({
   certifications: z.array(certificationSchema).default([]),
   languages: z.array(languageSchema).default([]),
   custom: z.array(customSectionSchema).default([]),
+  // User overrides for built-in section headings (e.g. rename "Education" to
+  // "Studies"). Keyed by built-in section key; an empty/absent value falls back
+  // to the default label in SECTION_LABELS. Custom sections carry their own title.
+  sectionTitles: z.record(z.string(), z.string()).default({}),
   // Section render order. Built-in keys (see BUILT_IN_SECTIONS) plus custom
   // sections referenced as `custom:<id>`, so custom sections can be reordered
   // freely among the built-in ones.
@@ -122,6 +126,90 @@ export const SECTION_LABELS: Record<string, string> = {
   certifications: "Certifications",
   languages: "Languages",
 };
+
+/**
+ * Display title for a section, honoring user renames of built-in headings and
+ * each custom section's own title. Used by every renderer (preview, PDF, DOCX)
+ * so a rename flows through to exports.
+ */
+export function resolveSectionTitle(data: ResumeData, key: string): string {
+  if (key.startsWith("custom:")) {
+    const c = data.custom.find((s) => `custom:${s.id}` === key);
+    return c?.title?.trim() || "Section";
+  }
+  return data.sectionTitles?.[key]?.trim() || SECTION_LABELS[key] || key;
+}
+
+/** Whether a section currently holds any real (non-empty) content. */
+export function sectionHasContent(data: ResumeData, key: string): boolean {
+  switch (key) {
+    case "summary":
+      return !!data.summary.trim();
+    case "experience":
+      return data.experience.some(
+        (e) => e.role || e.company || e.location || e.startDate || e.endDate || e.bullets.some(Boolean),
+      );
+    case "education":
+      return data.education.some(
+        (e) => e.institution || e.degree || e.field || e.location || e.details || e.startDate || e.endDate,
+      );
+    case "skills":
+      return data.skills.some((g) => g.category || g.items.some(Boolean));
+    case "projects":
+      return data.projects.some((p) => p.name || p.description || p.link || p.bullets.some(Boolean));
+    case "certifications":
+      return data.certifications.some((c) => c.name || c.issuer || c.date || c.url);
+    case "languages":
+      return data.languages.some((l) => l.name || l.level);
+    default:
+      if (key.startsWith("custom:")) {
+        const c = data.custom.find((s) => `custom:${s.id}` === key);
+        return !!c && (!!c.title.trim() || c.items.some((i) => i.text.trim()));
+      }
+      return true;
+  }
+}
+
+/** Number of item rows a built-in list section currently has. */
+function sectionItemCount(data: ResumeData, key: string): number {
+  switch (key) {
+    case "experience":
+      return data.experience.length;
+    case "education":
+      return data.education.length;
+    case "skills":
+      return data.skills.length;
+    case "projects":
+      return data.projects.length;
+    case "certifications":
+      return data.certifications.length;
+    case "languages":
+      return data.languages.length;
+    default:
+      return 0;
+  }
+}
+
+/**
+ * Keys of sections the user has *kept* but left without any real content — they
+ * would render as empty blocks in the preview/exports. Surfaced on export so the
+ * user fills them in or removes them. A section with zero rows is treated as
+ * intentionally omitted (renderers skip it) and is not flagged; the optional
+ * summary is likewise never flagged when blank.
+ */
+export function validateResume(data: ResumeData): string[] {
+  const empty: string[] = [];
+  for (const key of resolveSectionOrder(data)) {
+    if (key === "summary") continue;
+    if (sectionHasContent(data, key)) continue;
+    if (key.startsWith("custom:")) {
+      empty.push(key);
+    } else if (sectionItemCount(data, key) > 0) {
+      empty.push(key);
+    }
+  }
+  return empty;
+}
 
 /** Build the resolved render order: stored order first, then any missing keys. */
 export function resolveSectionOrder(data: ResumeData): string[] {

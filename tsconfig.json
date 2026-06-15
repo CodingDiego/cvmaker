@@ -22,7 +22,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@premium": ["./src/templates/premium-empty.ts"]
     }
   },
   "include": [

@@ -1,0 +1,76 @@
+{
+  "common": {
+    "language": "Idioma"
+  },
+  "header": {
+    "homeAria": "Início do CVMaker",
+    "templates": "Modelos",
+    "dashboard": "Painel",
+    "signIn": "Entrar",
+    "getStarted": "Começar"
+  },
+  "footer": {
+    "tagline": "Currículos gratuitos e compatíveis com ATS. Crie, compartilhe por link e exporte para PDF ou DOCX em minutos.",
+    "product": "Produto",
+    "account": "Conta",
+    "legal": "Legal",
+    "templates": "Modelos",
+    "createCv": "Criar um currículo",
+    "dashboard": "Painel",
+    "login": "Entrar",
+    "signup": "Cadastrar-se",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos de Serviço",
+    "rights": "Todos os direitos reservados.",
+    "builtBy": "Feito por",
+    "install": "Instalar app"
+  },
+  "home": {
+    "badge": "Grátis para sempre. Sem marcas d'água.",
+    "lead": "Crie um currículo compatível com ATS que ainda parece bem projetado. Edite seu rascunho uma vez, troque de modelo livremente e baixe exatamente o formato que você precisa.",
+    "chooseTemplate": "Escolher um modelo",
+    "createAccount": "Criar conta grátis",
+    "livePreview": "Pré-visualização do modelo",
+    "step": "Passo {n}",
+    "outcomes": [
+      { "value": "PDF", "label": "texto limpo e selecionável" },
+      { "value": "DOCX", "label": "exportação editável do Word" },
+      { "value": "ZIP", "label": "um clique para todos os formatos" }
+    ],
+    "heroBadges": ["Texto compatível com ATS", "Exportações editáveis", "Compartilhamento público"],
+    "workflowTitle": "Como o CVMaker funciona",
+    "workflow": [
+      {
+        "title": "Escolha a estrutura",
+        "description": "Comece com modelos compatíveis com ATS que têm diferenças reais de layout, não apenas de cor."
+      },
+      {
+        "title": "Edite uma vez",
+        "description": "Suas seções, ordem, cor de destaque e tipografia continuam reutilizáveis entre os designs."
+      },
+      {
+        "title": "Exporte direto",
+        "description": "Baixe PDF, DOCX ou ZIP no editor sem esperar por uma fila em segundo plano."
+      }
+    ],
+    "exportsTitle": "Um criador de currículos que respeita o arquivo no final.",
+    "exportsLead": "O editor só é útil se o download final for confiável. O CVMaker mantém os formatos de exportação visíveis, diretos e consistentes com a pré-visualização.",
+    "trust": [
+      {
+        "title": "ATS em primeiro lugar",
+        "description": "Cada exportação mantém o currículo como texto selecionável com uma hierarquia de seções previsível."
+      },
+      {
+        "title": "Links compartilháveis",
+        "description": "Publique uma página pública do currículo com navegação, downloads e uma pré-visualização rápida e legível."
+      },
+      {
+        "title": "Rascunhos privados",
+        "description": "Seus rascunhos ficam protegidos pela sua conta até você publicá-los."
+      }
+    ],
+    "rangeTitle": "Variedade de modelos",
+    "rangeLead": "Layouts conservadores, técnicos, executivos e editoriais compartilham um único modelo de rascunho.",
+    "seeAll": "Ver todos os modelos"
+  }
+}
