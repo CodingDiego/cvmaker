@@ -18,10 +18,12 @@ import {
   type ResetRequestValues,
 } from "@/lib/auth/auth-schemas";
 import { AuthCard, FormError, IconField, PasswordField, SubmitButton } from "./auth-ui";
+import { useT } from "@/i18n/provider";
 
 const initial: ActionState = { status: "idle" };
 
 export function ResetRequestForm() {
+  const t = useT();
   const [state, action, pending] = useActionState(requestPasswordResetAction, initial);
   const form = useForm<ResetRequestValues>({
     resolver: zodResolver(resetRequestSchema),
@@ -32,11 +34,11 @@ export function ResetRequestForm() {
     return (
       <AuthCard
         icon={MailCheck}
-        title="Check your email"
-        description="If an account exists for that address, we've sent a reset link."
+        title={t("auth.reset.sentTitle")}
+        description={t("auth.reset.sentDescription")}
       >
         <Button variant="outline" className="h-11 w-full" render={<Link href="/login" />}>
-          Back to sign in
+          {t("auth.reset.backToSignIn")}
         </Button>
       </AuthCard>
     );
@@ -45,8 +47,8 @@ export function ResetRequestForm() {
   return (
     <AuthCard
       icon={KeyRound}
-      title="Reset your password"
-      description="Enter your email and we'll send a reset link."
+      title={t("auth.reset.requestTitle")}
+      description={t("auth.reset.requestDescription")}
     >
       <form
         onSubmit={form.handleSubmit((values) => {
@@ -60,20 +62,20 @@ export function ResetRequestForm() {
         <IconField
           id="email"
           type="email"
-          label="Email"
+          label={t("auth.reset.email")}
           icon={Mail}
           autoComplete="email"
           required
-          placeholder="you@email.com"
+          placeholder={t("auth.reset.emailPlaceholder")}
           error={form.formState.errors.email?.message}
           {...form.register("email")}
         />
         {state.status === "error" && <FormError message={state.message} />}
-        <SubmitButton pending={pending}>Send reset link</SubmitButton>
+        <SubmitButton pending={pending}>{t("auth.reset.sendLink")}</SubmitButton>
         <p className="text-center text-sm text-muted-foreground">
-          Remembered it?{" "}
+          {t("auth.reset.rememberedIt")}{" "}
           <Link href="/login" className="font-medium text-foreground hover:underline">
-            Back to sign in
+            {t("auth.reset.backToSignIn")}
           </Link>
         </p>
       </form>
@@ -82,6 +84,7 @@ export function ResetRequestForm() {
 }
 
 export function ResetPerformForm({ token }: { token: string }) {
+  const t = useT();
   const [state, action, pending] = useActionState(performPasswordResetAction, initial);
   const form = useForm<ResetPerformValues>({
     resolver: zodResolver(resetPerformSchema),
@@ -92,11 +95,11 @@ export function ResetPerformForm({ token }: { token: string }) {
     return (
       <AuthCard
         icon={CheckCircle2}
-        title="Password updated"
-        description="You can now sign in with your new password."
+        title={t("auth.reset.updatedTitle")}
+        description={t("auth.reset.updatedDescription")}
       >
         <Button className="h-11 w-full" render={<Link href="/login" />}>
-          Sign in
+          {t("auth.reset.signIn")}
         </Button>
       </AuthCard>
     );
@@ -105,8 +108,8 @@ export function ResetPerformForm({ token }: { token: string }) {
   return (
     <AuthCard
       icon={Lock}
-      title="Choose a new password"
-      description="Enter a new password for your account."
+      title={t("auth.reset.performTitle")}
+      description={t("auth.reset.performDescription")}
     >
       <form
         onSubmit={form.handleSubmit((values) => {
@@ -121,17 +124,17 @@ export function ResetPerformForm({ token }: { token: string }) {
         <input type="hidden" name="token" value={token} />
         <PasswordField
           id="password"
-          label="New password"
+          label={t("auth.reset.newPassword")}
           icon={Lock}
           autoComplete="new-password"
           required
           minLength={8}
-          placeholder="At least 8 characters"
+          placeholder={t("auth.reset.passwordPlaceholder")}
           error={form.formState.errors.password?.message}
           {...form.register("password")}
         />
         {state.status === "error" && <FormError message={state.message} />}
-        <SubmitButton pending={pending}>Update password</SubmitButton>
+        <SubmitButton pending={pending}>{t("auth.reset.updatePassword")}</SubmitButton>
       </form>
     </AuthCard>
   );
