@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { shareSearchParamsCache } from "@/lib/cv/share-search-params";
 import { getPublicCv } from "@/lib/cv/share-service";
+import { OG_IMAGE } from "@/lib/seo";
 import { getTemplate } from "@/templates/registry";
 import { ShareView } from "./share-view";
 import { ShareUnavailable } from "./share-unavailable";
@@ -36,8 +37,8 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     ...baseMetadata,
     title,
     description,
-    openGraph: { type: "profile", title, description },
-    twitter: { card: "summary_large_image", title, description },
+    openGraph: { type: "profile", title, description, images: [OG_IMAGE] },
+    twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE.url] },
   };
 }
 

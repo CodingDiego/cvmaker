@@ -26,6 +26,19 @@ const OG_LOCALE: Record<Locale, string> = {
 };
 
 /**
+ * Shared social-card image. Root-relative so `metadataBase` resolves it to an
+ * absolute URL. MUST be repeated on every route that sets its own `openGraph`:
+ * Next does not inherit `openGraph.images` from a parent once a page defines its
+ * own `openGraph` object, so omitting it here silently drops the card image.
+ */
+export const OG_IMAGE = {
+  url: "/opengraph.png",
+  width: 1731,
+  height: 909,
+  alt: "CVMaker - Free ATS-friendly resume builder",
+} as const;
+
+/**
  * Per-route `alternates` with a localized canonical + full hreflang set. The
  * canonical points at the CURRENT locale's URL (e.g. `/es/templates`); the
  * `languages` map advertises every locale plus an `x-default` (English). Paths
@@ -66,8 +79,9 @@ export function pageMetadata(opts: {
       description,
       url: `/${lang}${seg}`,
       locale: OG_LOCALE[lang],
+      images: [OG_IMAGE],
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE.url] },
     ...(index ? {} : { robots: { index: false, follow: true } }),
   };
 }
