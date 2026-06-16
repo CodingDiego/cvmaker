@@ -4,6 +4,7 @@ import type {
   EducationalOrganization,
   BreadcrumbList,
   CollectionPage,
+  FAQPage,
   ItemList,
   Organization,
   Person,
@@ -126,6 +127,26 @@ export function softwareApplicationLd(): WithContext<SoftwareApplication> {
     description: siteConfig.description,
     url: siteConfig.url,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  };
+}
+
+/**
+ * FAQPage structured data for the home FAQ. The same Q&As are rendered visibly
+ * on the page (a hard requirement for Google's FAQ markup). Note: FAQ rich
+ * results are now largely restricted to authoritative gov/health sites, so this
+ * mainly aids entity understanding rather than guaranteeing a rich snippet.
+ */
+export function faqPageLd(
+  items: ReadonlyArray<{ q: string; a: string }>,
+): WithContext<FAQPage> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
   };
 }
 

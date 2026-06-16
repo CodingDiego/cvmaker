@@ -42,7 +42,15 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
 
 const CONTROL = "h-9";
 
-export function EditorToolbar({ status }: { status: SaveStatus }) {
+export function EditorToolbar({
+  status,
+  onShowErrors,
+}: {
+  status: SaveStatus;
+  /** Called when an action (share/export) is blocked by empty sections, so the
+   *  shell can reveal the form (and its inline highlights) on mobile. */
+  onShowErrors?: () => void;
+}) {
   const cvId = useCvStore((s) => s.cvId);
   const title = useCvStore((s) => s.title);
   const templateId = useCvStore((s) => s.templateId);
@@ -51,28 +59,37 @@ export function EditorToolbar({ status }: { status: SaveStatus }) {
   const setMeta = useCvStore((s) => s.setMeta);
 
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b bg-card/60 px-3 py-2.5 backdrop-blur sm:gap-3 sm:px-4">
-      <Button
-        variant="ghost"
-        size="icon"
-        className={CONTROL}
-        aria-label="Back to dashboard"
-        render={<Link href="/dashboard" />}
-      >
-        <ArrowLeft className="size-4" />
-      </Button>
+    <div className="flex flex-col gap-2 border-b bg-card/60 px-3 py-2 backdrop-blur sm:px-4 sm:py-2.5">
+      {/* Row 1 — identity + primary actions */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`${CONTROL} shrink-0`}
+          aria-label="Back to dashboard"
+          render={<Link href="/dashboard" />}
+        >
+          <ArrowLeft className="size-4" />
+        </Button>
 
-      <Input
-        value={title}
-        onChange={(e) => setMeta({ title: e.target.value })}
-        className={`${CONTROL} w-40 font-medium sm:w-48`}
-        aria-label="CV title"
-        placeholder="Untitled CV"
-      />
+        <Input
+          value={title}
+          onChange={(e) => setMeta({ title: e.target.value })}
+          className={`${CONTROL} min-w-0 flex-1 font-medium sm:w-64 sm:flex-none`}
+          aria-label="CV title"
+          placeholder="Untitled CV"
+        />
 
-      <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2 sm:ml-auto sm:gap-3">
+          <ShareButton cvId={cvId} onShowErrors={onShowErrors} />
+          <ExportMenu cvId={cvId} onShowErrors={onShowErrors} />
+        </div>
+      </div>
+
+      {/* Row 2 — formatting controls + save status */}
+      <div className="flex items-center gap-2 sm:gap-3">
         <Select value={templateId} onValueChange={(v) => v && setMeta({ templateId: v })}>
-          <SelectTrigger className={`${CONTROL} w-36`} aria-label="Template">
+          <SelectTrigger className={`${CONTROL} min-w-0 flex-1 sm:w-40 sm:flex-none`} aria-label="Template">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -85,7 +102,7 @@ export function EditorToolbar({ status }: { status: SaveStatus }) {
         </Select>
 
         <Select value={fontFamily} onValueChange={(v) => v && setMeta({ fontFamily: v })}>
-          <SelectTrigger className={`${CONTROL} w-32`} aria-label="Font">
+          <SelectTrigger className={`${CONTROL} min-w-0 flex-1 sm:w-36 sm:flex-none`} aria-label="Font">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -98,7 +115,7 @@ export function EditorToolbar({ status }: { status: SaveStatus }) {
         </Select>
 
         <label
-          className={`${CONTROL} relative flex w-9 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-input`}
+          className={`${CONTROL} relative flex w-9 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-input`}
           title="Accent color"
           style={{ background: accentColor }}
         >
@@ -110,12 +127,10 @@ export function EditorToolbar({ status }: { status: SaveStatus }) {
             aria-label="Accent color"
           />
         </label>
-      </div>
 
-      <div className="ml-auto flex items-center gap-2 sm:gap-3">
-        <SaveIndicator status={status} />
-        <ShareButton cvId={cvId} />
-        <ExportMenu cvId={cvId} />
+        <div className="ml-auto flex items-center">
+          <SaveIndicator status={status} />
+        </div>
       </div>
     </div>
   );

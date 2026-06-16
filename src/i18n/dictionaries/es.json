@@ -72,5 +72,48 @@
     "rangeTitle": "Variedad de plantillas",
     "rangeLead": "Diseños conservadores, técnicos, ejecutivos y editoriales comparten un mismo modelo de borrador.",
     "seeAll": "Ver todas las plantillas"
+  },
+  "states": {
+    "notFound": {
+      "code": "404",
+      "title": "Página no encontrada",
+      "description": "La página que buscas no existe o puede haberse movido.",
+      "home": "Ir al inicio",
+      "templates": "Ver plantillas"
+    },
+    "error": {
+      "code": "500",
+      "title": "Algo salió mal",
+      "description": "Un error inesperado interrumpió esta página. Inténtalo de nuevo y, si sigue ocurriendo, vuelve al inicio.",
+      "retry": "Reintentar",
+      "home": "Ir al inicio"
+    },
+    "global": {
+      "title": "Algo salió mal",
+      "description": "Un error crítico impidió que la aplicación se cargara. Vuelve a cargar la página para continuar.",
+      "retry": "Recargar"
+    },
+    "auth": {
+      "notFoundTitle": "Página no encontrada",
+      "notFoundDescription": "Esa página de autenticación no existe. Inicia sesión o crea tu cuenta para continuar.",
+      "errorTitle": "Algo salió mal",
+      "errorDescription": "No pudimos completar la solicitud. Inténtalo de nuevo.",
+      "login": "Ir a iniciar sesión"
+    },
+    "dashboard": {
+      "notFoundTitle": "Página no encontrada",
+      "notFoundDescription": "Esta página del panel no existe. Elige una sección del menú o vuelve a tu panel.",
+      "errorTitle": "No pudimos cargar esto",
+      "errorDescription": "Ocurrió un error al cargar tu cuenta. Inténtalo de nuevo en un momento.",
+      "back": "Volver al panel"
+    },
+    "editor": {
+      "notFoundTitle": "Currículum no encontrado",
+      "notFoundDescription": "Este currículum no existe o ya no tienes acceso a él.",
+      "errorTitle": "El editor tuvo un problema",
+      "errorDescription": "Vuelve a cargar el editor para continuar; tus cambios guardados están a salvo.",
+      "retry": "Recargar editor",
+      "back": "Volver al panel"
+    }
   }
 }

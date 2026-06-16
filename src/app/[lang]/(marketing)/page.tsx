@@ -3,6 +3,7 @@ import { Link } from "@/components/link";
 import {
   ArrowRight,
   Check,
+  ChevronDown,
   Download,
   FileText,
   Layers3,
@@ -14,8 +15,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { LazyThumbnail } from "@/components/templates/lazy-thumbnail";
 import { sampleResume } from "@/lib/cv/types";
-import { pageMetadata, webPageLd } from "@/lib/seo";
-import { seoCopy } from "@/lib/seo-copy";
+import { faqPageLd, pageMetadata, webPageLd } from "@/lib/seo";
+import { faqCopy, faqHeading, seoCopy } from "@/lib/seo-copy";
 import { JsonLd } from "@/components/seo/json-ld";
 import { TEMPLATES } from "@/templates/registry";
 import { defaultLocale, isLocale } from "@/i18n/config";
@@ -223,6 +224,29 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
               </Link>
             );
           })}
+        </div>
+      </section>
+
+      <section aria-labelledby="faq-title" className="cv-defer border-t bg-secondary/30">
+        <JsonLd id="home-faq-json-ld" data={faqPageLd(faqCopy[locale])} />
+        <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+          <h2 id="faq-title" className="font-display text-3xl font-semibold text-balance">
+            {faqHeading[locale]}
+          </h2>
+          <div className="mt-8 divide-y rounded-lg border bg-background">
+            {faqCopy[locale].map((item) => (
+              <details
+                key={item.q}
+                className="group px-5 [&_summary::-webkit-details-marker]:hidden"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-medium">
+                  {item.q}
+                  <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+                </summary>
+                <p className="pb-4 text-sm leading-6 text-pretty text-muted-foreground">{item.a}</p>
+              </details>
+            ))}
+          </div>
         </div>
       </section>
     </div>

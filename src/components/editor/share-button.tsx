@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Check, Copy, Download, ExternalLink, Globe, Loader2, RefreshCw, Share2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { AlertTriangle, Check, Copy, Download, ExternalLink, Globe, Loader2, RefreshCw, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCvStore } from "@/lib/cv/store";
+import { resolveSectionTitle, validateResume } from "@/lib/cv/types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,10 +21,27 @@ import { shareCvAction, unshareCvAction } from "@/lib/cv/share-actions";
 import { shareInfoOptions, type ShareInfo } from "@/lib/cv/cv-queries";
 import { queryKeys } from "@/lib/query/keys";
 
-export function ShareButton({ cvId }: { cvId: string }) {
+export function ShareButton({ cvId, onShowErrors }: { cvId: string; onShowErrors?: () => void }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const queryClient = useQueryClient();
+
+  // A CV can only be shared once every kept section has content — an empty
+  // section would render as a blank block in the public copy. Mirror the export
+  // guard: flag the offending sections inline (via the store) and name them.
+  const data = useCvStore((s) => s.data);
+  const setSectionErrors = useCvStore((s) => s.setSectionErrors);
+  const emptySections = useMemo(() => validateResume(data), [data]);
+  const hasEmpty = emptySections.length > 0;
+
+  function flagEmpty() {
+    setSectionErrors(emptySections);
+    onShowErrors?.();
+    const names = emptySections.map((k) => resolveSectionTitle(data, k)).join(", ");
+    toast.error(
+      `Empty section${emptySections.length > 1 ? "s" : ""}: ${names}. Add details or remove ${emptySections.length > 1 ? "them" : "it"} before sharing.`,
+    );
+  }
 
   // Share state is read from GET /api/cvs/:cvId/share, fetched lazily the first
   // time the dialog opens (and refetched after a mutation invalidates the tag).
@@ -68,8 +87,21 @@ export function ShareButton({ cvId }: { cvId: string }) {
   const isPublic = info?.isPublic ?? false;
 
   function toggle(next: boolean) {
-    if (next) shareMutation.mutate("enable");
-    else unshareMutation.mutate();
+    if (next) {
+      if (hasEmpty) {
+        flagEmpty();
+        return;
+      }
+      shareMutation.mutate("enable");
+    } else unshareMutation.mutate();
+  }
+
+  function resync() {
+    if (hasEmpty) {
+      flagEmpty();
+      return;
+    }
+    shareMutation.mutate("resync");
   }
 
   function copy() {
@@ -82,8 +114,8 @@ export function ShareButton({ cvId }: { cvId: string }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="outline" size="sm" className="h-9" />}>
-        <Share2 className="size-4" /> Share
+      <DialogTrigger render={<Button variant="outline" size="sm" className="h-9" aria-label="Share" />}>
+        <Share2 className="size-4" /> <span className="hidden sm:inline">Share</span>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -92,6 +124,19 @@ export function ShareButton({ cvId }: { cvId: string }) {
             Make this CV public to share it with a link. The public copy can be viewed and downloaded by anyone.
           </DialogDescription>
         </DialogHeader>
+
+        {hasEmpty && (
+          <div className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-destructive">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+            <div className="text-sm">
+              <p className="font-medium">Some sections are empty</p>
+              <p className="text-xs text-destructive/90">
+                Add details or remove {emptySections.length > 1 ? "these" : "this"} before sharing:{" "}
+                {emptySections.map((k) => resolveSectionTitle(data, k)).join(", ")}.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
           <div className="flex items-center gap-2.5">
@@ -139,7 +184,7 @@ export function ShareButton({ cvId }: { cvId: string }) {
                   <Download className="size-4" /> DOCX
                 </Button>
               )}
-              <Button size="sm" variant="ghost" className="ml-auto" disabled={pending} onClick={() => shareMutation.mutate("resync")}>
+              <Button size="sm" variant="ghost" className="ml-auto" disabled={pending} onClick={resync}>
                 {pending ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
                 Update public copy
               </Button>

@@ -60,6 +60,10 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   experimental: {
     typedEnv: true,
+    // Enables app/global-not-found.tsx: a consistent 404 for unmatched URLs.
+    // Required because the root layout lives in the [lang] dynamic segment, so a
+    // 404 can't be composed from a static root layout + not-found.
+    globalNotFound: true,
   },
   serverExternalPackages: ["@node-rs/argon2", "@react-pdf/renderer"],
   turbopack: {

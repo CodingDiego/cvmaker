@@ -104,3 +104,102 @@ export const seoCopy: Record<SeoPageKey, Record<Locale, SeoCopy>> = {
     },
   },
 };
+
+/** Localized heading for the home FAQ section. */
+export const faqHeading: Record<Locale, string> = {
+  en: "Frequently asked questions",
+  es: "Preguntas frecuentes",
+  pt: "Perguntas frequentes",
+};
+
+export interface FaqItem {
+  q: string;
+  a: string;
+}
+
+/**
+ * Home FAQ — one source for both the visible accordion and the `FAQPage`
+ * JSON-LD (Google requires the answers to be visible on the page). Questions
+ * mirror the high-intent "is it free / ATS / PDF / watermark" queries that
+ * surface in the "People also ask" box for "cv maker free".
+ */
+export const faqCopy: Record<Locale, FaqItem[]> = {
+  en: [
+    {
+      q: "Is CVMaker free?",
+      a: "Yes. You can build, edit and download a complete CV for free — no watermark and no credit card. A Pro plan adds extra premium designs.",
+    },
+    {
+      q: "Are the CVs ATS-friendly?",
+      a: "Yes. Every template is structured so applicant tracking systems can read your name, experience, skills and education correctly.",
+    },
+    {
+      q: "Can I download my CV as PDF or Word (DOCX)?",
+      a: "Yes. Export your finished CV to PDF or DOCX in one click, as many times as you need.",
+    },
+    {
+      q: "Do I need an account to make a CV?",
+      a: "You can start from any template right away. A free account lets you save your draft, come back to edit it, and export.",
+    },
+    {
+      q: "Can I change templates without losing my content?",
+      a: "Yes. Your CV is one reusable draft — switch designs freely and your content stays exactly as you wrote it.",
+    },
+    {
+      q: "Does the downloaded CV have a watermark?",
+      a: "No. Every download is clean, with no watermark or branding — on both the free and Pro plans.",
+    },
+  ],
+  es: [
+    {
+      q: "¿CVMaker es gratis?",
+      a: "Sí. Podés crear, editar y descargar un CV completo gratis, sin marca de agua ni tarjeta de crédito. El plan Pro suma diseños premium extra.",
+    },
+    {
+      q: "¿Los CV son compatibles con ATS?",
+      a: "Sí. Cada plantilla está estructurada para que los sistemas ATS lean correctamente tu nombre, experiencia, habilidades y formación.",
+    },
+    {
+      q: "¿Puedo descargar mi CV en PDF o Word (DOCX)?",
+      a: "Sí. Exportá tu CV terminado a PDF o DOCX en un clic, todas las veces que necesites.",
+    },
+    {
+      q: "¿Necesito una cuenta para hacer un CV?",
+      a: "Podés empezar desde cualquier plantilla al instante. Una cuenta gratis te deja guardar el borrador, volver a editarlo y exportarlo.",
+    },
+    {
+      q: "¿Puedo cambiar de plantilla sin perder mi contenido?",
+      a: "Sí. Tu CV es un único borrador reutilizable: cambiá de diseño libremente y tu contenido queda tal como lo escribiste.",
+    },
+    {
+      q: "¿El CV descargado tiene marca de agua?",
+      a: "No. Cada descarga es limpia, sin marca de agua ni branding, tanto en el plan gratis como en Pro.",
+    },
+  ],
+  pt: [
+    {
+      q: "O CVMaker é grátis?",
+      a: "Sim. Você pode criar, editar e baixar um currículo completo de graça, sem marca d'água e sem cartão de crédito. O plano Pro adiciona designs premium extras.",
+    },
+    {
+      q: "Os currículos são compatíveis com ATS?",
+      a: "Sim. Cada modelo é estruturado para que os sistemas ATS leiam corretamente seu nome, experiência, habilidades e formação.",
+    },
+    {
+      q: "Posso baixar meu currículo em PDF ou Word (DOCX)?",
+      a: "Sim. Exporte seu currículo pronto para PDF ou DOCX em um clique, quantas vezes precisar.",
+    },
+    {
+      q: "Preciso de uma conta para fazer um currículo?",
+      a: "Você pode começar por qualquer modelo na hora. Uma conta grátis permite salvar o rascunho, voltar para editar e exportar.",
+    },
+    {
+      q: "Posso trocar de modelo sem perder meu conteúdo?",
+      a: "Sim. Seu currículo é um único rascunho reutilizável: troque de design livremente e seu conteúdo permanece como você escreveu.",
+    },
+    {
+      q: "O currículo baixado tem marca d'água?",
+      a: "Não. Cada download é limpo, sem marca d'água nem branding, tanto no plano grátis quanto no Pro.",
+    },
+  ],
+};

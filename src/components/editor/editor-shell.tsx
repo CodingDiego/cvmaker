@@ -1,16 +1,18 @@
 "use client";
 
 import { Activity, useState } from "react";
-import { Eye, Pencil } from "lucide-react";
+import { Expand, Eye, Pencil } from "lucide-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useCvStore } from "@/lib/cv/store";
 import { useAutosave } from "@/lib/cv/use-autosave";
 import { cvDetailOptions } from "@/lib/cv/cv-queries";
+import { Button } from "@/components/ui/button";
 import { EditorToolbar } from "./editor-toolbar";
 import { EditorForm } from "./editor-form";
 import { LivePreview } from "./live-preview";
+import { FullscreenPreview } from "./fullscreen-preview";
 
 type EditorView = "edit" | "preview";
 
@@ -27,6 +29,7 @@ export function EditorShell({ cvId }: { cvId: string }) {
   });
 
   const [view, setView] = useState<EditorView>("edit");
+  const [fullscreen, setFullscreen] = useState(false);
   const { status } = useAutosave();
   const isMobile = useIsMobile();
 
@@ -38,7 +41,7 @@ export function EditorShell({ cvId }: { cvId: string }) {
 
   return (
     <div className="flex h-svh flex-col">
-      <EditorToolbar status={status} />
+      <EditorToolbar status={status} onShowErrors={() => setView("edit")} />
 
       {/* Mobile view switch */}
       <div className="flex gap-1 border-b bg-card/40 p-2 md:hidden">
@@ -55,6 +58,13 @@ export function EditorShell({ cvId }: { cvId: string }) {
             {v}
           </button>
         ))}
+        <button
+          onClick={() => setFullscreen(true)}
+          aria-label="Full-screen preview"
+          className="flex items-center justify-center rounded-lg px-3 text-muted-foreground transition-colors hover:bg-muted"
+        >
+          <Expand className="size-3.5" />
+        </button>
       </div>
 
       <main id="main-content" className="grid min-h-0 flex-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" tabIndex={-1}>
@@ -64,11 +74,25 @@ export function EditorShell({ cvId }: { cvId: string }) {
           </div>
         </Activity>
         <Activity mode={previewMode}>
-          <div className="min-h-0 overflow-y-auto bg-muted/30">
-            <LivePreview />
+          <div className="relative min-h-0 bg-muted/30">
+            {/* Pinned maximize control (desktop; mobile uses the tab-bar button). */}
+            <Button
+              variant="outline"
+              size="icon"
+              className="absolute top-3 right-3 z-10 hidden size-8 bg-background/80 backdrop-blur md:inline-flex"
+              aria-label="Full-screen preview"
+              onClick={() => setFullscreen(true)}
+            >
+              <Expand className="size-4" />
+            </Button>
+            <div className="h-full min-h-0 overflow-y-auto">
+              <LivePreview />
+            </div>
           </div>
         </Activity>
       </main>
+
+      <FullscreenPreview open={fullscreen} onClose={() => setFullscreen(false)} />
     </div>
   );
 }

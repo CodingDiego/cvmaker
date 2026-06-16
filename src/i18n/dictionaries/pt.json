@@ -72,5 +72,48 @@
     "rangeTitle": "Variedade de modelos",
     "rangeLead": "Layouts conservadores, técnicos, executivos e editoriais compartilham um único modelo de rascunho.",
     "seeAll": "Ver todos os modelos"
+  },
+  "states": {
+    "notFound": {
+      "code": "404",
+      "title": "Página não encontrada",
+      "description": "A página que você procura não existe ou pode ter sido movida.",
+      "home": "Ir para o início",
+      "templates": "Ver modelos"
+    },
+    "error": {
+      "code": "500",
+      "title": "Algo deu errado",
+      "description": "Um erro inesperado interrompeu esta página. Tente novamente e, se continuar, volte ao início.",
+      "retry": "Tentar novamente",
+      "home": "Ir para o início"
+    },
+    "global": {
+      "title": "Algo deu errado",
+      "description": "Um erro crítico impediu o carregamento do app. Recarregue a página para continuar.",
+      "retry": "Recarregar"
+    },
+    "auth": {
+      "notFoundTitle": "Página não encontrada",
+      "notFoundDescription": "Essa página de autenticação não existe. Entre ou crie sua conta para continuar.",
+      "errorTitle": "Algo deu errado",
+      "errorDescription": "Não foi possível concluir a solicitação. Tente novamente.",
+      "login": "Ir para o login"
+    },
+    "dashboard": {
+      "notFoundTitle": "Página não encontrada",
+      "notFoundDescription": "Esta página do painel não existe. Escolha uma seção no menu ou volte ao seu painel.",
+      "errorTitle": "Não foi possível carregar",
+      "errorDescription": "Ocorreu um erro ao carregar sua conta. Tente novamente em instantes.",
+      "back": "Voltar ao painel"
+    },
+    "editor": {
+      "notFoundTitle": "Currículo não encontrado",
+      "notFoundDescription": "Este currículo não existe ou você não tem mais acesso a ele.",
+      "errorTitle": "O editor teve um problema",
+      "errorDescription": "Recarregue o editor para continuar — suas alterações salvas estão seguras.",
+      "retry": "Recarregar editor",
+      "back": "Voltar ao painel"
+    }
   }
 }

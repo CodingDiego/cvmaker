@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { deleteCvAction, renameCvAction } from "@/lib/cv/actions";
 import { queryKeys } from "@/lib/query/keys";
 import { TEMPLATE_LABELS, getTemplate } from "@/templates/registry";
-import { PreviewThumbnail } from "@/components/templates/preview-thumbnail";
+import { ResponsiveThumbnail } from "@/components/templates/responsive-thumbnail";
 import type { ResumeData } from "@/lib/cv/types";
 
 export function CvCard({
@@ -75,16 +75,12 @@ export function CvCard({
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg">
       <Link href={`/editor/${id}`} className="relative block overflow-hidden border-b bg-muted/30">
-        <div className="flex h-[210px] justify-center overflow-hidden">
-          <PreviewThumbnail
-            data={data}
-            tokens={getTemplate(templateId)}
-            accentColor={accentColor}
-            fontFamily={fontFamily}
-            width={300}
-            height={210}
-          />
-        </div>
+        <ResponsiveThumbnail
+          data={data}
+          tokens={getTemplate(templateId)}
+          accentColor={accentColor}
+          fontFamily={fontFamily}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
         {isPublic && (
           <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[0.7rem] font-medium text-primary-foreground shadow">

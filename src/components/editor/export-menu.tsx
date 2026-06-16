@@ -20,7 +20,7 @@ function exportHref(cvId: string, format: ExportFormat) {
   return `/api/cvs/${encodeURIComponent(cvId)}/export?format=${format}`;
 }
 
-export function ExportMenu({ cvId }: { cvId: string }) {
+export function ExportMenu({ cvId, onShowErrors }: { cvId: string; onShowErrors?: () => void }) {
   // Block export while any kept section is empty; flag them inline (via the
   // store) and tell the user which ones in a toast.
   function guard(e: React.MouseEvent) {
@@ -29,6 +29,7 @@ export function ExportMenu({ cvId }: { cvId: string }) {
     if (empty.length) {
       e.preventDefault();
       setSectionErrors(empty);
+      onShowErrors?.();
       const names = empty.map((k) => resolveSectionTitle(data, k)).join(", ");
       toast.error(`Empty section${empty.length > 1 ? "s" : ""}: ${names}. Add details or remove ${empty.length > 1 ? "them" : "it"} before exporting.`);
       return;
@@ -38,9 +39,9 @@ export function ExportMenu({ cvId }: { cvId: string }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="default" size="sm" className="h-9" />}>
+      <DropdownMenuTrigger render={<Button variant="default" size="sm" className="h-9" aria-label="Export" />}>
         <Download className="size-4" />
-        Export
+        <span className="hidden sm:inline">Export</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuGroup>

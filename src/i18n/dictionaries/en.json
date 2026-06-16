@@ -72,5 +72,48 @@
     "rangeTitle": "Template range",
     "rangeLead": "Conservative, technical, executive and editorial layouts share one draft model.",
     "seeAll": "See all templates"
+  },
+  "states": {
+    "notFound": {
+      "code": "404",
+      "title": "Page not found",
+      "description": "The page you’re looking for doesn’t exist or may have moved.",
+      "home": "Go home",
+      "templates": "Browse templates"
+    },
+    "error": {
+      "code": "500",
+      "title": "Something went wrong",
+      "description": "An unexpected error interrupted this page. Try again — if it keeps happening, head back and start fresh.",
+      "retry": "Try again",
+      "home": "Go home"
+    },
+    "global": {
+      "title": "Something went wrong",
+      "description": "A critical error stopped the app from loading. Please reload the page to continue.",
+      "retry": "Reload"
+    },
+    "auth": {
+      "notFoundTitle": "Page not found",
+      "notFoundDescription": "That authentication page doesn’t exist. Sign in or create your account to continue.",
+      "errorTitle": "Something went wrong",
+      "errorDescription": "We couldn’t complete that request. Please try again.",
+      "login": "Go to login"
+    },
+    "dashboard": {
+      "notFoundTitle": "Page not found",
+      "notFoundDescription": "This dashboard page doesn’t exist. Pick a section from the menu, or return to your dashboard.",
+      "errorTitle": "We couldn’t load this",
+      "errorDescription": "Something went wrong while loading your account. Try again in a moment.",
+      "back": "Back to dashboard"
+    },
+    "editor": {
+      "notFoundTitle": "Resume not found",
+      "notFoundDescription": "This resume doesn’t exist, or you no longer have access to it.",
+      "errorTitle": "The editor hit a snag",
+      "errorDescription": "Reload the editor to continue — your saved changes are safe.",
+      "retry": "Reload editor",
+      "back": "Back to dashboard"
+    }
   }
 }
