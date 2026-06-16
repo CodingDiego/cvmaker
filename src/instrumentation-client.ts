@@ -15,6 +15,21 @@ import { initBotId } from "botid/client/core";
 // segment with a leading `*` wildcard (`*` expands to `.*` in BotID's matcher).
 initBotId({
   protect: [
+    // Public GET pages.
+    { path: "/", method: "GET" },
+    { path: "/en", method: "GET" },
+    { path: "/es", method: "GET" },
+    { path: "/pt", method: "GET" },
+    { path: "/*/templates", method: "GET" },
+    { path: "/*/privacy", method: "GET" },
+    { path: "/*/terms", method: "GET" },
+    { path: "/*/success", method: "GET" },
+    { path: "/*/return", method: "GET" },
+    { path: "/*/share", method: "GET" },
+    { path: "/*/login", method: "GET" },
+    { path: "/*/register", method: "GET" },
+    { path: "/*/reset", method: "GET" },
+    { path: "/*/verify", method: "GET" },
     // Auth forms — the unauthenticated, bot-prone surface.
     { path: "/*/login", method: "POST" }, // sign in + 2FA verify
     { path: "/*/register", method: "POST" }, // account creation
