@@ -1,5 +1,5 @@
 import "server-only";
-import { cacheTag } from "next/cache";
+import { cacheTag, cacheLife } from "next/cache";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { cvs, type Cv } from "@/db/schema";
@@ -117,10 +117,25 @@ export async function unshareCv(userId: string, cvId: string): Promise<void> {
     .where(and(eq(cvs.id, cvId), eq(cvs.userId, userId)));
 }
 
-/** Public read used by the share page — only returns the CV if it's public. */
+/**
+ * Public read used by the share page — only returns the CV if it's public.
+ *
+ * `use cache: remote` (not plain `use cache`): the share page is fully dynamic
+ * (it reads the `u`/`c` searchParams), so this read runs at request time, where
+ * an in-memory cache barely hits — every serverless instance has its own memory.
+ * A remote cache is shared across all instances/regions, so a link that gets
+ * traffic is served from one durable entry instead of hammering Postgres. The
+ * content is public and identical for every viewer, and it's keyed only by
+ * (userId, cvId) — few unique values per link — so utilization is high.
+ *
+ * Freshness is driven by the `cv:<id>` tag, not the TTL: editing, re-sharing and
+ * unsharing all `updateTag(tags.cv(cvId))`, so an unshared/edited CV is evicted
+ * immediately. Hence the long `cacheLife` — it maximizes DB offload safely.
+ */
 export async function getPublicCv(userId: string, cvId: string): Promise<Cv | null> {
-  "use cache";
+  "use cache: remote";
   cacheTag(tags.cv(cvId));
+  cacheLife("days");
 
   const [row] = await db
     .select()
