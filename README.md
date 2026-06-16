@@ -163,4 +163,4 @@ Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-See [LICENSE](LICENSE). _(Add a license file before publishing — see CONTRIBUTING.)_
+CVMaker is licensed under the [GNU Affero General Public License v3.0](LICENSE).

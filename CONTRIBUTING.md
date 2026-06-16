@@ -92,4 +92,4 @@ purpose.
 ## License
 
 By contributing, you agree that your contributions will be licensed under the project's
-[LICENSE](LICENSE).
+[GNU Affero General Public License v3.0](LICENSE).
