@@ -378,3 +378,22 @@ export function sampleResume(): ResumeData {
     custom: [],
   });
 }
+
+/**
+ * Whether a resume carries no user-entered content yet — a fresh draft created
+ * from a template (see {@link templateStarter}) before anything is typed. Used by
+ * the dashboard to swap in sample content so a blank draft still previews the
+ * template design instead of an empty page.
+ */
+export function isResumeEmpty(data: ResumeData): boolean {
+  const h = data.header;
+  const headerHasContent =
+    !!h.fullName.trim() ||
+    !!h.title.trim() ||
+    !!h.photo ||
+    Object.values(h.contact).some((v) => typeof v === "string" && v.trim().length > 0);
+  if (headerHasContent) return false;
+
+  const keys = [...BUILT_IN_SECTIONS, ...data.custom.map((c) => `custom:${c.id}`)];
+  return !keys.some((key) => sectionHasContent(data, key));
+}

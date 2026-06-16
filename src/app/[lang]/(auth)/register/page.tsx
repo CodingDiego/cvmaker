@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { RegisterForm } from "@/components/auth/register-form";
+import { Skeleton } from "@/components/ui/skeleton";
 import { pageMetadata } from "@/lib/seo";
 import { seoCopy } from "@/lib/seo-copy";
 import { defaultLocale, isLocale } from "@/i18n/config";
@@ -18,5 +20,9 @@ export async function generateMetadata({
 
 export default async function RegisterPage() {
   if (await getCurrentUser()) redirect("/dashboard");
-  return <RegisterForm />;
+  return (
+    <Suspense fallback={<Skeleton className="h-96 w-full rounded-xl" />}>
+      <RegisterForm />
+    </Suspense>
+  );
 }

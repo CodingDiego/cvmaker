@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useT } from "@/i18n/provider";
 
 /**
  * Shared building blocks for the auth screens. Keeps every form visually
@@ -96,6 +97,7 @@ export function PasswordField({
   labelAction?: React.ReactNode;
   error?: string;
 }) {
+  const t = useT();
   const [show, setShow] = useState(false);
   const errorId = `${id}-error`;
   return (
@@ -118,7 +120,7 @@ export function PasswordField({
           type="button"
           onClick={() => setShow((s) => !s)}
           tabIndex={-1}
-          aria-label={show ? "Hide password" : "Show password"}
+          aria-label={show ? t("auth.hidePassword") : t("auth.showPassword")}
           className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"
         >
           {show ? <EyeOff aria-hidden="true" className="size-4" /> : <Eye aria-hidden="true" className="size-4" />}

@@ -14,13 +14,16 @@ import {
   type TwoFaValues,
 } from "@/lib/auth/auth-schemas";
 import { AuthCard, FormError, IconField, PasswordField, SubmitButton } from "./auth-ui";
+import { useT } from "@/i18n/provider";
+import { safeNext, withNext } from "@/lib/auth/safe-next";
 
 const initial: ActionState = { status: "idle" };
 
 export function LoginForm() {
+  const t = useT();
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/dashboard";
+  const next = safeNext(params.get("next"));
   const [state, action, pending] = useActionState(loginAction, initial);
   const [twoFaState, twoFaAction, twoFaPending] = useActionState(
     verifyLoginTwoFactorAction,
@@ -46,8 +49,8 @@ export function LoginForm() {
     return (
       <AuthCard
         icon={ShieldCheck}
-        title="Two-factor authentication"
-        description="Enter the 6-digit code from your authenticator app, or a backup code."
+        title={t("auth.login.twoFaTitle")}
+        description={t("auth.login.twoFaDescription")}
       >
         <form
           onSubmit={twoFaForm.handleSubmit((values) => {
@@ -62,7 +65,7 @@ export function LoginForm() {
           <input type="hidden" name="challengeId" value={state.challengeId} />
           <IconField
             id="code"
-            label="Authentication code"
+            label={t("auth.login.authCode")}
             icon={KeyRound}
             inputMode="numeric"
             autoComplete="one-time-code"
@@ -73,14 +76,14 @@ export function LoginForm() {
             {...twoFaForm.register("code")}
           />
           {twoFaState.status === "error" && <FormError message={twoFaState.message} />}
-          <SubmitButton pending={twoFaPending}>Verify</SubmitButton>
+          <SubmitButton pending={twoFaPending}>{t("auth.login.verify")}</SubmitButton>
         </form>
       </AuthCard>
     );
   }
 
   return (
-    <AuthCard icon={LogIn} title="Welcome back" description="Sign in to your CVMaker account.">
+    <AuthCard icon={LogIn} title={t("auth.login.title")} description={t("auth.login.description")}>
       <form
         onSubmit={loginForm.handleSubmit((values) => {
           const formData = new FormData();
@@ -94,38 +97,38 @@ export function LoginForm() {
         <IconField
           id="email"
           type="email"
-          label="Email"
+          label={t("auth.login.email")}
           icon={Mail}
           autoComplete="email"
           required
-          placeholder="you@email.com"
+          placeholder={t("auth.login.emailPlaceholder")}
           error={loginForm.formState.errors.email?.message}
           {...loginForm.register("email")}
         />
         <PasswordField
           id="password"
-          label="Password"
+          label={t("auth.login.password")}
           icon={Lock}
           autoComplete="current-password"
           required
-          placeholder="Password"
+          placeholder={t("auth.login.passwordPlaceholder")}
           error={loginForm.formState.errors.password?.message}
           labelAction={
             <Link href="/reset" className="text-xs text-muted-foreground hover:text-foreground">
-              Forgot password?
+              {t("auth.login.forgot")}
             </Link>
           }
           {...loginForm.register("password")}
         />
         {state.status === "error" && <FormError message={state.message} />}
-        <SubmitButton pending={pending}>Sign in</SubmitButton>
+        <SubmitButton pending={pending}>{t("auth.login.submit")}</SubmitButton>
         <p className="text-center text-sm text-muted-foreground">
-          No account?{" "}
+          {t("auth.login.noAccount")}{" "}
           <Link
-            href={next === "/dashboard" ? "/register" : `/register?next=${encodeURIComponent(next)}`}
+            href={withNext("/register", next)}
             className="font-medium text-foreground hover:underline"
           >
-            Create one
+            {t("auth.login.createOne")}
           </Link>
         </p>
       </form>

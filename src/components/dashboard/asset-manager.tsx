@@ -16,8 +16,10 @@ import {
 } from "@/lib/assets/actions";
 import { assetListOptions, type AssetView } from "@/lib/assets/asset-queries";
 import { queryKeys } from "@/lib/query/keys";
+import { useT } from "@/i18n/provider";
+import type { Translator } from "@/i18n/translate";
 
-function AssetRow({ asset }: { asset: AssetView }) {
+function AssetRow({ asset, t }: { asset: AssetView; t: Translator }) {
   const queryClient = useQueryClient();
   const invalidate = () => queryClient.invalidateQueries({ queryKey: queryKeys.assets.list() });
 
@@ -26,8 +28,8 @@ function AssetRow({ asset }: { asset: AssetView }) {
       next ? shareAssetAction(asset.id) : unshareAssetAction(asset.id),
     onSuccess: (res, next) => {
       if (res.ok) {
-        toast.message(next ? "Sharing asset…" : "Unsharing asset…", {
-          description: "The public copy is syncing in the background.",
+        toast.message(next ? t("dashboard.assets.sharing") : t("dashboard.assets.unsharing"), {
+          description: t("dashboard.assets.syncDesc"),
         });
       }
       invalidate();
@@ -51,8 +53,8 @@ function AssetRow({ asset }: { asset: AssetView }) {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="truncate font-medium">{asset.name}</span>
-              {asset.syncing && <Badge variant="secondary">Syncing…</Badge>}
-              {asset.shared && !asset.syncing && <Badge>Public</Badge>}
+              {asset.syncing && <Badge variant="secondary">{t("dashboard.assets.syncing")}</Badge>}
+              {asset.shared && !asset.syncing && <Badge>{t("dashboard.assets.public")}</Badge>}
             </div>
             <div className="text-xs text-muted-foreground">{asset.contentType}</div>
           </div>
@@ -63,10 +65,10 @@ function AssetRow({ asset }: { asset: AssetView }) {
             <Button
               variant="ghost"
               size="icon-sm"
-              aria-label="Copy public URL"
+              aria-label={t("dashboard.assets.copyUrlAria")}
               onClick={() => {
                 navigator.clipboard.writeText(asset.publicUrl!);
-                toast.success("Public URL copied");
+                toast.success(t("dashboard.assets.copied"));
               }}
             >
               <Copy className="size-4" />
@@ -78,13 +80,13 @@ function AssetRow({ asset }: { asset: AssetView }) {
               checked={asset.shared}
               disabled={pending}
               onCheckedChange={(next) => toggleMutation.mutate(next)}
-              aria-label="Share publicly"
+              aria-label={t("dashboard.assets.shareAria")}
             />
           </div>
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label="Delete asset"
+            aria-label={t("dashboard.assets.deleteAria")}
             disabled={pending}
             onClick={() => deleteMutation.mutate()}
           >
@@ -97,6 +99,7 @@ function AssetRow({ asset }: { asset: AssetView }) {
 }
 
 export function AssetManager() {
+  const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
@@ -115,13 +118,13 @@ export function AssetManager() {
     },
     onSuccess: (res) => {
       if (res.ok) {
-        toast.success("Asset uploaded");
+        toast.success(t("dashboard.assets.uploaded"));
         queryClient.invalidateQueries({ queryKey: queryKeys.assets.list() });
       } else {
-        toast.error(res.error ?? "Upload failed");
+        toast.error(res.error ?? t("dashboard.assets.uploadFailed"));
       }
     },
-    onError: () => toast.error("Upload failed"),
+    onError: () => toast.error(t("dashboard.assets.uploadFailed")),
     onSettled: () => {
       if (inputRef.current) inputRef.current.value = "";
     },
@@ -142,18 +145,18 @@ export function AssetManager() {
           ) : (
             <Upload className="size-4" />
           )}
-          Upload asset
+          {t("dashboard.assets.upload")}
         </Button>
       </div>
 
       {assets.length === 0 ? (
         <div className="rounded-xl border border-dashed py-16 text-center text-sm text-muted-foreground">
-          No assets yet. Upload a file, then toggle sharing to publish a public copy.
+          {t("dashboard.assets.empty")}
         </div>
       ) : (
         <div className="space-y-2">
           {assets.map((a) => (
-            <AssetRow key={a.id} asset={a} />
+            <AssetRow key={a.id} asset={a} t={t} />
           ))}
         </div>
       )}

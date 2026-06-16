@@ -9,10 +9,12 @@ import { profileSchema, type ProfileValues } from "@/lib/auth/auth-schemas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useT } from "@/i18n/provider";
 
 const initial: AccountActionState = { status: "idle" };
 
 export function ProfileForm({ email, name }: { email: string; name: string | null }) {
+  const t = useT();
   const [state, action, pending] = useActionState(updateProfileAction, initial);
   const form = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
@@ -31,14 +33,14 @@ export function ProfileForm({ email, name }: { email: string; name: string | nul
       noValidate
     >
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t("dashboard.account.email")}</Label>
         <Input id="email" value={email} disabled />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name">{t("dashboard.account.name")}</Label>
         <Input
           id="name"
-          placeholder="Your name"
+          placeholder={t("dashboard.account.namePlaceholder")}
           aria-invalid={Boolean(nameError) || undefined}
           aria-describedby={nameError ? "name-error" : undefined}
           {...form.register("name")}
@@ -56,11 +58,11 @@ export function ProfileForm({ email, name }: { email: string; name: string | nul
       )}
       {state.status === "success" && (
         <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <Check className="size-4 text-primary" /> Profile saved
+          <Check className="size-4 text-primary" /> {t("dashboard.account.saved")}
         </p>
       )}
       <Button type="submit" disabled={pending}>
-        <Save className="size-4" /> {pending ? "Saving..." : "Save changes"}
+        <Save className="size-4" /> {pending ? t("dashboard.account.saving") : t("dashboard.account.save")}
       </Button>
     </form>
   );

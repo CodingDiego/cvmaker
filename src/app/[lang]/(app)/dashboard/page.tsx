@@ -7,9 +7,10 @@ import { queryKeys } from "@/lib/query/keys";
 import { getCvListCached } from "@/lib/cv/cv-reads";
 import { Button } from "@/components/ui/button";
 import { CvList } from "@/components/dashboard/cv-list";
+import { getTFromParams } from "@/i18n/server";
 
-export default async function DashboardPage() {
-  const user = await requireUser("/dashboard");
+export default async function DashboardPage({ params }: { params: Promise<{ lang: string }> }) {
+  const [user, t] = await Promise.all([requireUser("/dashboard"), getTFromParams(params)]);
 
   // Prefetch the list through the same cached read the GET route uses, then
   // hand it to the client via HydrationBoundary — server-rendered, no flash,
@@ -24,11 +25,11 @@ export default async function DashboardPage() {
     <section aria-labelledby="dashboard-title" className="space-y-6">
       <header className="flex items-center justify-between">
         <div>
-          <h1 id="dashboard-title" className="text-2xl font-semibold">My CVs</h1>
-          <p className="text-sm text-muted-foreground">Create, edit and export your resumes.</p>
+          <h1 id="dashboard-title" className="text-2xl font-semibold">{t("dashboard.cvs.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("dashboard.cvs.subtitle")}</p>
         </div>
         <Button render={<Link href="/templates" />}>
-          <Plus className="size-4" /> New CV
+          <Plus className="size-4" /> {t("dashboard.cvs.newCv")}
         </Button>
       </header>
 

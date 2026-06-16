@@ -9,13 +9,16 @@ import { useForm } from "react-hook-form";
 import { registerAction, type ActionState } from "@/lib/auth/actions";
 import { registerSchema, type RegisterValues } from "@/lib/auth/auth-schemas";
 import { AuthCard, FormError, IconField, PasswordField, SubmitButton } from "./auth-ui";
+import { useT } from "@/i18n/provider";
+import { safeNext, withNext } from "@/lib/auth/safe-next";
 
 const initial: ActionState = { status: "idle" };
 
 export function RegisterForm() {
+  const t = useT();
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/dashboard";
+  const next = safeNext(params.get("next"));
   const [state, action, pending] = useActionState(registerAction, initial);
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
@@ -32,8 +35,8 @@ export function RegisterForm() {
   return (
     <AuthCard
       icon={UserPlus}
-      title="Create your account"
-      description="Build ATS-friendly resumes for free."
+      title={t("auth.register.title")}
+      description={t("auth.register.description")}
     >
       <form
         onSubmit={form.handleSubmit((values) => {
@@ -48,44 +51,44 @@ export function RegisterForm() {
       >
         <IconField
           id="name"
-          label="Name"
+          label={t("auth.register.name")}
           icon={User}
           autoComplete="name"
-          placeholder="Jane Doe"
+          placeholder={t("auth.register.namePlaceholder")}
           error={form.formState.errors.name?.message}
           {...form.register("name")}
         />
         <IconField
           id="email"
           type="email"
-          label="Email"
+          label={t("auth.register.email")}
           icon={Mail}
           autoComplete="email"
           required
-          placeholder="you@email.com"
+          placeholder={t("auth.register.emailPlaceholder")}
           error={form.formState.errors.email?.message}
           {...form.register("email")}
         />
         <PasswordField
           id="password"
-          label="Password"
+          label={t("auth.register.password")}
           icon={Lock}
           autoComplete="new-password"
           required
           minLength={8}
-          placeholder="At least 8 characters"
+          placeholder={t("auth.register.passwordPlaceholder")}
           error={form.formState.errors.password?.message}
           {...form.register("password")}
         />
         {state.status === "error" && <FormError message={state.message} />}
-        <SubmitButton pending={pending}>Create account</SubmitButton>
+        <SubmitButton pending={pending}>{t("auth.register.submit")}</SubmitButton>
         <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
+          {t("auth.register.haveAccount")}{" "}
           <Link
-            href={next === "/dashboard" ? "/login" : `/login?next=${encodeURIComponent(next)}`}
+            href={withNext("/login", next)}
             className="font-medium text-foreground hover:underline"
           >
-            Sign in
+            {t("auth.register.signIn")}
           </Link>
         </p>
       </form>

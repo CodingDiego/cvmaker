@@ -17,6 +17,7 @@ import {
 import { cvListOptions } from "@/lib/cv/cv-queries";
 import { cvSearchParsers } from "@/lib/search-params";
 import { TEMPLATES, TEMPLATE_LABELS } from "@/templates/registry";
+import { useT } from "@/i18n/provider";
 import { CvCard } from "./cv-card";
 
 /**
@@ -25,6 +26,7 @@ import { CvCard } from "./cv-card";
  * over the already-fetched list (no extra round-trips).
  */
 export function CvList() {
+  const t = useT();
   const { data: cvs = [] } = useQuery(cvListOptions());
 
   // URL is the source of truth for the filters (shareable, survives refresh).
@@ -50,12 +52,12 @@ export function CvList() {
   if (cvs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-20 text-center">
-        <p className="font-medium">No CVs yet</p>
+        <p className="font-medium">{t("dashboard.cvs.emptyTitle")}</p>
         <p className="mb-4 text-sm text-muted-foreground">
-          Pick a template to start building your resume.
+          {t("dashboard.cvs.emptyDescription")}
         </p>
         <Button render={<Link href="/templates" />}>
-          <Plus className="size-4" /> Browse templates
+          <Plus className="size-4" /> {t("dashboard.cvs.browseTemplates")}
         </Button>
       </div>
     );
@@ -72,9 +74,9 @@ export function CvList() {
           <Input
             value={q}
             onChange={(e) => setFilters({ q: e.target.value || null })}
-            placeholder="Search your CVs by title…"
+            placeholder={t("dashboard.cvs.searchPlaceholder")}
             className="pl-9"
-            aria-label="Search CVs"
+            aria-label={t("dashboard.cvs.searchAria")}
           />
         </div>
         {usedTemplates.length > 1 && (
@@ -82,11 +84,11 @@ export function CvList() {
             value={template}
             onValueChange={(v) => v && setFilters({ template: v === "all" ? null : v })}
           >
-            <SelectTrigger className="w-full sm:w-52" aria-label="Filter by template">
+            <SelectTrigger className="w-full sm:w-52" aria-label={t("dashboard.cvs.filterAria")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All templates</SelectItem>
+              <SelectItem value="all">{t("dashboard.cvs.allTemplates")}</SelectItem>
               {usedTemplates.map((t) => (
                 <SelectItem key={t.id} value={t.id}>
                   {TEMPLATE_LABELS[t.id]}
@@ -99,7 +101,7 @@ export function CvList() {
 
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed py-16 text-center text-sm text-muted-foreground">
-          No CVs match your search.
+          {t("dashboard.cvs.noMatch")}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

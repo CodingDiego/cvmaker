@@ -8,8 +8,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { revokeSessionAction, revokeOtherSessionsAction } from "@/lib/auth/session-actions";
 import { sessionListOptions } from "@/lib/auth/session-queries";
 import { queryKeys } from "@/lib/query/keys";
+import { useT } from "@/i18n/provider";
+import type { Translator } from "@/i18n/translate";
 
-function RevokeButton({ id }: { id: string }) {
+function RevokeButton({ id, t }: { id: string; t: Translator }) {
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: () => revokeSessionAction(id),
@@ -23,12 +25,13 @@ function RevokeButton({ id }: { id: string }) {
       onClick={() => mutation.mutate()}
     >
       {mutation.isPending ? <Loader2 className="size-3.5 animate-spin" /> : <ShieldX className="size-3.5" />}
-      Revoke
+      {t("dashboard.sessions.revoke")}
     </Button>
   );
 }
 
 export function SessionList() {
+  const t = useT();
   const queryClient = useQueryClient();
   const { data: sessions = [] } = useQuery(sessionListOptions());
 
@@ -50,7 +53,7 @@ export function SessionList() {
             onClick={() => revokeOthers.mutate()}
           >
             {revokeOthers.isPending && <Loader2 className="size-3.5 animate-spin" />}
-            Sign out all other sessions
+            {t("dashboard.sessions.signOutOthers")}
           </Button>
         </div>
       )}
@@ -63,17 +66,17 @@ export function SessionList() {
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="truncate font-medium">{s.deviceLabel ?? "Unknown device"}</span>
-                  {s.current && <Badge>This device</Badge>}
+                  <span className="truncate font-medium">{s.deviceLabel ?? t("dashboard.sessions.unknownDevice")}</span>
+                  {s.current && <Badge>{t("dashboard.sessions.thisDevice")}</Badge>}
                 </div>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <MapPin className="size-3" />
-                  <span>{s.ip ?? "unknown"}</span>
-                  <span>· active {new Date(s.lastActiveAt).toLocaleString()}</span>
+                  <span>{s.ip ?? t("dashboard.sessions.unknownIp")}</span>
+                  <span>· {t("dashboard.sessions.active", { time: new Date(s.lastActiveAt).toLocaleString() })}</span>
                 </div>
               </div>
             </div>
-            {!s.current && <RevokeButton id={s.id} />}
+            {!s.current && <RevokeButton id={s.id} t={t} />}
           </CardContent>
         </Card>
       ))}

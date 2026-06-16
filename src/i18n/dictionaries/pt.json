@@ -1,6 +1,8 @@
 {
   "common": {
-    "language": "Idioma"
+    "language": "Idioma",
+    "cancel": "Cancelar",
+    "loading": "Carregando…"
   },
   "header": {
     "homeAria": "Início do CVMaker",
@@ -18,23 +20,44 @@
     "createCv": "Criar um currículo",
     "dashboard": "Painel",
     "login": "Entrar",
-    "signup": "Cadastrar-se",
+    "signup": "Cadastrar",
     "privacy": "Política de Privacidade",
     "terms": "Termos de Serviço",
     "rights": "Todos os direitos reservados.",
     "builtBy": "Feito por",
     "install": "Instalar app"
   },
+  "nav": {
+    "sectionsAria": "Seções do painel",
+    "myCvs": "Meus currículos",
+    "assets": "Arquivos",
+    "billing": "Pagamentos",
+    "sessions": "Sessões",
+    "security": "Segurança",
+    "account": "Conta"
+  },
+  "userMenu": {
+    "menuAria": "Menu da conta",
+    "account": "Conta",
+    "dashboard": "Painel",
+    "security": "Segurança e 2FA",
+    "accountSettings": "Conta",
+    "signOut": "Sair"
+  },
   "home": {
     "badge": "Grátis para sempre. Sem marcas d'água.",
-    "lead": "Crie um currículo compatível com ATS que ainda parece bem projetado. Edite seu rascunho uma vez, troque de modelo livremente e baixe exatamente o formato que você precisa.",
+    "heroEyebrow": "Criador de currículo gratuito",
+    "heroTitleA": "Crie um currículo que te traga ",
+    "heroAccent": "entrevistas",
+    "heroTitleB": ".",
+    "lead": "Crie um currículo compatível com ATS que ainda parece bem desenhado. Edite seu rascunho uma vez, troque de modelo livremente e baixe exatamente o formato que você precisa.",
     "chooseTemplate": "Escolher um modelo",
     "createAccount": "Criar conta grátis",
-    "livePreview": "Pré-visualização do modelo",
+    "livePreview": "Pré-visualização ao vivo",
     "step": "Passo {n}",
     "outcomes": [
       { "value": "PDF", "label": "texto limpo e selecionável" },
-      { "value": "DOCX", "label": "exportação editável do Word" },
+      { "value": "DOCX", "label": "exportação editável em Word" },
       { "value": "ZIP", "label": "um clique para todos os formatos" }
     ],
     "heroBadges": ["Texto compatível com ATS", "Exportações editáveis", "Compartilhamento público"],
@@ -42,27 +65,27 @@
     "workflow": [
       {
         "title": "Escolha a estrutura",
-        "description": "Comece com modelos compatíveis com ATS que têm diferenças reais de layout, não apenas de cor."
+        "description": "Comece com modelos compatíveis com ATS com diferenças reais de layout, não apenas mudanças de cor."
       },
       {
         "title": "Edite uma vez",
-        "description": "Suas seções, ordem, cor de destaque e tipografia continuam reutilizáveis entre os designs."
+        "description": "Suas seções, ordem, cor de destaque e tipografia são reaproveitadas em todos os designs."
       },
       {
         "title": "Exporte direto",
-        "description": "Baixe PDF, DOCX ou ZIP no editor sem esperar por uma fila em segundo plano."
+        "description": "Baixe PDF, DOCX ou ZIP do editor sem esperar uma fila em segundo plano."
       }
     ],
-    "exportsTitle": "Um criador de currículos que respeita o arquivo no final.",
+    "exportsTitle": "Um criador de currículo que respeita o arquivo final.",
     "exportsLead": "O editor só é útil se o download final for confiável. O CVMaker mantém os formatos de exportação visíveis, diretos e consistentes com a pré-visualização.",
     "trust": [
       {
         "title": "ATS em primeiro lugar",
-        "description": "Cada exportação mantém o currículo como texto selecionável com uma hierarquia de seções previsível."
+        "description": "Cada exportação mantém o currículo como texto selecionável com hierarquia de seções previsível."
       },
       {
-        "title": "Links compartilháveis",
-        "description": "Publique uma página pública do currículo com navegação, downloads e uma pré-visualização rápida e legível."
+        "title": "Links para compartilhar",
+        "description": "Publique uma página de currículo pública com navegação, downloads e uma pré-visualização rápida e legível."
       },
       {
         "title": "Rascunhos privados",
@@ -73,38 +96,337 @@
     "rangeLead": "Layouts conservadores, técnicos, executivos e editoriais compartilham um único modelo de rascunho.",
     "seeAll": "Ver todos os modelos"
   },
+  "dashboard": {
+    "cvs": {
+      "title": "Meus currículos",
+      "subtitle": "Crie, edite e exporte seus currículos.",
+      "newCv": "Novo currículo",
+      "emptyTitle": "Nenhum currículo ainda",
+      "emptyDescription": "Escolha um modelo para começar a criar seu currículo.",
+      "browseTemplates": "Ver modelos",
+      "searchPlaceholder": "Busque seus currículos por título…",
+      "searchAria": "Buscar currículos",
+      "allTemplates": "Todos os modelos",
+      "filterAria": "Filtrar por modelo",
+      "noMatch": "Nenhum currículo corresponde à sua busca.",
+      "public": "Público",
+      "samplePreview": "Prévia de exemplo",
+      "edit": "Editar",
+      "rename": "Renomear",
+      "delete": "Excluir",
+      "deleteTitle": "Excluir este currículo?",
+      "deleteDescription": "“{title}” será excluído permanentemente. Isso não pode ser desfeito.",
+      "deleteDescriptionPublic": "“{title}” será excluído permanentemente, incluindo seu link público. Isso não pode ser desfeito.",
+      "deleted": "Currículo excluído",
+      "deleteError": "Não foi possível excluir este currículo",
+      "moreActions": "Mais ações"
+    },
+    "account": {
+      "title": "Conta",
+      "subtitle": "Gerencie as informações do seu perfil.",
+      "profile": "Perfil",
+      "email": "E-mail",
+      "name": "Nome",
+      "namePlaceholder": "Seu nome",
+      "save": "Salvar alterações",
+      "saving": "Salvando...",
+      "saved": "Perfil salvo"
+    },
+    "assets": {
+      "title": "Arquivos",
+      "subtitle": "Os arquivos ficam em um armazenamento privado. Ative o compartilhamento para publicar uma cópia sincronizada no armazenamento público; cada alteração é re-sincronizada automaticamente.",
+      "upload": "Enviar arquivo",
+      "empty": "Nenhum arquivo ainda. Envie um arquivo e depois ative o compartilhamento para publicar uma cópia pública.",
+      "syncing": "Sincronizando…",
+      "public": "Público",
+      "copyUrlAria": "Copiar URL pública",
+      "copied": "URL pública copiada",
+      "shareAria": "Compartilhar publicamente",
+      "deleteAria": "Excluir arquivo",
+      "sharing": "Compartilhando arquivo…",
+      "unsharing": "Removendo compartilhamento…",
+      "syncDesc": "A cópia pública está sincronizando em segundo plano.",
+      "uploaded": "Arquivo enviado",
+      "uploadFailed": "Falha no envio"
+    },
+    "billing": {
+      "title": "Pagamentos",
+      "subtitle": "Gerencie sua assinatura, formas de pagamento e faturas.",
+      "portalUnavailable": "Não foi possível abrir o portal de pagamentos agora. Tente novamente em instantes ou contate o suporte se continuar acontecendo.",
+      "yourPlan": "Seu plano",
+      "pro": "Pro",
+      "free": "Grátis",
+      "proDescription": "Você está no Pro — todos os modelos premium e rascunhos ilimitados estão desbloqueados.",
+      "freeDescription": "Atualize para o Pro para desbloquear modelos premium e rascunhos ilimitados.",
+      "upgrade": "Atualizar para o Pro",
+      "portalTitle": "Portal do cliente Polar",
+      "portalDescription": "Gerencie sua assinatura, formas de pagamento e faturas com segurança no Polar.",
+      "openPortal": "Abrir portal de pagamentos"
+    },
+    "security": {
+      "title": "Segurança",
+      "subtitle": "Gerencie a 2FA e a verificação da conta.",
+      "emailVerification": "Verificação de e-mail",
+      "verified": "Verificado",
+      "unverified": "Não verificado",
+      "verifyEmail": "Verificar e-mail",
+      "twoFactor": "Autenticação de dois fatores",
+      "twoFactorDescription": "Adicione uma segunda etapa ao entrar usando um app autenticador (TOTP).",
+      "enabled": "Ativada",
+      "disabled": "Desativada",
+      "setup": "Configurar 2FA",
+      "setupInstructions": "Escaneie este código QR com seu app autenticador e depois digite o código de 6 dígitos para confirmar.",
+      "qrAlt": "Código QR da 2FA",
+      "manualKey": "Ou digite esta chave manualmente:",
+      "verificationCode": "Código de verificação",
+      "confirm": "Confirmar",
+      "regenerate": "Gerar novos códigos de backup",
+      "disable": "Desativar 2FA",
+      "saveBackup": "Salve seus códigos de backup",
+      "backupDescription": "Cada código funciona uma única vez. Guarde-os em local seguro — eles permitem entrar caso você perca o autenticador.",
+      "enabledToast": "Autenticação de dois fatores ativada",
+      "disabledToast": "Autenticação de dois fatores desativada"
+    },
+    "sessions": {
+      "title": "Sessões ativas",
+      "subtitle": "Dispositivos conectados à sua conta. Sessões locais/de desenvolvimento são agrupadas para evitar bagunça. Revogue as que você não reconhecer.",
+      "signOutOthers": "Encerrar todas as outras sessões",
+      "thisDevice": "Este dispositivo",
+      "unknownDevice": "Dispositivo desconhecido",
+      "unknownIp": "desconhecido",
+      "active": "ativa {time}",
+      "revoke": "Revogar"
+    }
+  },
+  "auth": {
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha",
+    "login": {
+      "title": "Bem-vindo de volta",
+      "description": "Entre na sua conta do CVMaker.",
+      "email": "E-mail",
+      "emailPlaceholder": "voce@email.com",
+      "password": "Senha",
+      "passwordPlaceholder": "Senha",
+      "forgot": "Esqueceu a senha?",
+      "submit": "Entrar",
+      "noAccount": "Não tem conta?",
+      "createOne": "Crie uma",
+      "twoFaTitle": "Autenticação de dois fatores",
+      "twoFaDescription": "Digite o código de 6 dígitos do seu app autenticador ou um código de backup.",
+      "authCode": "Código de autenticação",
+      "verify": "Verificar"
+    },
+    "register": {
+      "title": "Crie sua conta",
+      "description": "Crie currículos compatíveis com ATS de graça.",
+      "name": "Nome",
+      "namePlaceholder": "João Silva",
+      "email": "E-mail",
+      "emailPlaceholder": "voce@email.com",
+      "password": "Senha",
+      "passwordPlaceholder": "Pelo menos 8 caracteres",
+      "submit": "Criar conta",
+      "haveAccount": "Já tem uma conta?",
+      "signIn": "Entrar"
+    },
+    "reset": {
+      "requestTitle": "Redefina sua senha",
+      "requestDescription": "Digite seu e-mail e enviaremos um link de redefinição.",
+      "email": "E-mail",
+      "emailPlaceholder": "voce@email.com",
+      "sendLink": "Enviar link",
+      "rememberedIt": "Lembrou dela?",
+      "backToSignIn": "Voltar para entrar",
+      "sentTitle": "Verifique seu e-mail",
+      "sentDescription": "Se existir uma conta para esse endereço, enviamos um link de redefinição.",
+      "performTitle": "Escolha uma nova senha",
+      "performDescription": "Digite uma nova senha para sua conta.",
+      "newPassword": "Nova senha",
+      "passwordPlaceholder": "Pelo menos 8 caracteres",
+      "updatePassword": "Atualizar senha",
+      "updatedTitle": "Senha atualizada",
+      "updatedDescription": "Agora você pode entrar com sua nova senha.",
+      "signIn": "Entrar"
+    },
+    "verify": {
+      "verifiedTitle": "E-mail verificado",
+      "verifiedDescription": "Seu e-mail está confirmado. Tudo pronto.",
+      "failedTitle": "Falha na verificação",
+      "failedDescription": "Este link de verificação é inválido ou expirou.",
+      "title": "Verifique seu e-mail",
+      "descriptionUser": "Enviamos um link de verificação para {email}. Clique nele para confirmar seu endereço.",
+      "descriptionGeneric": "Enviamos um link de verificação. Clique nele para confirmar seu endereço.",
+      "goDashboard": "Ir para o painel",
+      "resend": "Reenviar e-mail de verificação",
+      "resent": "E-mail de verificação enviado",
+      "waiting": "Aguardando a abertura do link de verificação...",
+      "detected": "E-mail verificado. Atualizando esta página..."
+    }
+  },
+  "templates": {
+    "count": "{free} modelos grátis + {pro} designs Pro",
+    "title": "Escolha seu modelo",
+    "subtitle": "Comece com até {limit} rascunhos de currículo grátis, ou atualize para o Pro para desbloquear modelos premium e mais capacidade.",
+    "searchPlaceholder": "Buscar modelos...",
+    "searchAria": "Buscar modelos",
+    "allFonts": "Todas as fontes",
+    "filterAria": "Filtrar por fonte",
+    "noMatch": "Nenhum modelo corresponde aos seus filtros.",
+    "pro": "Pro",
+    "useTemplate": "Usar este modelo",
+    "upgradeToUse": "Atualizar para usar",
+    "upgradeMoreDrafts": "Atualizar para mais rascunhos",
+    "continueOrNew": "Continuar ou criar novo",
+    "draftDialogTitle": "Você já tem um rascunho com este modelo",
+    "draftDialogDescription": "\"{title}\" já usa este modelo (editado em {date}). Continue editando ou crie um currículo novo. Seu rascunho atual é mantido de qualquer forma.",
+    "continueDraft": "Continuar rascunho",
+    "startNew": "Criar novo",
+    "upgrade": "Atualizar"
+  },
+  "editor": {
+    "back": "Voltar ao painel",
+    "titlePlaceholder": "Currículo sem título",
+    "titleAria": "Título do currículo",
+    "templateAria": "Modelo",
+    "fontAria": "Fonte",
+    "accentColor": "Cor de destaque",
+    "saving": "Salvando…",
+    "saved": "Salvo",
+    "saveFailed": "Falha ao salvar",
+    "edit": "Editar",
+    "preview": "Pré-visualização",
+    "fullscreenAria": "Pré-visualização em tela cheia",
+    "closePreviewAria": "Fechar pré-visualização",
+    "share": {
+      "button": "Compartilhar",
+      "dialogTitle": "Compartilhe seu currículo",
+      "dialogDescription": "Torne este currículo público para compartilhá-lo com um link. A cópia pública pode ser vista e baixada por qualquer pessoa.",
+      "emptyTitle": "Algumas seções estão vazias",
+      "emptyDescription": "Adicione detalhes ou remova {these} antes de compartilhar: {sections}.",
+      "publicLink": "Link público",
+      "anyoneCanView": "Qualquer pessoa com o link pode ver",
+      "onlyYou": "Só você pode ver este currículo",
+      "copyLinkAria": "Copiar link",
+      "openLinkAria": "Abrir link",
+      "updateCopy": "Atualizar cópia pública",
+      "updateHint": "Editou seu currículo? Clique em “Atualizar cópia pública” para republicar a versão mais recente.",
+      "nowPublic": "Seu currículo agora é público",
+      "nowPublicDesc": "Qualquer pessoa com o link pode ver e baixar.",
+      "copyUpdated": "Cópia pública atualizada",
+      "sharingDisabled": "Compartilhamento desativado",
+      "updateError": "Não foi possível atualizar o compartilhamento",
+      "linkCopied": "Link copiado",
+      "emptyToast": "{plural} vazia(s): {sections}. Adicione detalhes ou remova {them} antes de compartilhar."
+    },
+    "export": {
+      "button": "Exportar",
+      "downloadAs": "Baixar como",
+      "pdf": "PDF",
+      "docx": "Word (DOCX)",
+      "zip": "Todos os formatos (ZIP)",
+      "emptyToast": "{plural} vazia(s): {sections}. Adicione detalhes ou remova {them} antes de exportar."
+    },
+    "photo": {
+      "add": "Adicionar foto",
+      "replace": "Trocar foto",
+      "remove": "Remover",
+      "positionAria": "Posição da foto",
+      "left": "Esquerda",
+      "center": "Centro",
+      "right": "Direita",
+      "alt": "Perfil"
+    },
+    "actions": {
+      "add": "Adicionar",
+      "addSection": "Adicionar seção",
+      "moveUp": "Mover para cima",
+      "moveDown": "Mover para baixo",
+      "remove": "Remover",
+      "rename": "Renomear esta seção",
+      "sectionTitleAria": "Título da seção {section}"
+    },
+    "emptySection": "Esta seção está vazia — adicione detalhes ou remova-a antes de exportar.",
+    "sections": {
+      "personal": "Dados pessoais",
+      "summary": "Resumo",
+      "experience": "Experiência",
+      "education": "Formação",
+      "skills": "Habilidades",
+      "projects": "Projetos",
+      "certifications": "Certificações",
+      "languages": "Idiomas",
+      "custom": "Seções personalizadas",
+      "customHint": "Adicione suas próprias seções (ex.: Prêmios, Publicações) e reordene-as. Elas aparecem depois das seções padrão.",
+      "customEmpty": "Nenhuma seção personalizada ainda."
+    },
+    "fields": {
+      "fullName": "Nome completo",
+      "jobTitle": "Cargo",
+      "email": "E-mail",
+      "phone": "Telefone",
+      "location": "Localização",
+      "website": "Site",
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "summary": "Resumo profissional",
+      "role": "Cargo",
+      "company": "Empresa",
+      "start": "Início",
+      "end": "Fim",
+      "currentlyHere": "Trabalho aqui atualmente",
+      "institution": "Instituição",
+      "degree": "Grau",
+      "field": "Área de estudo",
+      "detailsOptional": "Detalhes (opcional)",
+      "category": "Categoria",
+      "skillsCsv": "Habilidades (separadas por vírgula)",
+      "name": "Nome",
+      "link": "Link",
+      "description": "Descrição",
+      "issuer": "Emissor",
+      "date": "Data",
+      "credentialLink": "Link da credencial (opcional)",
+      "language": "Idioma",
+      "level": "Nível",
+      "sectionTitle": "Título da seção",
+      "customTitlePlaceholder": "Prêmios",
+      "customItems": "Itens (um por linha)",
+      "bulletsDefault": "Tópicos (um por linha)"
+    }
+  },
   "states": {
     "notFound": {
       "code": "404",
       "title": "Página não encontrada",
       "description": "A página que você procura não existe ou pode ter sido movida.",
-      "home": "Ir para o início",
+      "home": "Ir ao início",
       "templates": "Ver modelos"
     },
     "error": {
       "code": "500",
       "title": "Algo deu errado",
-      "description": "Um erro inesperado interrompeu esta página. Tente novamente e, se continuar, volte ao início.",
+      "description": "Um erro inesperado interrompeu esta página. Tente novamente — se continuar, volte e comece de novo.",
       "retry": "Tentar novamente",
-      "home": "Ir para o início"
+      "home": "Ir ao início"
     },
     "global": {
       "title": "Algo deu errado",
-      "description": "Um erro crítico impediu o carregamento do app. Recarregue a página para continuar.",
+      "description": "Um erro crítico impediu o app de carregar. Recarregue a página para continuar.",
       "retry": "Recarregar"
     },
     "auth": {
       "notFoundTitle": "Página não encontrada",
       "notFoundDescription": "Essa página de autenticação não existe. Entre ou crie sua conta para continuar.",
       "errorTitle": "Algo deu errado",
-      "errorDescription": "Não foi possível concluir a solicitação. Tente novamente.",
-      "login": "Ir para o login"
+      "errorDescription": "Não foi possível concluir essa solicitação. Tente novamente.",
+      "login": "Ir para entrar"
     },
     "dashboard": {
       "notFoundTitle": "Página não encontrada",
       "notFoundDescription": "Esta página do painel não existe. Escolha uma seção no menu ou volte ao seu painel.",
-      "errorTitle": "Não foi possível carregar",
-      "errorDescription": "Ocorreu um erro ao carregar sua conta. Tente novamente em instantes.",
+      "errorTitle": "Não foi possível carregar isto",
+      "errorDescription": "Algo deu errado ao carregar sua conta. Tente novamente em instantes.",
       "back": "Voltar ao painel"
     },
     "editor": {

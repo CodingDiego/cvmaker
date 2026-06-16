@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { logoutAction } from "@/lib/auth/actions";
+import { useT } from "@/i18n/provider";
 
 function initials(name: string | null, email: string) {
   if (name) {
@@ -38,6 +39,7 @@ export function UserMenu({
   avatarUrl: string | null;
 }) {
   const router = useRouter();
+  const t = useT();
 
   async function handleLogout() {
     await logoutAction();
@@ -49,7 +51,7 @@ export function UserMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="icon" className="rounded-full" aria-label="Account menu" />
+          <Button variant="ghost" size="icon" className="rounded-full" aria-label={t("userMenu.menuAria")} />
         }
       >
         <Avatar className="size-8">
@@ -60,23 +62,23 @@ export function UserMenu({
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuGroup>
           <DropdownMenuLabel className="truncate">
-            <div className="font-medium">{name ?? "Account"}</div>
+            <div className="font-medium">{name ?? t("userMenu.account")}</div>
             <div className="text-xs text-muted-foreground truncate">{email}</div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem render={<Link href="/dashboard" />}>
-          <LayoutDashboard className="size-4" /> Dashboard
+          <LayoutDashboard className="size-4" /> {t("userMenu.dashboard")}
         </DropdownMenuItem>
         <DropdownMenuItem render={<Link href="/dashboard/security" />}>
-          <ShieldCheck className="size-4" /> Security & 2FA
+          <ShieldCheck className="size-4" /> {t("userMenu.security")}
         </DropdownMenuItem>
         <DropdownMenuItem render={<Link href="/dashboard/account" />}>
-          <Settings className="size-4" /> Account
+          <Settings className="size-4" /> {t("userMenu.accountSettings")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => handleLogout()}>
-          <LogOut className="size-4" /> Sign out
+          <LogOut className="size-4" /> {t("userMenu.signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -5,15 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TwoFactorSetup } from "@/components/dashboard/two-factor-setup";
+import { getTFromParams } from "@/i18n/server";
 
-export default async function SecurityPage() {
-  const user = await requireUser("/dashboard/security");
+export default async function SecurityPage({ params }: { params: Promise<{ lang: string }> }) {
+  const [user, t] = await Promise.all([requireUser("/dashboard/security"), getTFromParams(params)]);
 
   return (
     <section aria-labelledby="security-title" className="space-y-6">
       <header>
-        <h1 id="security-title" className="text-2xl font-semibold">Security</h1>
-        <p className="text-sm text-muted-foreground">Manage 2FA and account verification.</p>
+        <h1 id="security-title" className="text-2xl font-semibold">{t("dashboard.security.title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("dashboard.security.subtitle")}</p>
       </header>
 
       <Card>
@@ -25,10 +26,10 @@ export default async function SecurityPage() {
               ) : (
                 <MailWarning className="size-5 text-amber-500" />
               )}
-              Email verification
+              {t("dashboard.security.emailVerification")}
             </CardTitle>
             <Badge variant={user.emailVerified ? "default" : "secondary"}>
-              {user.emailVerified ? "Verified" : "Unverified"}
+              {user.emailVerified ? t("dashboard.security.verified") : t("dashboard.security.unverified")}
             </Badge>
           </div>
           <CardDescription>{user.email}</CardDescription>
@@ -36,7 +37,7 @@ export default async function SecurityPage() {
         {!user.emailVerified && (
           <CardContent>
             <Button variant="outline" render={<Link href="/verify" />}>
-              Verify email
+              {t("dashboard.security.verifyEmail")}
             </Button>
           </CardContent>
         )}

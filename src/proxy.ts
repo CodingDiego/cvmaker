@@ -17,6 +17,13 @@ import { defaultLocale, isLocale, isLocalizablePath } from "@/i18n/config";
 const LOCALE_COOKIE = "NEXT_LOCALE";
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
+// A path segment shaped like a language tag ("fr", "de", "pt-BR") that isn't one
+// of our supported locales. We treat it as a *mistyped locale* and swap it for
+// the resolved locale, so `/fr/dashboard` lands on `/en/dashboard` instead of
+// 404ing. Longer/word-like first segments ("templates") are real routes and are
+// only prefixed, never stripped.
+const LOCALE_SHAPED = /^[a-z]{2,3}(-[a-z0-9]{2,8})?$/i;
+
 function pickLocale(request: NextRequest): string {
   const cookie = request.cookies.get(LOCALE_COOKIE)?.value;
   if (cookie && isLocale(cookie)) return cookie;
@@ -38,7 +45,14 @@ export default async function proxy(request: NextRequest) {
     if (!isLocale(seg)) {
       const locale = pickLocale(request);
       const url = request.nextUrl.clone();
-      url.pathname = `/${locale}${pathname === "/" ? "" : pathname}`;
+      // Mistyped locale ("/fr/…") → replace the bad segment; otherwise the path
+      // has no locale at all ("/templates") → prefix it.
+      const rest = LOCALE_SHAPED.test(seg)
+        ? pathname.slice(seg.length + 1) // drop "/<seg>"
+        : pathname === "/"
+          ? ""
+          : pathname;
+      url.pathname = `/${locale}${rest}`;
       const res = NextResponse.redirect(url);
       res.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: ONE_YEAR, sameSite: "lax" });
       return res;
