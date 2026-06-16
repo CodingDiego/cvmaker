@@ -6,10 +6,15 @@ import { Link } from "@/components/link";
 import { requireUser } from "@/lib/auth/session";
 import { getUserPlan } from "@/lib/billing/entitlements-server";
 
-export default async function BillingPage() {
+export default async function BillingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ portal?: string }>;
+}) {
   const user = await requireUser("/dashboard/billing");
   const plan = await getUserPlan(user.id);
   const isPro = plan === "pro";
+  const portalUnavailable = (await searchParams).portal === "unavailable";
 
   return (
     <section aria-labelledby="billing-title" className="space-y-6">
@@ -17,6 +22,16 @@ export default async function BillingPage() {
         <h1 id="billing-title" className="text-2xl font-semibold">Billing</h1>
         <p className="text-sm text-muted-foreground">Manage your subscription, payment methods and invoices.</p>
       </header>
+
+      {portalUnavailable && (
+        <div
+          role="alert"
+          className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+        >
+          We couldn&apos;t open the billing portal right now. Please try again in a
+          moment, or contact support if this keeps happening.
+        </div>
+      )}
 
       <Card>
         <CardHeader>
