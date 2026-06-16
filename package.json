@@ -33,6 +33,7 @@
     "@upstash/redis": "^1.38.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.4.0",
+    "@vercel/speed-insights": "^2.0.0",
     "@workflow/next": "^4.0.10",
     "botid": "^1.5.11",
     "class-variance-authority": "^0.7.1",

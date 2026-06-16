@@ -11,6 +11,7 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { isLocale, locales } from "@/i18n/config";
 import "../globals.css";
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const SITE_DESCRIPTION =
   "Create a professional, ATS-friendly CV for free. Pick a modern template, edit with live preview, and download as PDF or DOCX in minutes — no watermarks.";
@@ -131,6 +132,7 @@ export default async function RootLayout({
               <Suspense>
                 {children}
                 <Analytics />
+                <SpeedInsights />
               </Suspense>
             </TooltipProvider>
           </I18nProvider>
