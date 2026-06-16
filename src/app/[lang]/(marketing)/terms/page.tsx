@@ -2,13 +2,19 @@ import type { Metadata } from "next";
 import { Link } from "@/components/link";
 import { LegalArticle } from "@/components/legal/legal-article";
 import { JsonLd } from "@/components/seo/json-ld";
-import { webPageLd } from "@/lib/seo";
+import { pageMetadata, webPageLd } from "@/lib/seo";
+import { seoCopy } from "@/lib/seo-copy";
+import { defaultLocale, isLocale } from "@/i18n/config";
 
-export const metadata: Metadata = {
-  title: "Terms of Service",
-  description: "Terms governing access to and use of CVMaker.",
-  alternates: { canonical: "/terms" },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : defaultLocale;
+  return pageMetadata({ lang: locale, path: "/terms", ...seoCopy.terms[locale] });
+}
 
 export default function TermsPage() {
   return (

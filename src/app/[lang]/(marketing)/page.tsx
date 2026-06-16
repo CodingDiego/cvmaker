@@ -14,15 +14,27 @@ import {
 import { Button } from "@/components/ui/button";
 import { LazyThumbnail } from "@/components/templates/lazy-thumbnail";
 import { sampleResume } from "@/lib/cv/types";
-import { webPageLd } from "@/lib/seo";
+import { pageMetadata, webPageLd } from "@/lib/seo";
+import { seoCopy } from "@/lib/seo-copy";
 import { JsonLd } from "@/components/seo/json-ld";
 import { TEMPLATES } from "@/templates/registry";
 import { defaultLocale, isLocale } from "@/i18n/config";
 import { getT } from "@/i18n/server";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/" },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : defaultLocale;
+  return pageMetadata({
+    lang: locale,
+    path: "/",
+    absoluteTitle: true,
+    ...seoCopy.home[locale],
+  });
+}
 
 // Parsed once at module scope — `sampleResume()` runs `resumeSchema.parse(...)`,
 // so this avoids re-parsing on every render and shares one object across every

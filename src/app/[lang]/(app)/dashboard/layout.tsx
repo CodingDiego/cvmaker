@@ -11,6 +11,8 @@ export const metadata: Metadata = {
     default: "Dashboard",
     template: "%s · Dashboard",
   },
+  // The authenticated dashboard is private — keep it out of search indexes.
+  robots: { index: false, follow: false },
 };
 
 async function RequestTimeMarker() {

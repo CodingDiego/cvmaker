@@ -6,6 +6,8 @@ import { ThemeToggle } from "@/components/theme-toggle";
 export const metadata: Metadata = {
   title: "Authentication",
   description: "Sign in, register, or reset your password.",
+  // No blanket robots rule here: /register is an indexable conversion page (it's
+  // in the sitemap), while /login, /reset and /verify set their own noindex.
 };
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {

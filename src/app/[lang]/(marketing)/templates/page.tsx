@@ -6,21 +6,20 @@ import { listCvs } from "@/lib/cv/service";
 import { TemplateGallery } from "@/components/templates/template-gallery";
 import type { TemplateDraft } from "@/components/templates/template-card";
 import { JsonLd } from "@/components/seo/json-ld";
-import { breadcrumbLd, templatesCollectionPageLd, templatesItemListLd } from "@/lib/seo";
+import { breadcrumbLd, pageMetadata, templatesCollectionPageLd, templatesItemListLd } from "@/lib/seo";
+import { seoCopy } from "@/lib/seo-copy";
+import { defaultLocale, isLocale } from "@/i18n/config";
 import { FREE_TEMPLATES, PRO_TEMPLATES } from "@/templates/registry";
 
-export const metadata: Metadata = {
-  title: "Resume Templates",
-  description:
-    "Browse free and premium ATS-friendly resume templates for CVMaker, then create a reusable CV draft.",
-  alternates: { canonical: "/templates" },
-  openGraph: {
-    title: "Resume Templates - CVMaker",
-    description:
-      "Browse free and premium ATS-friendly resume templates for CVMaker, then create a reusable CV draft.",
-    url: "/templates",
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : defaultLocale;
+  return pageMetadata({ lang: locale, path: "/templates", ...seoCopy.templates[locale] });
+}
 
 export default async function TemplatesPage() {
   const user = await getCurrentUser();

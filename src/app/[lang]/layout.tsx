@@ -13,7 +13,7 @@ import "../globals.css";
 import { Analytics } from "@vercel/analytics/next"
 
 const SITE_DESCRIPTION =
-  "Create, edit and export ATS-friendly resumes. Start with free templates, then unlock Pro CV designs, live preview, PDF and DOCX export.";
+  "Create a professional, ATS-friendly CV for free. Pick a modern template, edit with live preview, and download as PDF or DOCX in minutes — no watermarks.";
 
 const OG_IMAGE = {
   url: "/opengraph.png",
@@ -25,19 +25,27 @@ const OG_IMAGE = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "CVMaker - Free ATS-friendly resume builder",
-    template: "%s - CVMaker",
+    default: "Free CV Maker – ATS-Friendly Resume Builder | CVMaker",
+    template: "%s · CVMaker",
   },
   description: SITE_DESCRIPTION,
   applicationName: siteConfig.name,
   keywords: [
+    "free cv maker",
+    "cv maker",
+    "free resume builder",
     "resume builder",
-    "CV maker",
     "ATS-friendly resume",
-    "free resume templates",
+    "free cv templates",
+    "online cv",
     "PDF resume",
     "DOCX resume",
-    "online CV",
+    "cv maker gratis",
+    "plantillas de cv gratis",
+    "crear cv online",
+    "criar currículo grátis",
+    "currículo online",
+    "modelos de currículo",
   ],
   authors: [{ name: siteConfig.name }],
   creator: siteConfig.name,
@@ -59,8 +67,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: siteConfig.name,
-    title: "CVMaker - Free ATS-friendly resume builder",
+    siteName: "CVMaker · free-cv.com",
+    title: "Free CV Maker – ATS-Friendly Resume Builder | CVMaker",
     description: SITE_DESCRIPTION,
     url: siteConfig.url,
     locale: "en_US",
@@ -68,7 +76,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "CVMaker - Free ATS-friendly resume builder",
+    title: "Free CV Maker – ATS-Friendly Resume Builder | CVMaker",
     description: SITE_DESCRIPTION,
     images: [OG_IMAGE],
   },

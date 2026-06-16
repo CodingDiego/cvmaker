@@ -1,4 +1,5 @@
 import "server-only";
+import type { Metadata } from "next";
 import type {
   EducationalOrganization,
   BreadcrumbList,
@@ -12,8 +13,63 @@ import type {
   WithContext,
 } from "schema-dts";
 import { env } from "@/lib/env";
+import { locales, type Locale } from "@/i18n/config";
 import { TEMPLATES } from "@/templates/registry";
 import type { ResumeData } from "@/lib/cv/types";
+
+/** OpenGraph locale tags for each supported app locale. */
+const OG_LOCALE: Record<Locale, string> = {
+  en: "en_US",
+  es: "es_ES",
+  pt: "pt_BR",
+};
+
+/**
+ * Per-route `alternates` with a localized canonical + full hreflang set. The
+ * canonical points at the CURRENT locale's URL (e.g. `/es/templates`); the
+ * `languages` map advertises every locale plus an `x-default` (English). Paths
+ * are root-relative — `metadataBase` resolves them to absolute URLs.
+ */
+export function localeAlternates(path: string, lang: Locale): NonNullable<Metadata["alternates"]> {
+  const seg = path === "/" ? "" : path;
+  const languages: Record<string, string> = {};
+  for (const l of locales) languages[l] = `/${l}${seg}`;
+  languages["x-default"] = `/en${seg}`;
+  return { canonical: `/${lang}${seg}`, languages };
+}
+
+/**
+ * Build a route's `Metadata` from localized copy: localized title/description,
+ * a localized canonical + hreflang set, and matching OpenGraph/Twitter cards.
+ * `absoluteTitle` opts out of the `%s · CVMaker` layout template (used by the
+ * home page); `index: false` marks private/transactional routes noindex.
+ */
+export function pageMetadata(opts: {
+  lang: Locale;
+  path: string;
+  title: string;
+  description: string;
+  absoluteTitle?: boolean;
+  index?: boolean;
+}): Metadata {
+  const { lang, path, title, description, absoluteTitle, index = true } = opts;
+  const seg = path === "/" ? "" : path;
+  return {
+    title: absoluteTitle ? { absolute: title } : title,
+    description,
+    alternates: localeAlternates(path, lang),
+    openGraph: {
+      type: "website",
+      siteName: siteConfig.name,
+      title,
+      description,
+      url: `/${lang}${seg}`,
+      locale: OG_LOCALE[lang],
+    },
+    twitter: { card: "summary_large_image", title, description },
+    ...(index ? {} : { robots: { index: false, follow: true } }),
+  };
+}
 
 /**
  * Central SEO configuration + JSON-LD builders (typed with schema-dts). Server
