@@ -6,14 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { revokeSessionAction, revokeOtherSessionsAction } from "@/lib/auth/session-actions";
-import { sessionListOptions, type SessionView } from "@/lib/auth/session-queries";
+import { sessionListOptions } from "@/lib/auth/session-queries";
 import { queryKeys } from "@/lib/query/keys";
-
-const envLabel: Record<SessionView["environment"], string> = {
-  prod: "Production",
-  preview: "Preview",
-  local: "Local / Dev",
-};
 
 function RevokeButton({ id }: { id: string }) {
   const queryClient = useQueryClient();
@@ -71,9 +65,6 @@ export function SessionList() {
                 <div className="flex items-center gap-2">
                   <span className="truncate font-medium">{s.deviceLabel ?? "Unknown device"}</span>
                   {s.current && <Badge>This device</Badge>}
-                  <Badge variant={s.environment === "local" ? "secondary" : "outline"}>
-                    {envLabel[s.environment]}
-                  </Badge>
                 </div>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <MapPin className="size-3" />
