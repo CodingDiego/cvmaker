@@ -1,7 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import NextLink from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Check, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,19 +27,35 @@ function withLocale(pathname: string, target: Locale): string {
 
 export function LanguageSwitcher() {
   const pathname = usePathname() || "/";
+  const router = useRouter();
   const current = useLocale();
   const t = useT();
 
+  const options = useMemo(
+    () => locales.map((l) => ({ locale: l, href: withLocale(pathname, l) })),
+    [pathname],
+  );
+
   return (
-    <DropdownMenu>
+    <DropdownMenu
+      onOpenChange={(open) => {
+        // Warm the other locales' routes the moment the menu opens, so the
+        // switch is instant on click/tap — no hover required (works on touch).
+        if (open) {
+          for (const { locale, href } of options) {
+            if (locale !== current) router.prefetch(href);
+          }
+        }
+      }}
+    >
       <DropdownMenuTrigger
         render={<Button variant="ghost" size="icon" className="h-9" aria-label={t("common.language")} />}
       >
         <Globe className="size-4" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {locales.map((l) => (
-          <DropdownMenuItem key={l} render={<NextLink href={withLocale(pathname, l)} prefetch={false} />}>
+        {options.map(({ locale: l, href }) => (
+          <DropdownMenuItem key={l} render={<NextLink href={href} prefetch={false} />}>
             <Check className={l === current ? "size-4 opacity-100" : "size-4 opacity-0"} />
             {localeLabels[l]}
           </DropdownMenuItem>

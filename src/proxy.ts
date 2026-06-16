@@ -61,12 +61,18 @@ export const config = {
   // EXCEPT static assets, Next internals, Workflow internals, and metadata
   // files. Workflow queue calls must bypass proxy so exports can start.
   //
+  // Machine-to-machine endpoints are also excluded: cron (`/api/cron/*`, secured
+  // by the Vercel `CRON_SECRET` bearer) and provider webhooks (`/api/webhooks/*`,
+  // secured by signature). They carry no user session, so running session
+  // rotation/cookie logic on them is pure overhead — and forwarding their
+  // request through the proxy must never interfere with their own auth.
+  //
   // BotID serves its challenge + verification traffic from the fixed, internal
   // prefix `/149e9513-01fa-4fb0-aad4-566afd725d1b/...` (rewritten to Vercel's
   // bot-protection API by `withBotId` in next.config). Middleware runs BEFORE
   // those rewrites, so without this exclusion the locale redirect would rewrite
   // BotID's extension-less POSTs to `/en/149e.../…` and break verification.
   matcher: [
-    "/((?!_next/static|_next/image|149e9513-01fa-4fb0-aad4-566afd725d1b/|\\.well-known/workflow/|favicon.ico|robots.txt|sitemap.xml|llms.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff2?)$).*)",
+    "/((?!_next/static|_next/image|api/cron/|api/webhooks/|149e9513-01fa-4fb0-aad4-566afd725d1b/|\\.well-known/workflow/|favicon.ico|robots.txt|sitemap.xml|llms.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff2?)$).*)",
   ],
 };

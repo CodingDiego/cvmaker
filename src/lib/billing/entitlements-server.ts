@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { eq, or } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
@@ -10,7 +11,14 @@ function toBillingPlan(value: string | null | undefined): BillingPlan {
   return value === "pro" ? "pro" : "free";
 }
 
-export async function getUserPlan(userId: string): Promise<BillingPlan> {
+/**
+ * Per-request deduplicated (React `cache`): multiple gates in a single render —
+ * the template gallery, the editor and export all check the plan — collapse to
+ * one query. Keyed by the primitive `userId` so the cache actually hits. The
+ * plan only changes via the Polar webhook (a separate request), so deduping
+ * within a request never serves a stale value.
+ */
+export const getUserPlan = cache(async (userId: string): Promise<BillingPlan> => {
   const [row] = await db
     .select({ billingPlan: users.billingPlan })
     .from(users)
@@ -18,7 +26,7 @@ export async function getUserPlan(userId: string): Promise<BillingPlan> {
     .limit(1);
 
   return toBillingPlan(row?.billingPlan);
-}
+});
 
 async function findUserForPolarCustomer(input: { externalId?: string | null; email?: string | null }) {
   const filters = [];
