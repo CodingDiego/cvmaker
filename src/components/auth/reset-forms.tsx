@@ -18,7 +18,7 @@ import {
   type ResetRequestValues,
 } from "@/lib/auth/auth-schemas";
 import { AuthCard, FormError, IconField, PasswordField, SubmitButton } from "./auth-ui";
-import { useT } from "@/i18n/provider";
+  import { useT } from "@/i18n/provider";
 
 const initial: ActionState = { status: "idle" };
 
