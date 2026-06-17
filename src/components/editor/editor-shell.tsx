@@ -13,10 +13,12 @@ import { EditorToolbar } from "./editor-toolbar";
 import { EditorForm } from "./editor-form";
 import { LivePreview } from "./live-preview";
 import { FullscreenPreview } from "./fullscreen-preview";
+import { useT } from "@/i18n/provider";
 
 type EditorView = "edit" | "preview";
 
 export function EditorShell({ cvId }: { cvId: string }) {
+  const t = useT();
   // The detail was server-prefetched into the cache, so this resolves
   // synchronously on first render (no loading state).
   const { data: cv } = useSuspenseQuery(cvDetailOptions(cvId));
@@ -50,17 +52,17 @@ export function EditorShell({ cvId }: { cvId: string }) {
             key={v}
             onClick={() => setView(v)}
             className={cn(
-              "flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 text-sm font-medium capitalize transition-colors",
+              "flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 text-sm font-medium transition-colors",
               view === v ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted",
             )}
           >
             {v === "edit" ? <Pencil className="size-3.5" /> : <Eye className="size-3.5" />}
-            {v}
+            {t(`editor.${v}`)}
           </button>
         ))}
         <button
           onClick={() => setFullscreen(true)}
-          aria-label="Full-screen preview"
+          aria-label={t("editor.fullscreenAria")}
           className="flex items-center justify-center rounded-lg px-3 text-muted-foreground transition-colors hover:bg-muted"
         >
           <Expand className="size-3.5" />
@@ -80,7 +82,7 @@ export function EditorShell({ cvId }: { cvId: string }) {
               variant="outline"
               size="icon"
               className="absolute top-3 right-3 z-10 hidden size-8 bg-background/80 backdrop-blur md:inline-flex"
-              aria-label="Full-screen preview"
+              aria-label={t("editor.fullscreenAria")}
               onClick={() => setFullscreen(true)}
             >
               <Expand className="size-4" />

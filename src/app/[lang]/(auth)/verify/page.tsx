@@ -6,6 +6,8 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
 import { EmailVerificationPoller } from "@/components/auth/email-verification-poller";
 import { ResendVerification } from "@/components/auth/resend-verification";
+import { getTFromParams } from "@/i18n/server";
+import { safeNext, withNext } from "@/lib/auth/safe-next";
 
 export const metadata: Metadata = {
   title: "Verify Email",
@@ -48,11 +50,17 @@ function Shell({
 }
 
 export default async function VerifyPage({
+  params,
   searchParams,
 }: {
-  searchParams: Promise<{ token?: string }>;
+  params: Promise<{ lang: string }>;
+  searchParams: Promise<{ token?: string; next?: string }>;
 }) {
-  const { token } = await searchParams;
+  const [{ token, next: rawNext }, t] = await Promise.all([searchParams, getTFromParams(params)]);
+  // Carry any "use this template" intent through email verification so the user
+  // lands on the CV they were creating, not a generic dashboard.
+  const next = safeNext(rawNext);
+  const continueHref = withNext("/dashboard", next);
 
   if (token) {
     const ok = await verifyEmailToken(token);
@@ -60,15 +68,11 @@ export default async function VerifyPage({
       <Shell
         icon={ok ? <CheckCircle2 className="size-5" /> : <XCircle className="size-5" />}
         iconClassName={ok ? "text-foreground" : "text-destructive"}
-        title={ok ? "Email verified" : "Verification failed"}
-        description={
-          ok
-            ? "Your email is confirmed. You're all set."
-            : "This verification link is invalid or has expired."
-        }
+        title={ok ? t("auth.verify.verifiedTitle") : t("auth.verify.failedTitle")}
+        description={ok ? t("auth.verify.verifiedDescription") : t("auth.verify.failedDescription")}
       >
-        <Button className="h-11 w-full" render={<Link href="/dashboard" />}>
-          Go to dashboard
+        <Button className="h-11 w-full" render={<Link href={ok ? continueHref : "/dashboard"} />}>
+          {t("auth.verify.goDashboard")}
         </Button>
       </Shell>
     );
@@ -80,11 +84,11 @@ export default async function VerifyPage({
     return (
       <Shell
         icon={<CheckCircle2 className="size-5" />}
-        title="Email verified"
-        description="Your email is confirmed. You're all set."
+        title={t("auth.verify.verifiedTitle")}
+        description={t("auth.verify.verifiedDescription")}
       >
-        <Button className="h-11 w-full" render={<Link href="/dashboard" />}>
-          Go to dashboard
+        <Button className="h-11 w-full" render={<Link href={continueHref} />}>
+          {t("auth.verify.goDashboard")}
         </Button>
       </Shell>
     );
@@ -93,11 +97,11 @@ export default async function VerifyPage({
   return (
     <Shell
       icon={<MailCheck className="size-5" />}
-      title="Verify your email"
+      title={t("auth.verify.title")}
       description={
         user
-          ? `We sent a verification link to ${user.email}. Click it to confirm your address.`
-          : "We sent you a verification link. Click it to confirm your address."
+          ? t("auth.verify.descriptionUser", { email: user.email })
+          : t("auth.verify.descriptionGeneric")
       }
     >
       <EmailVerificationPoller enabled={Boolean(user && !user.emailVerified)} />

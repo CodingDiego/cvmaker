@@ -7,8 +7,10 @@ import {
   getVerificationPollDecision,
   type VerificationStatus,
 } from "@/lib/auth/verification-status";
+import { useT } from "@/i18n/provider";
 
 export function EmailVerificationPoller({ enabled }: { enabled: boolean }) {
+  const t = useT();
   const router = useRouter();
   const [detected, setDetected] = useState(false);
 
@@ -71,9 +73,7 @@ export function EmailVerificationPoller({ enabled }: { enabled: boolean }) {
 
   return (
     <p className="text-center text-sm text-muted-foreground" aria-live="polite">
-      {detected
-        ? "Email verified. Updating this page..."
-        : "Waiting for the verification link to be opened..."}
+      {detected ? t("auth.verify.detected") : t("auth.verify.waiting")}
     </p>
   );
 }

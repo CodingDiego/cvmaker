@@ -77,16 +77,36 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
 
       <section
         aria-labelledby="home-hero-title"
-        className="mx-auto grid min-h-[calc(100svh-3.5rem)] max-w-6xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.92fr_1.08fr] lg:py-16"
+        className="mx-auto grid min-h-[calc(100svh-3.5rem)] max-w-6xl items-center gap-12 px-4 py-12 sm:px-6 lg:grid-cols-[1.02fr_0.98fr] lg:py-16"
       >
         <div className="max-w-xl">
-          <span className="mb-5 inline-flex items-center gap-1.5 rounded-full border bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground">
-            <Check className="size-3.5 text-primary" /> {t("home.badge")}
+          <span className="mb-6 inline-flex items-center gap-2 rounded-full border bg-background/80 px-3 py-1 text-xs font-medium shadow-sm">
+            <Sparkles className="size-3.5 text-primary" />
+            <span className="font-display font-semibold tracking-tight">CVMaker</span>
+            <span aria-hidden className="h-3 w-px bg-border" />
+            <span className="text-muted-foreground">{t("home.badge")}</span>
           </span>
-          <h1 id="home-hero-title" className="max-w-3xl font-display text-5xl font-semibold leading-[1.05] text-balance sm:text-6xl">
-            CVMaker
+
+          <h1
+            id="home-hero-title"
+            className="font-display text-[2.75rem] font-semibold leading-[1.04] tracking-tight text-balance sm:text-6xl"
+          >
+            {t("home.heroTitleA")}
+            <span className="relative whitespace-nowrap text-primary">
+              {t("home.heroAccent")}
+              <svg
+                aria-hidden
+                viewBox="0 0 300 12"
+                preserveAspectRatio="none"
+                className="absolute -bottom-1 left-0 h-[0.5em] w-full text-primary/35"
+              >
+                <path d="M2 9 C 80 2, 220 2, 298 8" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round" />
+              </svg>
+            </span>
+            {t("home.heroTitleB")}
           </h1>
-          <p className="mt-5 max-w-lg text-lg leading-8 text-pretty text-muted-foreground">
+
+          <p className="mt-6 max-w-lg text-lg leading-8 text-pretty text-muted-foreground">
             {t("home.lead")}
           </p>
 
@@ -99,7 +119,15 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
             </Button>
           </div>
 
-          <div className="mt-10 grid max-w-lg grid-cols-3 divide-x rounded-lg border bg-background/80">
+          <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2">
+            {HERO_BADGES.map((i) => (
+              <li key={i} className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+                <Check className="size-4 text-primary" /> {t(`home.heroBadges.${i}`)}
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-10 grid max-w-lg grid-cols-3 divide-x rounded-xl border bg-background/80 shadow-sm">
             {OUTCOMES.map((i) => (
               <div key={i} className="px-4 py-3">
                 <div className="font-display text-lg font-semibold">{t(`home.outcomes.${i}.value`)}</div>
@@ -109,46 +137,54 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
           </div>
         </div>
 
-        <div className="relative min-h-[430px] overflow-hidden rounded-lg border bg-[linear-gradient(135deg,color-mix(in_oklch,var(--secondary)_80%,transparent),color-mix(in_oklch,var(--background)_70%,var(--primary)_6%))] p-4 shadow-sm sm:min-h-[520px] sm:p-5">
-          <div className="mb-4 flex items-center justify-between border-b pb-3 text-xs text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <span className="size-2 rounded-full bg-destructive" />
-              <span className="size-2 rounded-full bg-chart-3" />
-              <span className="size-2 rounded-full bg-primary" />
-            </div>
-            <span>{t("home.livePreview")}</span>
-          </div>
-
-          <div className="relative h-[360px] sm:h-[440px]">
-            <div
-              aria-hidden
-              className="bg-glow pointer-events-none absolute inset-x-4 top-2 bottom-6 -z-0 rounded-[2rem] opacity-60"
-            />
-            {HERO_TEMPLATES.map((id, index) => {
-              const tokens = template(id);
-              if (!tokens) return null;
-              const layout = [
-                { pos: "left-1 top-14 -rotate-[7deg] sm:left-3", w: 150, h: 300, z: "z-0", extra: "opacity-90" },
-                { pos: "left-1/2 top-1 -translate-x-1/2", w: 224, h: 330, z: "z-10", extra: "" },
-                { pos: "right-1 top-16 rotate-[7deg] sm:right-3", w: 150, h: 300, z: "z-0", extra: "opacity-90" },
-              ][index]!;
-              return (
-                <div
-                  key={id}
-                  className={`absolute ${layout.pos} ${layout.z} ${layout.extra} overflow-hidden rounded-lg border bg-white shadow-xl ring-1 ring-black/5 transition-transform duration-300 hover:z-20 hover:-translate-y-1`}
-                >
-                  <LazyThumbnail data={SAMPLE} tokens={tokens} width={layout.w} height={layout.h} />
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="grid gap-2 sm:grid-cols-3">
-            {HERO_BADGES.map((i) => (
-              <div key={i} className="rounded-md border bg-background/80 px-3 py-2 text-xs font-medium text-muted-foreground">
-                {t(`home.heroBadges.${i}`)}
+        <div className="relative">
+          <div
+            aria-hidden
+            className="bg-glow pointer-events-none absolute -inset-6 -z-10 rounded-[2.5rem] opacity-70 blur-2xl"
+          />
+          <div className="relative min-h-[440px] overflow-hidden rounded-2xl border bg-[linear-gradient(135deg,color-mix(in_oklch,var(--secondary)_80%,transparent),color-mix(in_oklch,var(--background)_70%,var(--primary)_6%))] p-4 shadow-xl ring-1 ring-black/5 sm:min-h-[540px] sm:p-5">
+            <div className="mb-4 flex items-center justify-between border-b pb-3 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span className="size-2 rounded-full bg-destructive" />
+                <span className="size-2 rounded-full bg-chart-3" />
+                <span className="size-2 rounded-full bg-primary" />
               </div>
-            ))}
+              <span className="flex items-center gap-1.5">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60" />
+                  <span className="relative inline-flex size-2 rounded-full bg-primary" />
+                </span>
+                {t("home.livePreview")}
+              </span>
+            </div>
+
+            <div className="relative h-[380px] sm:h-[460px]">
+              {HERO_TEMPLATES.map((id, index) => {
+                const tokens = template(id);
+                if (!tokens) return null;
+                const layout = [
+                  { pos: "left-0 top-16 -rotate-[8deg] sm:left-2", w: 152, h: 300, z: "z-0", extra: "opacity-95" },
+                  { pos: "left-1/2 top-0 -translate-x-1/2", w: 232, h: 340, z: "z-10", extra: "" },
+                  { pos: "right-0 top-20 rotate-[8deg] sm:right-2", w: 152, h: 300, z: "z-0", extra: "opacity-95" },
+                ][index]!;
+                return (
+                  <div
+                    key={id}
+                    className={`absolute ${layout.pos} ${layout.z} ${layout.extra} overflow-hidden rounded-xl border bg-white shadow-2xl ring-1 ring-black/5 transition-transform duration-300 hover:z-20 hover:-translate-y-1.5`}
+                  >
+                    <LazyThumbnail data={SAMPLE} tokens={tokens} width={layout.w} height={layout.h} />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Floating accent chip */}
+          <div className="absolute -bottom-3 -left-3 hidden items-center gap-2 rounded-xl border bg-background px-3 py-2 shadow-lg sm:flex">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Download className="size-4" />
+            </span>
+            <span className="text-xs font-medium">PDF · DOCX · ZIP</span>
           </div>
         </div>
       </section>

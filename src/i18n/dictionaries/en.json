@@ -303,7 +303,7 @@
       "dialogTitle": "Share your CV",
       "dialogDescription": "Make this CV public to share it with a link. The public copy can be viewed and downloaded by anyone.",
       "emptyTitle": "Some sections are empty",
-      "emptyDescription": "Add details or remove {these} before sharing: {sections}.",
+      "emptyDescription": "Add details or remove the empty sections before sharing: {sections}.",
       "publicLink": "Public link",
       "anyoneCanView": "Anyone with the link can view",
       "onlyYou": "Only you can see this CV",
@@ -317,7 +317,7 @@
       "sharingDisabled": "Sharing disabled",
       "updateError": "Couldn't update sharing",
       "linkCopied": "Link copied",
-      "emptyToast": "Empty {plural}: {sections}. Add details or remove {them} before sharing."
+      "emptyToast": "Some sections are empty: {sections}. Add details or remove them before sharing."
     },
     "export": {
       "button": "Export",
@@ -325,7 +325,7 @@
       "pdf": "PDF",
       "docx": "Word (DOCX)",
       "zip": "All formats (ZIP)",
-      "emptyToast": "Empty {plural}: {sections}. Add details or remove {them} before exporting."
+      "emptyToast": "Some sections are empty: {sections}. Add details or remove them before exporting."
     },
     "photo": {
       "add": "Add photo",

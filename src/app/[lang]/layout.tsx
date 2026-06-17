@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { JsonLd } from "@/components/seo/json-ld";
 import { display, geistMono, sans, cvFontVariables } from "@/lib/fonts";
 import { Providers } from "@/lib/providers";
-import { organizationLd, siteConfig, softwareApplicationLd, websiteLd } from "@/lib/seo";
+import { OG_IMAGE, organizationLd, siteConfig, softwareApplicationLd, websiteLd } from "@/lib/seo";
 import { I18nProvider } from "@/i18n/provider";
 import { getDictionary } from "@/i18n/dictionaries";
 import { defaultLocale, isLocale, locales } from "@/i18n/config";
@@ -14,13 +14,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const SITE_DESCRIPTION =
   "Create a professional, ATS-friendly CV for free. Pick a modern template, edit with live preview, and download as PDF or DOCX in minutes — no watermarks.";
-
-const OG_IMAGE = {
-  url: "/opengraph.png",
-  width: 1731,
-  height: 909,
-  alt: "CVMaker - Free ATS-friendly resume builder",
-};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),

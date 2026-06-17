@@ -303,7 +303,7 @@
       "dialogTitle": "Compartilhe seu currículo",
       "dialogDescription": "Torne este currículo público para compartilhá-lo com um link. A cópia pública pode ser vista e baixada por qualquer pessoa.",
       "emptyTitle": "Algumas seções estão vazias",
-      "emptyDescription": "Adicione detalhes ou remova {these} antes de compartilhar: {sections}.",
+      "emptyDescription": "Adicione detalhes ou remova as seções vazias antes de compartilhar: {sections}.",
       "publicLink": "Link público",
       "anyoneCanView": "Qualquer pessoa com o link pode ver",
       "onlyYou": "Só você pode ver este currículo",
@@ -317,7 +317,7 @@
       "sharingDisabled": "Compartilhamento desativado",
       "updateError": "Não foi possível atualizar o compartilhamento",
       "linkCopied": "Link copiado",
-      "emptyToast": "{plural} vazia(s): {sections}. Adicione detalhes ou remova {them} antes de compartilhar."
+      "emptyToast": "Há seções vazias: {sections}. Adicione detalhes ou remova-as antes de compartilhar."
     },
     "export": {
       "button": "Exportar",
@@ -325,7 +325,7 @@
       "pdf": "PDF",
       "docx": "Word (DOCX)",
       "zip": "Todos os formatos (ZIP)",
-      "emptyToast": "{plural} vazia(s): {sections}. Adicione detalhes ou remova {them} antes de exportar."
+      "emptyToast": "Há seções vazias: {sections}. Adicione detalhes ou remova-as antes de exportar."
     },
     "photo": {
       "add": "Adicionar foto",

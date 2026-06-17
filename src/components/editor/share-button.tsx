@@ -20,8 +20,10 @@ import { Switch } from "@/components/ui/switch";
 import { shareCvAction, unshareCvAction } from "@/lib/cv/share-actions";
 import { shareInfoOptions, type ShareInfo } from "@/lib/cv/cv-queries";
 import { queryKeys } from "@/lib/query/keys";
+import { useT } from "@/i18n/provider";
 
 export function ShareButton({ cvId, onShowErrors }: { cvId: string; onShowErrors?: () => void }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const queryClient = useQueryClient();
@@ -38,9 +40,7 @@ export function ShareButton({ cvId, onShowErrors }: { cvId: string; onShowErrors
     setSectionErrors(emptySections);
     onShowErrors?.();
     const names = emptySections.map((k) => resolveSectionTitle(data, k)).join(", ");
-    toast.error(
-      `Empty section${emptySections.length > 1 ? "s" : ""}: ${names}. Add details or remove ${emptySections.length > 1 ? "them" : "it"} before sharing.`,
-    );
+    toast.error(t("editor.share.emptyToast", { sections: names }));
   }
 
   // Share state is read from GET /api/cvs/:cvId/share, fetched lazily the first
@@ -58,15 +58,15 @@ export function ShareButton({ cvId, onShowErrors }: { cvId: string; onShowErrors
     onSuccess: ({ r, mode }) => {
       writeShare(r);
       if (mode === "enable") {
-        toast.success("Your CV is now public", {
-          description: "Anyone with the link can view and download it.",
+        toast.success(t("editor.share.nowPublic"), {
+          description: t("editor.share.nowPublicDesc"),
         });
       } else {
-        toast.success("Public copy updated");
+        toast.success(t("editor.share.copyUpdated"));
       }
     },
     onError: (e) =>
-      toast.error("Couldn't update sharing", {
+      toast.error(t("editor.share.updateError"), {
         description: e instanceof Error ? e.message : undefined,
       }),
   });
@@ -75,10 +75,10 @@ export function ShareButton({ cvId, onShowErrors }: { cvId: string; onShowErrors
     mutationFn: () => unshareCvAction(cvId),
     onSuccess: () => {
       writeShare({ isPublic: false, shareUrl: null, pdfUrl: null, docxUrl: null });
-      toast.success("Sharing disabled");
+      toast.success(t("editor.share.sharingDisabled"));
     },
     onError: (e) =>
-      toast.error("Couldn't update sharing", {
+      toast.error(t("editor.share.updateError"), {
         description: e instanceof Error ? e.message : undefined,
       }),
   });
@@ -108,20 +108,20 @@ export function ShareButton({ cvId, onShowErrors }: { cvId: string; onShowErrors
     if (!info?.shareUrl) return;
     navigator.clipboard.writeText(info.shareUrl);
     setCopied(true);
-    toast.success("Link copied");
+    toast.success(t("editor.share.linkCopied"));
     setTimeout(() => setCopied(false), 1500);
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="outline" size="sm" className="h-9" aria-label="Share" />}>
-        <Share2 className="size-4" /> <span className="hidden sm:inline">Share</span>
+      <DialogTrigger render={<Button variant="outline" size="sm" className="h-9" aria-label={t("editor.share.button")} />}>
+        <Share2 className="size-4" /> <span className="hidden sm:inline">{t("editor.share.button")}</span>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share your CV</DialogTitle>
+          <DialogTitle>{t("editor.share.dialogTitle")}</DialogTitle>
           <DialogDescription>
-            Make this CV public to share it with a link. The public copy can be viewed and downloaded by anyone.
+            {t("editor.share.dialogDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -129,10 +129,11 @@ export function ShareButton({ cvId, onShowErrors }: { cvId: string; onShowErrors
           <div className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-destructive">
             <AlertTriangle className="mt-0.5 size-4 shrink-0" />
             <div className="text-sm">
-              <p className="font-medium">Some sections are empty</p>
+              <p className="font-medium">{t("editor.share.emptyTitle")}</p>
               <p className="text-xs text-destructive/90">
-                Add details or remove {emptySections.length > 1 ? "these" : "this"} before sharing:{" "}
-                {emptySections.map((k) => resolveSectionTitle(data, k)).join(", ")}.
+                {t("editor.share.emptyDescription", {
+                  sections: emptySections.map((k) => resolveSectionTitle(data, k)).join(", "),
+                })}
               </p>
             </div>
           </div>
@@ -142,9 +143,9 @@ export function ShareButton({ cvId, onShowErrors }: { cvId: string; onShowErrors
           <div className="flex items-center gap-2.5">
             <Globe className="size-4 text-primary" />
             <div>
-              <div className="text-sm font-medium">Public link</div>
+              <div className="text-sm font-medium">{t("editor.share.publicLink")}</div>
               <div className="text-xs text-muted-foreground">
-                {isPublic ? "Anyone with the link can view" : "Only you can see this CV"}
+                {isPublic ? t("editor.share.anyoneCanView") : t("editor.share.onlyYou")}
               </div>
             </div>
           </div>
@@ -159,14 +160,14 @@ export function ShareButton({ cvId, onShowErrors }: { cvId: string; onShowErrors
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Input readOnly value={info.shareUrl} className="h-9 font-mono text-xs" />
-              <Button size="icon" variant="outline" className="h-9 shrink-0" aria-label="Copy link" onClick={copy}>
+              <Button size="icon" variant="outline" className="h-9 shrink-0" aria-label={t("editor.share.copyLinkAria")} onClick={copy}>
                 {copied ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
               </Button>
               <Button
                 size="icon"
                 variant="outline"
                 className="h-9 shrink-0"
-                aria-label="Open link"
+                aria-label={t("editor.share.openLinkAria")}
                 render={<a href={info.shareUrl} target="_blank" rel="noreferrer noopener" />}
               >
                 <ExternalLink className="size-4" />
@@ -186,11 +187,11 @@ export function ShareButton({ cvId, onShowErrors }: { cvId: string; onShowErrors
               )}
               <Button size="sm" variant="ghost" className="ml-auto" disabled={pending} onClick={resync}>
                 {pending ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
-                Update public copy
+                {t("editor.share.updateCopy")}
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Edited your CV? Click “Update public copy” to re-publish the latest version.
+              {t("editor.share.updateHint")}
             </p>
           </div>
         )}

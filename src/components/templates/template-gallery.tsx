@@ -18,6 +18,7 @@ import { templateSearchParsers } from "@/lib/search-params";
 import { PreviewThumbnail } from "@/components/templates/preview-thumbnail";
 import { UseTemplateButton, type TemplateDraft } from "@/components/templates/template-card";
 import type { BillingPlan } from "@/lib/billing/entitlements";
+import { useT } from "@/i18n/provider";
 
 export function TemplateGallery({
   drafts,
@@ -30,6 +31,7 @@ export function TemplateGallery({
   draftCount: number;
   isAuthed: boolean;
 }) {
+  const t = useT();
   const sample = useMemo(() => sampleResume(), []);
 
   const [{ q, font }, setFilters] = useQueryStates(templateSearchParsers, {
@@ -58,20 +60,20 @@ export function TemplateGallery({
           <Input
             value={q}
             onChange={(e) => setFilters({ q: e.target.value || null })}
-            placeholder="Search templates..."
+            placeholder={t("templates.searchPlaceholder")}
             className="pl-9"
-            aria-label="Search templates"
+            aria-label={t("templates.searchAria")}
           />
         </div>
         <Select
           value={font}
           onValueChange={(v) => v && setFilters({ font: v === "all" ? null : v })}
         >
-          <SelectTrigger className="w-full sm:w-44" aria-label="Filter by font">
+          <SelectTrigger className="w-full sm:w-44" aria-label={t("templates.filterAria")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All fonts</SelectItem>
+            <SelectItem value="all">{t("templates.allFonts")}</SelectItem>
             {FONT_OPTIONS.map((f) => (
               <SelectItem key={f.id} value={f.id}>
                 {f.label.replace(" (serif)", "")}
@@ -83,7 +85,7 @@ export function TemplateGallery({
 
       {filtered.length === 0 ? (
         <p className="rounded-xl border border-dashed py-16 text-center text-sm text-muted-foreground">
-          No templates match your filters.
+          {t("templates.noMatch")}
         </p>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6">
@@ -117,7 +119,7 @@ export function TemplateGallery({
                       <div className="flex shrink-0 flex-col items-end gap-1">
                         {isPro && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[0.7rem] font-medium text-primary-foreground">
-                            <Crown className="size-3" /> Pro
+                            <Crown className="size-3" /> {t("templates.pro")}
                           </span>
                         )}
                         <span className="rounded-full bg-muted px-2 py-0.5 text-[0.7rem] text-muted-foreground">

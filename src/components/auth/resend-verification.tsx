@@ -4,8 +4,10 @@ import { useState, useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { resendVerificationAction } from "@/lib/auth/actions";
+import { useT } from "@/i18n/provider";
 
 export function ResendVerification() {
+  const t = useT();
   const [pending, startTransition] = useTransition();
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +31,7 @@ export function ResendVerification() {
         }
       >
         {pending && <Loader2 aria-hidden="true" className="size-4 animate-spin" />}
-        {sent ? "Verification email sent" : "Resend verification email"}
+        {sent ? t("auth.verify.resent") : t("auth.verify.resend")}
       </Button>
       {error && (
         <p className="text-center text-sm text-destructive" role="alert">

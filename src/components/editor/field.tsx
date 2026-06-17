@@ -4,6 +4,7 @@ import { ExternalLink, Link2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useT } from "@/i18n/provider";
 
 function hrefFor(v: string) {
   const t = v.trim();
@@ -105,7 +106,7 @@ export function AreaField({
 
 /** Bullets editor: one line per bullet. */
 export function BulletsField({
-  label = "Bullet points (one per line)",
+  label,
   value,
   onChange,
   placeholder = "Delivered X by doing Y\nReduced Z by N%",
@@ -115,9 +116,10 @@ export function BulletsField({
   onChange: (v: string[]) => void;
   placeholder?: string;
 }) {
+  const t = useT();
   return (
     <AreaField
-      label={label}
+      label={label ?? t("editor.fields.bulletsDefault")}
       rows={4}
       value={value.join("\n")}
       onChange={(v) => onChange(v.split("\n"))}

@@ -303,7 +303,7 @@
       "dialogTitle": "Compartí tu CV",
       "dialogDescription": "Hacé público este CV para compartirlo con un enlace. Cualquiera puede ver y descargar la copia pública.",
       "emptyTitle": "Algunas secciones están vacías",
-      "emptyDescription": "Agregá detalles o quitá {these} antes de compartir: {sections}.",
+      "emptyDescription": "Agregá detalles o quitá las secciones vacías antes de compartir: {sections}.",
       "publicLink": "Enlace público",
       "anyoneCanView": "Cualquiera con el enlace puede verlo",
       "onlyYou": "Solo vos podés ver este CV",
@@ -317,7 +317,7 @@
       "sharingDisabled": "Compartir desactivado",
       "updateError": "No se pudo actualizar el compartir",
       "linkCopied": "Enlace copiado",
-      "emptyToast": "{plural} vacía(s): {sections}. Agregá detalles o quitá {them} antes de compartir."
+      "emptyToast": "Hay secciones vacías: {sections}. Agregá detalles o quitalas antes de compartir."
     },
     "export": {
       "button": "Exportar",
@@ -325,7 +325,7 @@
       "pdf": "PDF",
       "docx": "Word (DOCX)",
       "zip": "Todos los formatos (ZIP)",
-      "emptyToast": "{plural} vacía(s): {sections}. Agregá detalles o quitá {them} antes de exportar."
+      "emptyToast": "Hay secciones vacías: {sections}. Agregá detalles o quitalas antes de exportar."
     },
     "photo": {
       "add": "Agregar foto",

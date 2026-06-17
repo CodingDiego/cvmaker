@@ -9,11 +9,11 @@ import { isLocale } from "@/i18n/config";
 
 const items = [
   { href: "/dashboard", labelKey: "nav.myCvs", icon: FileText, exact: true },
-  { href: "/dashboard/assets", labelKey: "nav.assets", icon: Images },
-  { href: "/dashboard/billing", labelKey: "nav.billing", icon: CreditCard },
-  { href: "/dashboard/sessions", labelKey: "nav.sessions", icon: MonitorSmartphone },
-  { href: "/dashboard/security", labelKey: "nav.security", icon: ShieldCheck },
-  { href: "/dashboard/account", labelKey: "nav.account", icon: User },
+  { href: "/dashboard/assets", labelKey: "nav.assets", icon: Images, exact: false },
+  { href: "/dashboard/billing", labelKey: "nav.billing", icon: CreditCard, exact: false },
+  { href: "/dashboard/sessions", labelKey: "nav.sessions", icon: MonitorSmartphone, exact: false },
+  { href: "/dashboard/security", labelKey: "nav.security", icon: ShieldCheck, exact: false },
+  { href: "/dashboard/account", labelKey: "nav.account", icon: User, exact: false },
 ] as const;
 
 /** Strip a leading `/en|/es|/pt` segment so active-state checks compare against

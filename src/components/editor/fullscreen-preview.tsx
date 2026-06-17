@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LivePreview } from "./live-preview";
+import { useT } from "@/i18n/provider";
 
 /**
  * Full-viewport overlay that shows the live preview on its own — gives the CV
@@ -13,6 +14,7 @@ import { LivePreview } from "./live-preview";
  * larger area automatically.
  */
 export function FullscreenPreview({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const t = useT();
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -32,8 +34,8 @@ export function FullscreenPreview({ open, onClose }: { open: boolean; onClose: (
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
       <div className="flex items-center justify-between border-b bg-card/60 px-4 py-2">
-        <span className="text-sm font-medium">Preview</span>
-        <Button variant="ghost" size="icon" className="h-9" aria-label="Close preview" onClick={onClose}>
+        <span className="text-sm font-medium">{t("editor.preview")}</span>
+        <Button variant="ghost" size="icon" className="h-9" aria-label={t("editor.closePreviewAria")} onClick={onClose}>
           <X className="size-4" />
         </Button>
       </div>

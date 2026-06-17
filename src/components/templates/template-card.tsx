@@ -17,6 +17,7 @@ import { createCvAction } from "@/lib/cv/actions";
 import type { BillingPlan } from "@/lib/billing/entitlements";
 import { FREE_DRAFT_LIMIT } from "@/templates/registry";
 import type { TemplateAccess } from "@/templates/types";
+import { useT } from "@/i18n/provider";
 
 export interface TemplateDraft {
   id: string;
@@ -39,6 +40,7 @@ export function UseTemplateButton({
   draftCount: number;
   isAuthed?: boolean;
 }) {
+  const t = useT();
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +66,7 @@ export function UseTemplateButton({
         className="w-full"
         render={<Link href={`/register?next=${encodeURIComponent(`/start/${templateId}`)}`} />}
       >
-        <ArrowRight className="size-4" /> Use this template
+        <ArrowRight className="size-4" /> {t("templates.useTemplate")}
       </Button>
     );
   }
@@ -72,7 +74,7 @@ export function UseTemplateButton({
   if (requiresUpgrade) {
     return (
       <Button size="sm" className="w-full" render={<Link href="/api/checkout" />}>
-        <Crown className="size-4" /> Upgrade to use
+        <Crown className="size-4" /> {t("templates.upgradeToUse")}
       </Button>
     );
   }
@@ -80,7 +82,7 @@ export function UseTemplateButton({
   if (!draft && reachedDraftLimit) {
     return (
       <Button size="sm" variant="outline" className="w-full" render={<Link href="/api/checkout" />}>
-        <Crown className="size-4" /> Upgrade for more drafts
+        <Crown className="size-4" /> {t("templates.upgradeMoreDrafts")}
       </Button>
     );
   }
@@ -90,7 +92,7 @@ export function UseTemplateButton({
       <div className="space-y-2">
         <Button size="sm" className="w-full" disabled={pending} onClick={startNew}>
           {pending ? <Loader2 className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
-          Use this template
+          {t("templates.useTemplate")}
         </Button>
         {error && <p className="text-xs text-destructive">{error}</p>}
       </div>
@@ -100,20 +102,21 @@ export function UseTemplateButton({
   return (
     <Dialog>
       <DialogTrigger render={<Button size="sm" variant="outline" className="w-full" />}>
-        <PencilLine className="size-4" /> Continue or start new
+        <PencilLine className="size-4" /> {t("templates.continueOrNew")}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>You have a draft with this template</DialogTitle>
+          <DialogTitle>{t("templates.draftDialogTitle")}</DialogTitle>
           <DialogDescription>
-            &quot;{draft.title}&quot; already uses this template (edited{" "}
-            {new Date(draft.updatedAt).toLocaleDateString()}). Continue editing it, or start a
-            fresh CV. Your existing draft is kept either way.
+            {t("templates.draftDialogDescription", {
+              title: draft.title,
+              date: new Date(draft.updatedAt).toLocaleDateString(),
+            })}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button className="flex-1" onClick={() => router.push(`/editor/${draft.id}`)}>
-            <PencilLine className="size-4" /> Continue draft
+            <PencilLine className="size-4" /> {t("templates.continueDraft")}
           </Button>
           {canStartNew ? (
             <Button variant="outline" className="flex-1" disabled={pending} onClick={startNew}>
@@ -122,11 +125,11 @@ export function UseTemplateButton({
               ) : (
                 <FilePlus2 className="size-4" />
               )}
-              Start new
+              {t("templates.startNew")}
             </Button>
           ) : (
             <Button variant="outline" className="flex-1" render={<Link href="/api/checkout" />}>
-              <Crown className="size-4" /> Upgrade
+              <Crown className="size-4" /> {t("templates.upgrade")}
             </Button>
           )}
         </div>

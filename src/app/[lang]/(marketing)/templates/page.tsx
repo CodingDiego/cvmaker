@@ -9,6 +9,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { breadcrumbLd, pageMetadata, templatesCollectionPageLd, templatesItemListLd } from "@/lib/seo";
 import { seoCopy } from "@/lib/seo-copy";
 import { defaultLocale, isLocale } from "@/i18n/config";
+import { getTFromParams } from "@/i18n/server";
 import { FREE_TEMPLATES, PRO_TEMPLATES } from "@/templates/registry";
 
 export async function generateMetadata({
@@ -21,8 +22,8 @@ export async function generateMetadata({
   return pageMetadata({ lang: locale, path: "/templates", ...seoCopy.templates[locale] });
 }
 
-export default async function TemplatesPage() {
-  const user = await getCurrentUser();
+export default async function TemplatesPage({ params }: { params: Promise<{ lang: string }> }) {
+  const [user, t] = await Promise.all([getCurrentUser(), getTFromParams(params)]);
   const draftsByTemplate: Record<string, TemplateDraft> = {};
   let draftCount = 0;
   let plan: BillingPlan = "free";
@@ -58,14 +59,13 @@ export default async function TemplatesPage() {
       <section aria-labelledby="templates-title" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <header className="mx-auto mb-12 max-w-2xl text-center">
           <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
-            {FREE_TEMPLATES.length} free templates + {PRO_TEMPLATES.length} Pro designs
+            {t("templates.count", { free: FREE_TEMPLATES.length, pro: PRO_TEMPLATES.length })}
           </span>
           <h1 id="templates-title" className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
-            Choose your template
+            {t("templates.title")}
           </h1>
           <p className="mt-4 text-pretty text-muted-foreground">
-            Start with up to {FREE_DRAFT_LIMIT} free CV drafts, or upgrade to unlock premium
-            templates and higher draft capacity.
+            {t("templates.subtitle", { limit: FREE_DRAFT_LIMIT })}
           </p>
         </header>
 
