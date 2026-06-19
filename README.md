@@ -11,14 +11,17 @@ Production: **[free-cv.com](https://free-cv.com)**
 ## Features
 
 - **Live editor** — autosaving form with a real-time preview of the rendered resume.
-- **10 free ATS-friendly templates** — distinct silhouettes (sidebars, side-labels,
-  two-column bodies, accent bands), all driven by design tokens so renderers stay DRY.
+- **ATS-friendly designs** — three self-contained free designs (Clásico ATS, Moderno
+  Acento, Técnico Dev), each a module that owns its own preview, PDF and DOCX renderer
+  over a shared resume model. Distinct silhouettes that stay parseable by
+  applicant-tracking systems.
 - **PDF & DOCX export** — server-rendered via `@react-pdf/renderer` and `docx`, run as
   durable background jobs (Vercel Workflow).
 - **Accounts & security** — email/password auth (Argon2), email verification, password
   reset, optional TOTP two-factor, active-session management with refresh-token rotation.
 - **Sharing** — public read-only share links for a CV.
-- **i18n** — sub-path routing (`/en`, `/es`, `/pt`) with a custom dictionary system.
+- **i18n** — subdomain routing (`en.`/`es.`/`pt.`), mapped to an internal `[lang]`
+  segment by `next.config.ts`, with a custom dictionary system.
 - **Billing** — optional Pro plan via [Polar](https://polar.sh) (premium templates live in
   a private overlay; the open-source build ships free templates only).
 - **Bot protection** — Vercel BotID gating on sensitive auth/account actions.
@@ -49,7 +52,7 @@ Production: **[free-cv.com](https://free-cv.com)**
 
 ```
 src/
-  app/[lang]/            Localized routes
+  app/[lang]/            Localized routes (locale comes from the subdomain, not the URL)
     (marketing)/         Landing, templates, legal, checkout return
     (auth)/              Login, register, reset, verify
     (app)/               Dashboard + editor (authenticated)
@@ -62,11 +65,13 @@ src/
     billing/             Entitlements + Polar checkout
     assets/              User asset uploads (Blob)
     query/               TanStack Query setup
-  templates/             Template registry + PDF/DOCX/preview renderers
+  templates/             Design catalog + shared render helpers
+    designs/             One self-contained module per free design (meta/preview/pdf/docx)
+    render/              Server-only export entry points (pick renderer by id)
   i18n/                  Locale config + en/es/pt dictionaries
   workflows/             Durable background jobs
   db/                    Drizzle schema + client
-  proxy.ts               Session + locale request handling
+  proxy.ts               Session refresh (locale routing lives in next.config.ts)
 drizzle/                 SQL migrations + snapshots
 scripts/                 Smoke / preload scripts
 ```
@@ -138,17 +143,28 @@ Open [http://localhost:3000](http://localhost:3000).
 | `bun run db:studio`   | Open Drizzle Studio                           |
 | `bun run debug-pr`    | `next build --debug-prerender`                |
 
-## Adding a template
+## Adding a design
 
-All free templates are plain token objects in
-[`src/templates/registry.ts`](src/templates/registry.ts) — no per-template renderer code.
-Add an entry to `FREE_TEMPLATE_DEFS` describing layout, accent, font, density, etc.; the
-shared preview/PDF/DOCX renderers pick it up automatically. Aim for a silhouette that
-reads as distinct even at thumbnail scale, and keep it ATS-parseable.
+Each CV design is a self-contained module under
+[`src/templates/designs/`](src/templates/designs/) — there is no shared token renderer.
+A free design is a folder (`designs/<id>/`) with four files:
+
+- `meta.ts` — client-safe metadata (id, label, accent color, category, `access`).
+- `preview.tsx` — the on-screen React preview (pixel-perfect; also used for thumbnails).
+- `pdf.tsx` — the `@react-pdf/renderer` export (`renderPdf`).
+- `docx.ts` — the `docx` export (`renderDocx`).
+
+Then register it in two places: add the meta + preview to `FREE_DESIGNS` in
+[`designs/index.ts`](src/templates/designs/index.ts) (client-safe), and the renderers to
+`FREE_RENDERERS` in [`designs/renderers.ts`](src/templates/designs/renderers.ts)
+(server-only). That split is what keeps `@react-pdf/renderer` and `docx` out of client
+bundles. Reuse the shared helpers (`designs/shared.tsx`, `designs/pdf-kit.tsx`,
+`designs/docx-kit.ts`). Aim for a silhouette that reads as distinct even at thumbnail
+scale, and keep it ATS-parseable.
 
 > Premium (`access: "pro"`) designs are **not** in this repo — they live in a private
-> `/.premium` overlay merged via the `@premium` alias and resolve to an empty stub in the
-> open-source build.
+> `/.premium` overlay merged via the `@premium` / `@premium/render` aliases and resolve
+> to empty stubs in the open-source build.
 
 ## Deployment
 

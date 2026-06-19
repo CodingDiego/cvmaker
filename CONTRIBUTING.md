@@ -70,9 +70,11 @@ bun run build       # full production build (catches type + prerender errors)
 - **Validation** with Zod for any external input (forms, request bodies, webhooks).
 - **UI** — reuse the primitives in `src/components/ui` and Base UI; follow the existing
   Tailwind token conventions. Keep components accessible (labels, roles, focus states).
-- **Templates** — add free templates as token objects in
-  [`src/templates/registry.ts`](src/templates/registry.ts); don't fork renderer code.
-  Premium designs are out of scope for this repo (private overlay).
+- **Designs** — each CV design is a self-contained module under
+  [`src/templates/designs/`](src/templates/designs/) (`meta.ts` + `preview.tsx` +
+  `pdf.tsx` + `docx.ts`); register it in `designs/index.ts` (client-safe) and
+  `designs/renderers.ts` (server-only). Premium designs are out of scope for this repo
+  (private overlay). See the README's "Adding a design" section.
 
 ## Commit & PR guidelines
 

@@ -7,8 +7,8 @@ details are made public.
 
 ## Supported Versions
 
-This project is 1.0. Security fixes are accepted for the current `main` branch
-and the version deployed at [free-cv.com](https://free-cv.com). Older commits,
+This project is on the 1.x release line. Security fixes are accepted for the
+current `main` branch and the version deployed at [free-cv.com](https://free-cv.com). Older commits,
 forks, private deployments, and local development environments are not supported
 unless a maintainer explicitly says otherwise.
 
