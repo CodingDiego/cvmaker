@@ -3,6 +3,7 @@ import { ArrowLeft, CreditCard, FileText, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@/components/link";
+import { env } from "@/lib/env";
 
 export const metadata: Metadata = {
   title: "Checkout paused",
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const returnUrl = "https://free-cv.com/return";
+const returnUrl = `${env.appUrl()}/return`;
 
 export default function ReturnPage() {
   return (

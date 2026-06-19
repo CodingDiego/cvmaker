@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { PreviewThumbnail } from "./preview-thumbnail";
 import type { ResumeData } from "@/lib/cv/types";
-import type { TemplateTokens } from "@/templates/types";
 
 /**
  * A {@link PreviewThumbnail} that fills its parent's width and is cropped to a
@@ -13,14 +12,14 @@ import type { TemplateTokens } from "@/templates/types";
  */
 export function ResponsiveThumbnail({
   data,
-  tokens,
+  templateId,
   accentColor,
   fontFamily,
   /** Cropped height as a fraction of the measured width (default ≈ 300×210). */
   ratio = 210 / 300,
 }: {
   data: ResumeData;
-  tokens: TemplateTokens;
+  templateId: string;
   accentColor?: string;
   fontFamily?: string;
   ratio?: number;
@@ -49,7 +48,7 @@ export function ResponsiveThumbnail({
       {width > 0 && (
         <PreviewThumbnail
           data={data}
-          tokens={tokens}
+          templateId={templateId}
           width={width}
           height={height}
           accentColor={accentColor}

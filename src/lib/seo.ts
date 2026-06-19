@@ -14,7 +14,7 @@ import type {
   WithContext,
 } from "schema-dts";
 import { env } from "@/lib/env";
-import { locales, type Locale } from "@/i18n/config";
+import { defaultLocale, locales, type Locale } from "@/i18n/config";
 import { TEMPLATES } from "@/templates/registry";
 import type { ResumeData } from "@/lib/cv/types";
 
@@ -39,17 +39,29 @@ export const OG_IMAGE = {
 } as const;
 
 /**
+ * Absolute URL for a locale + path, built on the locale's subdomain. The locale
+ * lives in the host now (`en|es|pt.<root>`), so `localeUrl("es", "/templates")`
+ * → `https://es.free-cv.com/templates`. `siteConfig.url` is the default-locale
+ * origin (`https://en.free-cv.com`); we swap its locale subdomain for `lang`.
+ */
+export function localeUrl(lang: Locale, path = ""): string {
+  const root = new URL(siteConfig.url);
+  const bareHost = root.host.replace(/^(?:en|es|pt)\./, "");
+  const seg = path === "/" ? "" : path;
+  return `${root.protocol}//${lang}.${bareHost}${seg}`;
+}
+
+/**
  * Per-route `alternates` with a localized canonical + full hreflang set. The
- * canonical points at the CURRENT locale's URL (e.g. `/es/templates`); the
- * `languages` map advertises every locale plus an `x-default` (English). Paths
- * are root-relative — `metadataBase` resolves them to absolute URLs.
+ * canonical points at the CURRENT locale's subdomain URL (e.g.
+ * `https://es.free-cv.com/templates`); the `languages` map advertises every
+ * locale plus an `x-default` (English). All URLs are absolute per-subdomain.
  */
 export function localeAlternates(path: string, lang: Locale): NonNullable<Metadata["alternates"]> {
-  const seg = path === "/" ? "" : path;
   const languages: Record<string, string> = {};
-  for (const l of locales) languages[l] = `/${l}${seg}`;
-  languages["x-default"] = `/en${seg}`;
-  return { canonical: `/${lang}${seg}`, languages };
+  for (const l of locales) languages[l] = localeUrl(l, path);
+  languages["x-default"] = localeUrl(defaultLocale, path);
+  return { canonical: localeUrl(lang, path), languages };
 }
 
 /**
@@ -67,7 +79,6 @@ export function pageMetadata(opts: {
   index?: boolean;
 }): Metadata {
   const { lang, path, title, description, absoluteTitle, index = true } = opts;
-  const seg = path === "/" ? "" : path;
   return {
     title: absoluteTitle ? { absolute: title } : title,
     description,
@@ -77,7 +88,7 @@ export function pageMetadata(opts: {
       siteName: siteConfig.name,
       title,
       description,
-      url: `/${lang}${seg}`,
+      url: localeUrl(lang, path),
       locale: OG_LOCALE[lang],
       images: [OG_IMAGE],
     },
@@ -238,7 +249,7 @@ export function templatesItemListLd(): WithContext<ItemList> {
 export function personLd(data: ResumeData, opts: { url: string }): WithContext<Person> {
   const c = data.header.contact;
   const sameAs = [c.linkedin, c.github, c.website].filter(Boolean).map(toHref);
-  const skills = data.skills.flatMap((s) => s.items).filter(Boolean).slice(0, 40);
+  const skills = data.skills.flatMap((s) => s.items.map((i) => i.name)).filter(Boolean).slice(0, 40);
   const currentJob = data.experience.find((e) => e.current) ?? data.experience[0];
   const alumniOf = data.education
     .filter((e) => e.institution)

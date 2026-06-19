@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { absoluteUrl } from "@/lib/seo";
+import { localeUrl } from "@/lib/seo";
 import { locales } from "@/i18n/config";
 
 // Public, indexable routes only. Authed app routes (/dashboard, /editor) and
@@ -14,7 +14,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "privacy", priority: 0.3, changeFrequency: "monthly" },
   ];
 
-  const localized = (locale: string, path: string) => absoluteUrl(path ? `${locale}/${path}` : locale);
+  const localized = (locale: (typeof locales)[number], path: string) =>
+    localeUrl(locale, path ? `/${path}` : "/");
 
   return entries.flatMap(({ path, priority, changeFrequency }) =>
     locales.map((locale) => ({

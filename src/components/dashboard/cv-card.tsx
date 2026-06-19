@@ -22,7 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { deleteCvAction, renameCvAction } from "@/lib/cv/actions";
 import { queryKeys } from "@/lib/query/keys";
-import { TEMPLATE_LABELS, getTemplate } from "@/templates/registry";
+import { TEMPLATE_LABELS } from "@/templates/registry";
 import { ResponsiveThumbnail } from "@/components/templates/responsive-thumbnail";
 import { isResumeEmpty, sampleResume, type ResumeData } from "@/lib/cv/types";
 import { useT } from "@/i18n/provider";
@@ -89,7 +89,7 @@ export function CvCard({
       <Link href={`/editor/${id}`} className="relative block overflow-hidden border-b bg-muted/30">
         <ResponsiveThumbnail
           data={previewData}
-          tokens={getTemplate(templateId)}
+          templateId={templateId}
           accentColor={accentColor}
           fontFamily={fontFamily}
         />

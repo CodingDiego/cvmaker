@@ -21,14 +21,16 @@ import { getTemplateAccess } from "@/templates/registry";
  */
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ lang: string; templateId: string }> },
+  { params }: { params: Promise<{ templateId: string }> },
 ) {
-  const { lang, templateId } = await params;
-  const here = `/${lang}/start/${encodeURIComponent(templateId)}`;
+  const { templateId } = await params;
+  // Bare paths: the locale lives in the host, so `new URL(..., req.url)` keeps
+  // the current subdomain and the next.config rewrite re-injects `[lang]`.
+  const here = `/start/${encodeURIComponent(templateId)}`;
 
   const user = await getCurrentUser();
   if (!user) {
-    return NextResponse.redirect(new URL(`/${lang}/register?next=${encodeURIComponent(here)}`, req.url));
+    return NextResponse.redirect(new URL(`/register?next=${encodeURIComponent(here)}`, req.url));
   }
 
   // Gate Pro templates behind a Pro plan.
@@ -42,7 +44,7 @@ export async function GET(
   try {
     const cv = await createCv(user.id, { templateId });
     updateTag(tags.cvList(user.id));
-    return NextResponse.redirect(new URL(`/${lang}/editor/${cv.id}`, req.url));
+    return NextResponse.redirect(new URL(`/editor/${cv.id}`, req.url));
   } catch (error) {
     if (isCvLimitError(error)) {
       // Out of free drafts — nudge to upgrade rather than failing.

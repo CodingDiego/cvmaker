@@ -11,8 +11,8 @@ import "./globals.css";
 // 404 for URLs that match no route can't be composed from layout + not-found.
 // global-not-found (enabled via experimental.globalNotFound) renders its own full
 // document. It bypasses normal rendering, so it self-imports styles and fonts.
-// Links are plain anchors to the default locale since the app <Link> needs client
-// context this page doesn't provide.
+// Links are plain bare-path anchors (the locale lives in the host; the config
+// rewrite injects [lang]) — the app <Link> needs client context this page lacks.
 
 export const metadata: Metadata = {
   title: "Page not found",
@@ -40,14 +40,18 @@ export default async function GlobalNotFound() {
             <p className="text-sm text-pretty text-muted-foreground sm:text-base">
               {t("states.notFound.description")}
             </p>
+            {/* Plain anchors (full navigation): this page bypasses normal
+                rendering and has no router/Providers context for next/link. */}
+            {/* eslint-disable @next/next/no-html-link-for-pages */}
             <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
-              <a href={`/${defaultLocale}`} className={buttonVariants()}>
+              <a href="/" className={buttonVariants()}>
                 {t("states.notFound.home")}
               </a>
-              <a href={`/${defaultLocale}/templates`} className={buttonVariants({ variant: "outline" })}>
+              <a href="/templates" className={buttonVariants({ variant: "outline" })}>
                 {t("states.notFound.templates")}
               </a>
             </div>
+            {/* eslint-enable @next/next/no-html-link-for-pages */}
           </div>
         </main>
       </body>

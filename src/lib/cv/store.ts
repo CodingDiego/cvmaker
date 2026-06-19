@@ -27,8 +27,8 @@ interface CvState extends CvMeta {
 export const useCvStore = create<CvState>((set) => ({
   cvId: "",
   title: "",
-  templateId: "classic",
-  accentColor: "#2563eb",
+  templateId: "clasico-ats",
+  accentColor: "#1c1c1c",
   fontFamily: "inter",
   data: {} as ResumeData,
   revision: 0,

@@ -1,5 +1,5 @@
 import "server-only";
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { defaultLocale, isLocale, type Locale } from "./config";
 import { getDictionary } from "./dictionaries";
 import { makeTranslator, type Translator } from "./translate";
@@ -17,15 +17,15 @@ export async function getTFromParams(params: Promise<{ lang: string }>): Promise
 }
 
 /**
- * Locale from the `NEXT_LOCALE` cookie (set by the proxy). Use this only in
- * server components that don't receive the `lang` route param; prefer the param
- * when available, since reading cookies opts the component into dynamic
- * rendering.
+ * Locale from the request host's locale subdomain (`es.free-cv.com` → `es`).
+ * Use this only in server components that don't receive the `lang` route param
+ * (e.g. `not-found.tsx`, which gets no params); prefer the param when available,
+ * since reading `headers()` opts the component into dynamic rendering.
  */
 export async function getLocale(): Promise<Locale> {
-  const store = await cookies();
-  const value = store.get("NEXT_LOCALE")?.value;
-  return value && isLocale(value) ? value : defaultLocale;
+  const host = (await headers()).get("host") ?? "";
+  const sub = host.split(".")[0] ?? "";
+  return isLocale(sub) ? sub : defaultLocale;
 }
 
 /** A server-side translator for the given locale. */

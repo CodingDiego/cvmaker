@@ -87,8 +87,12 @@ export const env = {
   // Vercel Cron — shared secret sent as `Authorization: Bearer <CRON_SECRET>`.
   cronSecret: () => optional("CRON_SECRET"),
 
-  // App URL.
-  appUrl: () => optional("APP_URL") ?? "https://free-cv.com",
+  // App URL — the default-locale origin. Locale lives in the subdomain, so this
+  // is the English host (`en.<root>`); other locales are derived from it via
+  // `localeUrl()` in seo.ts. APP_URL's host MUST be `en.<NEXT_PUBLIC_ROOT_DOMAIN>`.
+  // Transactional links (verify/reset/share/Polar return) build on this, so they
+  // land directly on the English subdomain without the apex→subdomain hop.
+  appUrl: () => optional("APP_URL") ?? "https://en.free-cv.com",
 
   // Deployment environment (Vercel).
   vercelEnv: () => optional("VERCEL_ENV"), // "production" | "preview" | "development"

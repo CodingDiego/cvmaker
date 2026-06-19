@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ScaledResume } from "@/components/templates/scaled-resume";
 import type { Cv } from "@/db/schema";
-import type { TemplateTokens } from "@/templates/types";
 
 /**
  * Presentational shell for a shared CV. Receives the resolved query params and
@@ -16,12 +15,10 @@ export function ShareView({
   userId,
   cvId,
   cv,
-  tokens,
 }: {
   userId: string;
   cvId: string;
   cv: Cv;
-  tokens: TemplateTokens;
 }) {
   const name = cv.data.header?.fullName || cv.title;
 
@@ -76,7 +73,7 @@ export function ShareView({
       <main id="main-content" className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6" tabIndex={-1}>
         <ScaledResume
           data={cv.data}
-          tokens={tokens}
+          templateId={cv.templateId}
           accentColor={cv.accentColor}
           fontFamily={cv.fontFamily}
         />

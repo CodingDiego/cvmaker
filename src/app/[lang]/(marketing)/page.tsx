@@ -42,10 +42,10 @@ export async function generateMetadata({
 // thumbnail on the page.
 const SAMPLE = sampleResume();
 
-const HERO_TEMPLATES = ["executive", "modern-serif", "two-column-ats"] as const;
-// Landing showcase uses only free templates so the public/OSS build never
-// depends on the private premium overlay being present.
-const GALLERY_TEMPLATES = ["classic", "professional", "technical", "modern-serif"] as const;
+const HERO_TEMPLATES = ["tecnico-dev", "moderno-acento", "clasico-ats"] as const;
+// Landing showcase uses only free designs so the public/OSS build never depends
+// on the private premium overlay being present.
+const GALLERY_TEMPLATES = ["clasico-ats", "moderno-acento", "tecnico-dev"] as const;
 
 // Icons stay in code; the copy is pulled from the locale dictionary by index.
 const OUTCOMES = [0, 1, 2] as const;
@@ -172,7 +172,7 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
                     key={id}
                     className={`absolute ${layout.pos} ${layout.z} ${layout.extra} overflow-hidden rounded-xl border bg-white shadow-2xl ring-1 ring-black/5 transition-transform duration-300 hover:z-20 hover:-translate-y-1.5`}
                   >
-                    <LazyThumbnail data={SAMPLE} tokens={tokens} width={layout.w} height={layout.h} />
+                    <LazyThumbnail data={SAMPLE} templateId={id} width={layout.w} height={layout.h} />
                   </div>
                 );
               })}
@@ -241,14 +241,14 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
           </Button>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {GALLERY_TEMPLATES.map((id) => {
             const tokens = template(id);
             if (!tokens) return null;
             return (
               <Link key={id} href="/templates" className="group rounded-lg border bg-background p-3 transition-colors hover:border-primary/50">
                 <div className="overflow-hidden rounded-md border bg-white">
-                  <LazyThumbnail data={SAMPLE} tokens={tokens} width={220} height={180} />
+                  <LazyThumbnail data={SAMPLE} templateId={id} width={220} height={180} />
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-3">
                   <div>

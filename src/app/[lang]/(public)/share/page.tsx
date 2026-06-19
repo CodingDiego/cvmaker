@@ -4,7 +4,6 @@ import type { SearchParams } from "nuqs/server";
 import { shareSearchParamsCache } from "@/lib/cv/share-search-params";
 import { getPublicCv } from "@/lib/cv/share-service";
 import { OG_IMAGE } from "@/lib/seo";
-import { getTemplate } from "@/templates/registry";
 import { ShareView } from "./share-view";
 import { ShareUnavailable } from "./share-unavailable";
 
@@ -64,7 +63,5 @@ async function ShareResolver({ searchParams }: PageProps) {
   const cv = await getPublicCv(userId, cvId);
   if (!cv) return <ShareUnavailable reason="not-public" />;
 
-  const tokens = getTemplate(cv.templateId);
-
-  return <ShareView userId={userId} cvId={cvId} cv={cv} tokens={tokens} />;
+  return <ShareView userId={userId} cvId={cvId} cv={cv} />;
 }

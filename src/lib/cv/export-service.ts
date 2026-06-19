@@ -4,6 +4,7 @@ import JSZip from "jszip";
 import { start } from "workflow/api";
 import { db } from "@/db";
 import { cvs, exports } from "@/db/schema";
+import { resumeSchema } from "./types";
 import { renderPdf } from "@/templates/render/pdf";
 import { renderDocx } from "@/templates/render/docx";
 import { uploadExport } from "@/lib/blob";
@@ -43,7 +44,8 @@ async function loadCvContext(userId: string, cvId: string): Promise<CvContext | 
     .limit(1);
   if (!row) return null;
   return {
-    data: row.data,
+    // Normalize legacy/partial documents (e.g. string[] skills) before render.
+    data: resumeSchema.parse(row.data),
     templateId: row.templateId,
     accentColor: row.accentColor,
     fontFamily: row.fontFamily,

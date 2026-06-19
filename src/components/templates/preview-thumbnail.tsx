@@ -1,6 +1,5 @@
 import { ResumePreview, PAGE_HEIGHT, PAGE_WIDTH } from "@/templates/preview/resume-preview";
 import type { ResumeData } from "@/lib/cv/types";
-import type { TemplateTokens } from "@/templates/types";
 
 /**
  * Renders a ResumePreview scaled down to a target pixel width. Pointer events
@@ -8,18 +7,18 @@ import type { TemplateTokens } from "@/templates/types";
  */
 export function PreviewThumbnail({
   data,
-  tokens,
+  templateId,
   accentColor,
   fontFamily,
   width = 280,
   height,
 }: {
   data: ResumeData;
-  tokens: TemplateTokens;
+  templateId: string;
   accentColor?: string;
   fontFamily?: string;
   width?: number;
-  /** Optional crop height (px). Defaults to the full A4 page height. */
+  /** Optional crop height (px). Defaults to the full page height. */
   height?: number;
 }) {
   const scale = width / PAGE_WIDTH;
@@ -30,7 +29,7 @@ export function PreviewThumbnail({
       aria-hidden
     >
       <div style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: PAGE_WIDTH }}>
-        <ResumePreview data={data} tokens={tokens} accentColor={accentColor} fontFamily={fontFamily} interactive={false} />
+        <ResumePreview data={data} templateId={templateId} accentColor={accentColor} fontFamily={fontFamily} interactive={false} />
       </div>
     </div>
   );

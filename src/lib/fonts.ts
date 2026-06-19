@@ -7,6 +7,15 @@ import {
   Lato,
   Source_Sans_3,
   Merriweather,
+  Arimo,
+  Archivo,
+  IBM_Plex_Sans,
+  IBM_Plex_Mono,
+  Cormorant_Garamond,
+  EB_Garamond,
+  Work_Sans,
+  Libre_Franklin,
+  Source_Serif_4,
 } from "next/font/google";
 
 // App chrome fonts — a distinctive editorial pairing (not Inter/Roboto):
@@ -51,6 +60,65 @@ export const merriweather = Merriweather({
   display: "swap",
 });
 
+// Design-specific CV fonts — each new bespoke design ships with the typeface it
+// was authored in (font is part of the design's identity, not user-selectable).
+// All self-hosted by next/font so the strict `font-src 'self'` CSP holds.
+export const arimo = Arimo({
+  variable: "--font-cv-arimo",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+export const archivo = Archivo({
+  variable: "--font-cv-archivo",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+export const plexSans = IBM_Plex_Sans({
+  variable: "--font-cv-plex-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+export const plexMono = IBM_Plex_Mono({
+  variable: "--font-cv-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+});
+export const cormorant = Cormorant_Garamond({
+  variable: "--font-cv-cormorant",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+export const ebGaramond = EB_Garamond({
+  variable: "--font-cv-eb-garamond",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+export const workSans = Work_Sans({
+  variable: "--font-cv-work-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+export const libreFranklin = Libre_Franklin({
+  variable: "--font-cv-libre-franklin",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+export const sourceSerif = Source_Serif_4({
+  variable: "--font-cv-source-serif",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
+});
+
 /** Class names for all CV font variables — attach to <html>. */
 export const cvFontVariables = [
   inter.variable,
@@ -58,6 +126,15 @@ export const cvFontVariables = [
   lato.variable,
   sourceSans.variable,
   merriweather.variable,
+  arimo.variable,
+  archivo.variable,
+  plexSans.variable,
+  plexMono.variable,
+  cormorant.variable,
+  ebGaramond.variable,
+  workSans.variable,
+  libreFranklin.variable,
+  sourceSerif.variable,
 ].join(" ");
 
 // Re-export the pure font config so existing imports keep working.

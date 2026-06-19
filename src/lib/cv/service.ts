@@ -27,7 +27,8 @@ export async function createCv(
   userId: string,
   input: { title?: string; templateId?: string } = {},
 ): Promise<Cv> {
-  const templateId = getTemplate(input.templateId || "classic").id;
+  const template = getTemplate(input.templateId || "clasico-ats");
+  const templateId = template.id;
   const plan = await getUserPlan(userId);
   requireTemplateAccess(plan, templateId);
   requireDraftAllowance(plan, (await listCvs(userId)).length);
@@ -38,6 +39,9 @@ export async function createCv(
       userId,
       title: input.title?.trim() || "Untitled CV",
       templateId,
+      // Seed the per-CV accent from the design's default so each design starts
+      // with its intended color (the DB column default is a generic blue).
+      accentColor: template.accentColor,
       data: templateStarter(),
     })
     .returning();
@@ -62,10 +66,13 @@ export async function updateCvMeta(
 ): Promise<void> {
   const nextMeta = { ...meta };
   if (nextMeta.templateId) {
-    const templateId = getTemplate(nextMeta.templateId).id;
+    const template = getTemplate(nextMeta.templateId);
     const plan = await getUserPlan(userId);
-    requireTemplateAccess(plan, templateId);
-    nextMeta.templateId = templateId;
+    requireTemplateAccess(plan, template.id);
+    nextMeta.templateId = template.id;
+    // Switching design re-seeds the accent to that design's default unless the
+    // caller is explicitly setting a color in the same update.
+    if (nextMeta.accentColor === undefined) nextMeta.accentColor = template.accentColor;
   }
 
   await db

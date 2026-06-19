@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCvStore } from "@/lib/cv/store";
 import { sampleResume } from "@/lib/cv/types";
-import { getTemplate } from "@/templates/registry";
 import { ResumePreview, PAGE_WIDTH } from "@/templates/preview/resume-preview";
 
 export function LivePreview() {
@@ -26,7 +25,6 @@ export function LivePreview() {
     return () => observer.disconnect();
   }, []);
 
-  const tokens = getTemplate(templateId);
   // Static example content shown as faded placeholders wherever a field is blank
   // (matched to the document by item id). Built once.
   const placeholder = useMemo(() => sampleResume(), []);
@@ -47,7 +45,7 @@ export function LivePreview() {
         >
           <ResumePreview
             data={data}
-            tokens={tokens}
+            templateId={templateId}
             accentColor={accentColor}
             fontFamily={fontFamily}
             placeholder={placeholder}

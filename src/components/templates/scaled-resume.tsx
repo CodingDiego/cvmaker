@@ -3,18 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 import { ResumePreview, PAGE_HEIGHT, PAGE_WIDTH } from "@/templates/preview/resume-preview";
 import type { ResumeData } from "@/lib/cv/types";
-import type { TemplateTokens } from "@/templates/types";
 
 /** Renders a resume page scaled responsively to fit its container width. */
 export function ScaledResume({
   data,
-  tokens,
+  templateId,
   accentColor,
   fontFamily,
   maxWidth = PAGE_WIDTH,
 }: {
   data: ResumeData;
-  tokens: TemplateTokens;
+  templateId: string;
   accentColor?: string;
   fontFamily?: string;
   maxWidth?: number;
@@ -39,7 +38,7 @@ export function ScaledResume({
           style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: PAGE_WIDTH }}
           className="overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10"
         >
-          <ResumePreview data={data} tokens={tokens} accentColor={accentColor} fontFamily={fontFamily} />
+          <ResumePreview data={data} templateId={templateId} accentColor={accentColor} fontFamily={fontFamily} />
         </div>
       </div>
     </div>

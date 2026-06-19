@@ -5,7 +5,7 @@ import { cvs, exports } from "@/db/schema";
 import { renderPdf } from "@/templates/render/pdf";
 import { renderDocx } from "@/templates/render/docx";
 import { uploadExport, getBytes, defaultStore } from "@/lib/blob";
-import type { ResumeData } from "@/lib/cv/types";
+import { resumeSchema, type ResumeData } from "@/lib/cv/types";
 
 /**
  * CV export pipeline, orchestrated with the Workflow DevKit. Each render +
@@ -38,7 +38,7 @@ async function loadCv(cvId: string, userId: string): Promise<CvContext | null> {
     .limit(1);
   if (!row) return null;
   return {
-    data: row.data,
+    data: resumeSchema.parse(row.data),
     templateId: row.templateId,
     accentColor: row.accentColor,
     fontFamily: row.fontFamily,

@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { PreviewThumbnail } from "./preview-thumbnail";
 import type { ResumeData } from "@/lib/cv/types";
-import type { TemplateTokens } from "@/templates/types";
 
 /**
  * Mounts a {@link PreviewThumbnail} only once its placeholder box approaches the
@@ -14,7 +13,7 @@ import type { TemplateTokens } from "@/templates/types";
  */
 export function LazyThumbnail({
   data,
-  tokens,
+  templateId,
   width,
   height,
   accentColor,
@@ -22,7 +21,7 @@ export function LazyThumbnail({
   rootMargin = "300px",
 }: {
   data: ResumeData;
-  tokens: TemplateTokens;
+  templateId: string;
   width: number;
   height: number;
   accentColor?: string;
@@ -61,7 +60,7 @@ export function LazyThumbnail({
       {show ? (
         <PreviewThumbnail
           data={data}
-          tokens={tokens}
+          templateId={templateId}
           width={width}
           height={height}
           accentColor={accentColor}

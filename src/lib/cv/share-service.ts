@@ -8,6 +8,7 @@ import { renderPdf } from "@/templates/render/pdf";
 import { renderDocx } from "@/templates/render/docx";
 import { putToStore, delFromStore } from "@/lib/blob";
 import { serializeShareParams } from "@/lib/cv/share-search-params";
+import { resumeSchema } from "@/lib/cv/types";
 import { env } from "@/lib/env";
 
 /**
@@ -69,7 +70,8 @@ export async function shareCv(userId: string, cvId: string): Promise<ShareInfo> 
   if (!row) throw new Error("CV not found");
 
   const opts = { templateId: row.templateId, accentColor: row.accentColor, fontFamily: row.fontFamily };
-  const [pdf, docx] = await Promise.all([renderPdf(row.data, opts), renderDocx(row.data, opts)]);
+  const data = resumeSchema.parse(row.data);
+  const [pdf, docx] = await Promise.all([renderPdf(data, opts), renderDocx(data, opts)]);
   const base = `public/cv/${userId}/${cvId}/${slug(row.title)}`;
 
   // Drop any previous public copies before uploading fresh ones.
@@ -142,5 +144,7 @@ export async function getPublicCv(userId: string, cvId: string): Promise<Cv | nu
     .from(cvs)
     .where(and(eq(cvs.id, cvId), eq(cvs.userId, userId), eq(cvs.isPublic, true)))
     .limit(1);
-  return row ?? null;
+  if (!row) return null;
+  // Normalize legacy/partial documents so the public preview renders correctly.
+  return { ...row, data: resumeSchema.parse(row.data) };
 }

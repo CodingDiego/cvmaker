@@ -11,31 +11,31 @@ import { initBotId } from "botid/client/core";
 //
 // The protected paths are the *page routes* our server actions POST to (App
 // Router posts a server action to the pathname of the page that rendered it).
-// Every page is locale-prefixed (`/en`, `/es`, `/pt`), so we match the locale
-// segment with a leading `*` wildcard (`*` expands to `.*` in BotID's matcher).
+// The locale now lives in the HOST (subdomain), so the *visible* pathname the
+// browser fetches/POSTs is BARE (`/login`, not `/es/login`) — the `[lang]`
+// segment is injected internally by the next.config rewrite, AFTER BotID's
+// client patch has already matched the visible URL. So these patterns must be
+// bare; a `/*/login`-style pattern would no longer match anything.
 initBotId({
   protect: [
     // Public GET pages.
     { path: "/", method: "GET" },
-    { path: "/en", method: "GET" },
-    { path: "/es", method: "GET" },
-    { path: "/pt", method: "GET" },
-    { path: "/*/templates", method: "GET" },
-    { path: "/*/privacy", method: "GET" },
-    { path: "/*/terms", method: "GET" },
-    { path: "/*/success", method: "GET" },
-    { path: "/*/return", method: "GET" },
-    { path: "/*/share", method: "GET" },
-    { path: "/*/login", method: "GET" },
-    { path: "/*/register", method: "GET" },
-    { path: "/*/reset", method: "GET" },
-    { path: "/*/verify", method: "GET" },
+    { path: "/templates", method: "GET" },
+    { path: "/privacy", method: "GET" },
+    { path: "/terms", method: "GET" },
+    { path: "/success", method: "GET" },
+    { path: "/return", method: "GET" },
+    { path: "/share", method: "GET" },
+    { path: "/login", method: "GET" },
+    { path: "/register", method: "GET" },
+    { path: "/reset", method: "GET" },
+    { path: "/verify", method: "GET" },
     // Auth forms — the unauthenticated, bot-prone surface.
-    { path: "/*/login", method: "POST" }, // sign in + 2FA verify
-    { path: "/*/register", method: "POST" }, // account creation
-    { path: "/*/reset", method: "POST" }, // password reset request + perform
+    { path: "/login", method: "POST" }, // sign in + 2FA verify
+    { path: "/register", method: "POST" }, // account creation
+    { path: "/reset", method: "POST" }, // password reset request + perform
     // Authenticated account forms (defense in depth).
-    { path: "/*/dashboard/account", method: "POST" }, // profile update
-    { path: "/*/dashboard/security", method: "POST" }, // 2FA enrollment
+    { path: "/dashboard/account", method: "POST" }, // profile update
+    { path: "/dashboard/security", method: "POST" }, // 2FA enrollment
   ],
 });

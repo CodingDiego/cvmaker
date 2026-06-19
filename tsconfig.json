@@ -23,7 +23,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@premium": ["./src/templates/premium-empty.ts"]
+      "@premium": ["./src/templates/premium-empty.ts"],
+      "@premium/render": ["./src/templates/premium-render-empty.ts"]
     }
   },
   "include": [

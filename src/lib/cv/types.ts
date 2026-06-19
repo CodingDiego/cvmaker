@@ -36,10 +36,24 @@ export const educationSchema = z.object({
   details: z.string().default(""),
 });
 
+/**
+ * A single skill. Stored as an object so bar-style designs can show an optional
+ * proficiency (0–100). Legacy documents stored skills as bare strings; the
+ * preprocess upgrades those to `{ name }` on parse, keeping old JSONB rows valid.
+ */
+export const skillItemSchema = z.preprocess(
+  (v) => (typeof v === "string" ? { name: v } : v),
+  z.object({
+    name: z.string().default(""),
+    // Optional proficiency 0–100. Only bar-style designs render it; others ignore it.
+    level: z.number().min(0).max(100).optional(),
+  }),
+);
+
 export const skillGroupSchema = z.object({
   id: z.string(),
   category: z.string().default(""),
-  items: z.array(z.string()).default([]),
+  items: z.array(skillItemSchema).default([]),
 });
 
 export const projectSchema = z.object({
@@ -154,7 +168,7 @@ export function sectionHasContent(data: ResumeData, key: string): boolean {
         (e) => e.institution || e.degree || e.field || e.location || e.details || e.startDate || e.endDate,
       );
     case "skills":
-      return data.skills.some((g) => g.category || g.items.some(Boolean));
+      return data.skills.some((g) => g.category || g.items.some((it) => it.name.trim()));
     case "projects":
       return data.projects.some((p) => p.name || p.description || p.link || p.bullets.some(Boolean));
     case "certifications":
@@ -228,6 +242,7 @@ export function resolveSectionOrder(data: ResumeData): string[] {
 export type Contact = z.infer<typeof contactSchema>;
 export type Experience = z.infer<typeof experienceSchema>;
 export type Education = z.infer<typeof educationSchema>;
+export type SkillItem = z.infer<typeof skillItemSchema>;
 export type SkillGroup = z.infer<typeof skillGroupSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Certification = z.infer<typeof certificationSchema>;
@@ -349,9 +364,35 @@ export function sampleResume(): ResumeData {
       },
     ],
     skills: [
-      { id: "sk-1", category: "Languages", items: ["TypeScript", "JavaScript", "Python", "Go"] },
-      { id: "sk-2", category: "Frameworks", items: ["React", "Next.js", "Node.js"] },
-      { id: "sk-3", category: "Tools", items: ["PostgreSQL", "Redis", "Docker", "AWS"] },
+      {
+        id: "sk-1",
+        category: "Languages",
+        items: [
+          { name: "TypeScript", level: 95 },
+          { name: "JavaScript", level: 90 },
+          { name: "Python", level: 80 },
+          { name: "Go", level: 70 },
+        ],
+      },
+      {
+        id: "sk-2",
+        category: "Frameworks",
+        items: [
+          { name: "React", level: 92 },
+          { name: "Next.js", level: 88 },
+          { name: "Node.js", level: 85 },
+        ],
+      },
+      {
+        id: "sk-3",
+        category: "Tools",
+        items: [
+          { name: "PostgreSQL", level: 80 },
+          { name: "Redis", level: 70 },
+          { name: "Docker", level: 78 },
+          { name: "AWS", level: 75 },
+        ],
+      },
     ],
     projects: [
       {

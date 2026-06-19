@@ -4,6 +4,7 @@ import { useMemo, useRef } from "react";
 import Image from "next/image";
 import { ChevronDown, ChevronUp, ImageUp, Plus, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -336,7 +337,53 @@ export function EditorForm() {
           return (
           <ItemCard key={g.id} onRemove={() => mutate((d) => { d.skills.splice(i, 1); })}>
             <TextField label={t("editor.fields.category")} placeholder={p?.category} value={g.category} onChange={(v) => mutate((d) => { d.skills[i]!.category = v; })} />
-            <AreaField label={t("editor.fields.skillsCsv")} rows={2} placeholder={p?.items.join(", ")} value={g.items.join(", ")} onChange={(v) => mutate((d) => { d.skills[i]!.items = v.split(",").map((s) => s.trim()); })} />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs">{t("editor.fields.skillsList")}</Label>
+                <span className="text-[0.7rem] text-muted-foreground">{t("editor.fields.skillLevelHint")}</span>
+              </div>
+              {g.items.map((it, j) => (
+                <div key={j} className="flex items-center gap-2">
+                  <Input
+                    value={it.name}
+                    placeholder={p?.items[j]?.name ?? t("editor.fields.skillNamePlaceholder")}
+                    onChange={(e) => mutate((d) => { d.skills[i]!.items[j]!.name = e.target.value; })}
+                    className="flex-1"
+                  />
+                  <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={it.level ?? ""}
+                    placeholder="%"
+                    aria-label={t("editor.fields.skillLevelAria")}
+                    className="w-16"
+                    onChange={(e) =>
+                      mutate((d) => {
+                        const v = e.target.value;
+                        d.skills[i]!.items[j]!.level =
+                          v === "" ? undefined : Math.max(0, Math.min(100, Math.round(Number(v))));
+                      })
+                    }
+                  />
+                  <Button
+                    size="icon-xs"
+                    variant="ghost"
+                    aria-label={t("editor.actions.remove")}
+                    onClick={() => mutate((d) => { d.skills[i]!.items.splice(j, 1); })}
+                  >
+                    <Trash2 className="size-3.5" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => mutate((d) => { d.skills[i]!.items.push({ name: "" }); })}
+              >
+                <Plus className="size-3.5" /> {t("editor.fields.addSkill")}
+              </Button>
+            </div>
           </ItemCard>
           );
         })}

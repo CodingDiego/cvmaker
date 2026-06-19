@@ -25,14 +25,22 @@ export interface CookieDescriptor {
   sameSite: "lax";
   path: string;
   maxAge: number;
+  domain?: string;
 }
 
 function base() {
+  const isProd = process.env.NODE_ENV === "production";
+  // Locale lives in the subdomain; scope auth cookies to the parent domain
+  // (`.free-cv.com`) so a session started on one locale stays valid across
+  // en/es/pt and the apex. Only in production: a `.localhost` domain attribute
+  // is not honored reliably, so dev keeps host-scoped cookies.
+  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
   return {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isProd,
     sameSite: "lax" as const,
     path: "/",
+    ...(isProd && root ? { domain: `.${root}` } : {}),
   };
 }
 

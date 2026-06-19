@@ -12,8 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCvStore } from "@/lib/cv/store";
-import { FREE_TEMPLATES } from "@/templates/registry";
-import { FONT_OPTIONS } from "@/lib/font-config";
+import { TEMPLATES, getTemplate } from "@/templates/registry";
 import { ExportMenu } from "./export-menu";
 import { ShareButton } from "./share-button";
 import type { SaveStatus } from "@/lib/cv/use-autosave";
@@ -57,7 +56,6 @@ export function EditorToolbar({
   const cvId = useCvStore((s) => s.cvId);
   const title = useCvStore((s) => s.title);
   const templateId = useCvStore((s) => s.templateId);
-  const fontFamily = useCvStore((s) => s.fontFamily);
   const accentColor = useCvStore((s) => s.accentColor);
   const setMeta = useCvStore((s) => s.setMeta);
 
@@ -91,27 +89,17 @@ export function EditorToolbar({
 
       {/* Row 2 — formatting controls + save status */}
       <div className="flex items-center gap-2 sm:gap-3">
-        <Select value={templateId} onValueChange={(v) => v && setMeta({ templateId: v })}>
-          <SelectTrigger className={`${CONTROL} min-w-0 flex-1 sm:w-40 sm:flex-none`} aria-label={t("editor.templateAria")}>
+        <Select
+          value={templateId}
+          onValueChange={(v) => v && setMeta({ templateId: v, accentColor: getTemplate(v).accentColor })}
+        >
+          <SelectTrigger className={`${CONTROL} min-w-0 flex-1 sm:w-44 sm:flex-none`} aria-label={t("editor.templateAria")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {FREE_TEMPLATES.map((t) => (
-              <SelectItem key={t.id} value={t.id}>
-                {t.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={fontFamily} onValueChange={(v) => v && setMeta({ fontFamily: v })}>
-          <SelectTrigger className={`${CONTROL} min-w-0 flex-1 sm:w-36 sm:flex-none`} aria-label={t("editor.fontAria")}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {FONT_OPTIONS.map((f) => (
-              <SelectItem key={f.id} value={f.id}>
-                {f.label}
+            {TEMPLATES.map((tpl) => (
+              <SelectItem key={tpl.id} value={tpl.id}>
+                {tpl.label}
               </SelectItem>
             ))}
           </SelectContent>

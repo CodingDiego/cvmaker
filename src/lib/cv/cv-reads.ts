@@ -21,7 +21,9 @@ function toCvListItem(cv: Cv): CvListItem {
     title: cv.title,
     templateId: cv.templateId,
     updatedAt: cv.updatedAt.toISOString(),
-    data: cv.data,
+    // Normalize older/partial documents (e.g. legacy string[] skills) to the
+    // current schema shape so dashboard thumbnails render with the new designs.
+    data: resumeSchema.parse(cv.data),
     accentColor: cv.accentColor,
     fontFamily: cv.fontFamily,
     isPublic: cv.isPublic,
