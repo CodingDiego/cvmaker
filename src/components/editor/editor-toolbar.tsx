@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/components/link";
-import { ArrowLeft, Check, CloudOff, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, CloudOff, Crown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { useCvStore } from "@/lib/cv/store";
 import { TEMPLATES, getTemplate } from "@/templates/registry";
+import { canUseTemplate, type BillingPlan } from "@/lib/billing/entitlements";
 import { ExportMenu } from "./export-menu";
 import { ShareButton } from "./share-button";
 import type { SaveStatus } from "@/lib/cv/use-autosave";
@@ -45,9 +46,12 @@ const CONTROL = "h-9";
 
 export function EditorToolbar({
   status,
+  plan,
   onShowErrors,
 }: {
   status: SaveStatus;
+  /** The user's billing plan — gates pro-only templates in the picker. */
+  plan: BillingPlan;
   /** Called when an action (share/export) is blocked by empty sections, so the
    *  shell can reveal the form (and its inline highlights) on mobile. */
   onShowErrors?: () => void;
@@ -91,17 +95,28 @@ export function EditorToolbar({
       <div className="flex items-center gap-2 sm:gap-3">
         <Select
           value={templateId}
-          onValueChange={(v) => v && setMeta({ templateId: v, accentColor: getTemplate(v).accentColor })}
+          // Guard the change too (not just the disabled item): a free user must
+          // never set a pro template, since autosave would then fail server-side
+          // with `template_requires_pro`.
+          onValueChange={(v) =>
+            v &&
+            canUseTemplate(plan, v) &&
+            setMeta({ templateId: v, accentColor: getTemplate(v).accentColor })
+          }
         >
           <SelectTrigger className={`${CONTROL} min-w-0 flex-1 sm:w-44 sm:flex-none`} aria-label={t("editor.templateAria")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {TEMPLATES.map((tpl) => (
-              <SelectItem key={tpl.id} value={tpl.id}>
-                {tpl.label}
-              </SelectItem>
-            ))}
+            {TEMPLATES.map((tpl) => {
+              const locked = !canUseTemplate(plan, tpl.id);
+              return (
+                <SelectItem key={tpl.id} value={tpl.id} disabled={locked}>
+                  {tpl.label}
+                  {locked && <Crown className="ml-auto text-muted-foreground" aria-label={t("templates.pro")} />}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
 

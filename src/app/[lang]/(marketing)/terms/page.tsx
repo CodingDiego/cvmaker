@@ -16,7 +16,9 @@ export async function generateMetadata({
   return pageMetadata({ lang: locale, path: "/terms", ...seoCopy.terms[locale] });
 }
 
-export default function TermsPage() {
+export default async function TermsPage({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : defaultLocale;
   return (
     <LegalArticle title="Terms of Service" updated="June 13, 2026">
       <JsonLd
@@ -25,6 +27,7 @@ export default function TermsPage() {
           name: "Terms of Service",
           description: "Terms governing access to and use of CVMaker.",
           path: "/terms",
+          lang: locale,
         })}
       />
       <p>

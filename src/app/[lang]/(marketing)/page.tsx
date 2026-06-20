@@ -71,6 +71,7 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
           description:
             "Build an ATS-friendly CV, switch templates, and export PDF or DOCX files from one reusable draft.",
           path: "/",
+          lang: locale,
         })}
       />
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-25 [mask-image:linear-gradient(to_bottom,black,transparent_55%)]" />

@@ -4,6 +4,7 @@ import { Activity, useState } from "react";
 import { Expand, Eye, Pencil } from "lucide-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import type { BillingPlan } from "@/lib/billing/entitlements";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useCvStore } from "@/lib/cv/store";
 import { useAutosave } from "@/lib/cv/use-autosave";
@@ -17,7 +18,7 @@ import { useT } from "@/i18n/provider";
 
 type EditorView = "edit" | "preview";
 
-export function EditorShell({ cvId }: { cvId: string }) {
+export function EditorShell({ cvId, plan }: { cvId: string; plan: BillingPlan }) {
   const t = useT();
   // The detail was server-prefetched into the cache, so this resolves
   // synchronously on first render (no loading state).
@@ -43,7 +44,7 @@ export function EditorShell({ cvId }: { cvId: string }) {
 
   return (
     <div className="flex h-svh flex-col">
-      <EditorToolbar status={status} onShowErrors={() => setView("edit")} />
+      <EditorToolbar status={status} plan={plan} onShowErrors={() => setView("edit")} />
 
       {/* Mobile view switch */}
       <div className="flex gap-1 border-b bg-card/40 p-2 md:hidden">

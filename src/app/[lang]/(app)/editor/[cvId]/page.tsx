@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth/session";
 import { getQueryClient } from "@/lib/query/client";
 import { queryKeys } from "@/lib/query/keys";
 import { getCvDetailCached } from "@/lib/cv/cv-reads";
+import { getUserPlan } from "@/lib/billing/entitlements-server";
 import { EditorShell } from "@/components/editor/editor-shell";
 
 // Auth-gated, per-user editor: inherently fully dynamic with no static shell.
@@ -19,7 +20,10 @@ export default async function EditorPage({ params }: { params: Promise<{ cvId: s
 
   // Read through the cached layer (already normalized to the schema shape), 404
   // if missing, then seed React Query so the client store hydrates without a flash.
-  const cv = await getCvDetailCached(user.id, cvId);
+  const [cv, plan] = await Promise.all([
+    getCvDetailCached(user.id, cvId),
+    getUserPlan(user.id),
+  ]);
   if (!cv) notFound();
 
   const queryClient = getQueryClient();
@@ -27,7 +31,7 @@ export default async function EditorPage({ params }: { params: Promise<{ cvId: s
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <EditorShell cvId={cvId} />
+      <EditorShell cvId={cvId} plan={plan} />
     </HydrationBoundary>
   );
 }

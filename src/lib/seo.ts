@@ -175,21 +175,29 @@ export function faqPageLd(
   };
 }
 
+/**
+ * `WebPage` for a specific route. `url` is the CURRENT locale's subdomain URL so
+ * it matches the page's canonical (e.g. `https://es.free-cv.com/privacy`).
+ * `isPartOf` stays the canonical default-locale `WebSite` — one entity for the
+ * whole site, consistent with `websiteLd()`.
+ */
 export function webPageLd({
   name,
   description,
   path,
+  lang,
 }: {
   name: string;
   description: string;
   path: string;
+  lang: Locale;
 }): WithContext<WebPage> {
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name,
     description,
-    url: absoluteUrl(path),
+    url: localeUrl(lang, path),
     isPartOf: {
       "@type": "WebSite",
       name: siteConfig.name,
@@ -198,19 +206,20 @@ export function webPageLd({
   };
 }
 
-export function templatesCollectionPageLd(): WithContext<CollectionPage> {
+export function templatesCollectionPageLd(lang: Locale): WithContext<CollectionPage> {
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "Resume templates",
     description: "Browse ATS-friendly free and premium resume templates for CVMaker.",
-    url: absoluteUrl("templates"),
-    mainEntity: templatesItemListLd(),
+    url: localeUrl(lang, "/templates"),
+    mainEntity: templatesItemListLd(lang),
   };
 }
 
 export function breadcrumbLd(
   items: Array<{ name: string; path: string }>,
+  lang: Locale,
 ): WithContext<BreadcrumbList> {
   return {
     "@context": "https://schema.org",
@@ -219,13 +228,13 @@ export function breadcrumbLd(
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
-      item: absoluteUrl(item.path),
+      item: localeUrl(lang, item.path),
     })),
   };
 }
 
-/** ItemList of every template for the gallery page. */
-export function templatesItemListLd(): WithContext<ItemList> {
+/** ItemList of every template for the gallery page, on the current locale's host. */
+export function templatesItemListLd(lang: Locale): WithContext<ItemList> {
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -236,7 +245,7 @@ export function templatesItemListLd(): WithContext<ItemList> {
       position: i + 1,
       name: t.label,
       description: t.description,
-      url: absoluteUrl(`templates#${t.id}`),
+      url: localeUrl(lang, `/templates#${t.id}`),
     })),
   };
 }

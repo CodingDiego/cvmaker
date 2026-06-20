@@ -16,7 +16,9 @@ export async function generateMetadata({
   return pageMetadata({ lang: locale, path: "/privacy", ...seoCopy.privacy[locale] });
 }
 
-export default function PrivacyPage() {
+export default async function PrivacyPage({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  const locale = isLocale(lang) ? lang : defaultLocale;
   return (
     <LegalArticle title="Privacy Policy" updated="June 13, 2026">
       <JsonLd
@@ -25,6 +27,7 @@ export default function PrivacyPage() {
           name: "Privacy Policy",
           description: "How CVMaker collects, uses, stores, and protects account and resume data.",
           path: "/privacy",
+          lang: locale,
         })}
       />
       <p>

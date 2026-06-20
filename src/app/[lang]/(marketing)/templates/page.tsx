@@ -23,7 +23,8 @@ export async function generateMetadata({
 }
 
 export default async function TemplatesPage({ params }: { params: Promise<{ lang: string }> }) {
-  const [user, t] = await Promise.all([getCurrentUser(), getTFromParams(params)]);
+  const [{ lang }, user, t] = await Promise.all([params, getCurrentUser(), getTFromParams(params)]);
+  const locale = isLocale(lang) ? lang : defaultLocale;
   const draftsByTemplate: Record<string, TemplateDraft> = {};
   let draftCount = 0;
   let plan: BillingPlan = "free";
@@ -46,14 +47,17 @@ export default async function TemplatesPage({ params }: { params: Promise<{ lang
 
   return (
     <div className="relative">
-      <JsonLd id="templates-collection-json-ld" data={templatesCollectionPageLd()} />
-      <JsonLd id="templates-list-json-ld" data={templatesItemListLd()} />
+      <JsonLd id="templates-collection-json-ld" data={templatesCollectionPageLd(locale)} />
+      <JsonLd id="templates-list-json-ld" data={templatesItemListLd(locale)} />
       <JsonLd
         id="templates-breadcrumb-json-ld"
-        data={breadcrumbLd([
-          { name: "Home", path: "/" },
-          { name: "Templates", path: "/templates" },
-        ])}
+        data={breadcrumbLd(
+          [
+            { name: "Home", path: "/" },
+            { name: "Templates", path: "/templates" },
+          ],
+          locale,
+        )}
       />
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-glow" />
       <section aria-labelledby="templates-title" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
