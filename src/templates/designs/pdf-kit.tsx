@@ -10,6 +10,7 @@ import {
 } from "@react-pdf/renderer";
 import type { ResumeData } from "@/lib/cv/types";
 import { resolveSectionOrder, resolveSectionTitle } from "@/lib/cv/types";
+import { pdfHeaderStyles, pdfHeaderTextStyle } from "@/templates/render/pdf-layout";
 
 /**
  * Shared react-pdf builder. Each bespoke design maps to a config here so the
@@ -77,6 +78,7 @@ export async function buildResumePdf(data: ResumeData, config: PdfConfig): Promi
   const sidebarSections = new Set(config.sidebar?.sections ?? []);
   const darkSide = config.sidebar?.dark ?? false;
   const headerAlign = config.header === "centered" ? "center" : "left";
+  const headerStyles = pdfHeaderStyles();
 
   const s = StyleSheet.create({
     page: { flexDirection: "row", fontFamily, fontSize: 9.5, color: "#1f2937", lineHeight: 1.4 },
@@ -95,13 +97,19 @@ export async function buildResumePdf(data: ResumeData, config: PdfConfig): Promi
       fontFamily: boldFont,
       textAlign: headerAlign,
       letterSpacing: config.letterSpacedName ? 1.5 : 0,
+      ...headerStyles.name,
     },
-    role: { fontSize: 11, color: "#4b5563", marginTop: 3, textAlign: headerAlign },
+    role: {
+      fontSize: 11,
+      color: "#4b5563",
+      textAlign: headerAlign,
+      ...headerStyles.role,
+    },
     contactRow: {
       flexDirection: "row",
       flexWrap: "wrap",
       justifyContent: headerAlign === "center" ? "center" : "flex-start",
-      marginTop: 6,
+      ...headerStyles.contacts,
     },
     contactItem: { fontSize: 8.5, color: "#6b7280", marginRight: 8, marginBottom: 2 },
     section: { marginTop: 12 },
@@ -328,7 +336,7 @@ export async function buildResumePdf(data: ResumeData, config: PdfConfig): Promi
         // eslint-disable-next-line jsx-a11y/alt-text
         <Image src={photo} style={{ width: PHOTO, height: PHOTO, borderRadius: PHOTO / 2, objectFit: "cover", marginRight: 12, marginBottom: 6 }} />
       ) : null}
-      <View>
+      <View style={pdfHeaderTextStyle({ hasPhoto: Boolean(photo), photoPosition: data.header.photoPosition })}>
         <Text style={[s.name, light ? { color: "#ffffff" } : {}]}>
           {config.uppercaseName ? (data.header.fullName || "Your Name").toUpperCase() : data.header.fullName || "Your Name"}
         </Text>

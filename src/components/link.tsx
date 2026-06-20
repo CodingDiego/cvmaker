@@ -1,17 +1,17 @@
 "use client";
 
 import NextLink, { type LinkProps } from "next/link";
-  import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { forwardRef, useCallback } from "react";
 import { getQueryClient } from "@/lib/query/client";
 import { prefetchForPath } from "@/lib/query/prefetch-registry";
+import { resolveLinkPrefetch } from "./link-prefetch";
 
 /**
  * App-default Link.
  *
- * Wraps next/link with intent-based prefetching: nothing is fetched until
- * hover/focus, then BOTH the Next.js route and the React Query data for the
- * destination are warmed. Hrefs are bare (`/templates`) — the locale lives in
+ * Preserves Next.js automatic route prefetching and additionally warms React
+ * Query data on hover/focus. Hrefs are bare (`/templates`) — the locale lives in
  * the host (subdomain), so no path prefixing is needed; the `app/[lang]` segment
  * is injected by the `next.config.ts` rewrite. Prefixing here would produce
  * `en.host/en/templates` → `/en/en/templates` → 404.
@@ -22,12 +22,12 @@ import { prefetchForPath } from "@/lib/query/prefetch-registry";
 const prefetched = new Set<string>();
 
 type Props = Omit<LinkProps, "prefetch"> & {
-  prefetch?: boolean;
+  prefetch?: LinkProps["prefetch"];
   children?: React.ReactNode;
 } & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps>;
 
 export const Link = forwardRef<HTMLAnchorElement, Props>(function Link(
-  { href, prefetch = false, onMouseEnter, onFocus, children, ...props },
+  { href, prefetch, onMouseEnter, onFocus, children, ...props },
   ref,
 ) {
   const router = useRouter();
@@ -53,7 +53,7 @@ export const Link = forwardRef<HTMLAnchorElement, Props>(function Link(
     <NextLink
       ref={ref}
       href={href}
-      prefetch={prefetch}
+      prefetch={resolveLinkPrefetch(prefetch)}
       onMouseEnter={(e) => {
         onMouseEnter?.(e);
         warm();

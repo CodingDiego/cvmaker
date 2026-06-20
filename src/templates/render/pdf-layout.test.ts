@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { pdfHeaderTextStyle, pdfHeaderTypography } from "./pdf-layout";
+import { pdfHeaderStyles, pdfHeaderTextStyle, pdfHeaderTypography } from "./pdf-layout";
 
 describe("pdfHeaderTextStyle", () => {
   test("does not collapse centered photo headers", () => {
@@ -18,11 +18,9 @@ describe("pdfHeaderTextStyle", () => {
     });
   });
 
-  test("uses the same horizontal text sizing when no photo is present", () => {
+  test("keeps the text block full width when no photo is present", () => {
     expect(pdfHeaderTextStyle({ hasPhoto: false, photoPosition: "left" })).toEqual({
-      flexGrow: 1,
-      flexShrink: 1,
-      flexBasis: 0,
+      width: "100%",
     });
   });
 });
@@ -34,6 +32,16 @@ describe("pdfHeaderTypography", () => {
       roleLineHeight: 1.25,
       roleMarginTop: 4,
       contactMarginTop: 8,
+    });
+  });
+});
+
+describe("pdfHeaderStyles", () => {
+  test("keeps the role and contacts visibly separated from the name", () => {
+    expect(pdfHeaderStyles()).toEqual({
+      name: { lineHeight: 1.2 },
+      role: { lineHeight: 1.25, marginTop: 4 },
+      contacts: { marginTop: 8 },
     });
   });
 });

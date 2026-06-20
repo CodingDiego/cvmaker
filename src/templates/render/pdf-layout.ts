@@ -12,6 +12,10 @@ export function pdfHeaderTextStyle({
   hasPhoto: boolean;
   photoPosition: PhotoPosition;
 }): PdfStyle {
+  if (!hasPhoto) {
+    return { width: "100%" };
+  }
+
   if (hasPhoto && photoPosition === "center") {
     return {
       marginTop: 8,
@@ -34,5 +38,18 @@ export function pdfHeaderTypography() {
     roleLineHeight: 1.25,
     roleMarginTop: 4,
     contactMarginTop: 8,
+  } as const;
+}
+
+export function pdfHeaderStyles() {
+  const typography = pdfHeaderTypography();
+
+  return {
+    name: { lineHeight: typography.nameLineHeight },
+    role: {
+      lineHeight: typography.roleLineHeight,
+      marginTop: typography.roleMarginTop,
+    },
+    contacts: { marginTop: typography.contactMarginTop },
   } as const;
 }
